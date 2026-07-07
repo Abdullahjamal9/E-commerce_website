@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/** Product type, e.g. Shoes, Clothes, Watches — shown in the Shop nav dropdown. */
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
+/** Cross-cutting collection labels, e.g. Men, Women, Sports, Luxury, New Arrivals. */
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  tagline     String
+  description String
+  price       Int
+  stock       Int      @default(0)
+  category    String
+  tags        Json     @default("[]")
+  colors      Json
+  sizes       Json
+  images      Json
+  spinImages  Json     @default("[]")
+  featuredAt  DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems OrderItem[]
+  reviews    Review[]
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customerName String
+  rating       Int
+  comment      String
+  images       Json     @default("[]")
+  createdAt    DateTime @default(now())
+}
+
+enum PaymentMethod {
+  COD
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  AWAITING_VERIFICATION
+  PAID
+  FAILED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  orderNumber   String        @unique
+  customerName  String
+  email         String
+  phone         String
+  address       String
+  city          String
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+  orderStatus   OrderStatus   @default(PENDING)
+  transactionRef String?
+  paymentProof  Json          @default("[]")
+  total         Int
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id          String @id @default(cuid())
+  orderId     String
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName String
+  price       Int
+  colorName   String
+  colorHex    String
+  size        String
+  qty         Int
+  image       String
+}
+
+model AdminUser {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  resetToken        String?   @unique
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime  @default(now())
+}
+
+model Settings {
+  id                  Int     @id @default(1)
+  storeName           String  @default("AURA")
+  bankName            String  @default("")
+  bankAccountName     String  @default("")
+  bankAccountNumber   String  @default("")
+  easypaisaNumber      String  @default("")
+  codEnabled          Boolean @default(true)
+  bankTransferEnabled Boolean @default(true)
+  contactPhone        String  @default("")
+  whatsappNumber      String  @default("")
+  contactEmail        String  @default("")
+  address             String  @default("")
+}

@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #05060a;
+  --fg: #f5f7ff;
+  --glass: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --panel-solid: rgba(9, 10, 16, 0.97);
+  --select-bg: #1c1f26;
+  color-scheme: dark;
+}
+
+.light {
+  --bg: #f4f6fc;
+  --fg: #0a0c14;
+  --glass: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(10, 12, 20, 0.08);
+  --panel-solid: rgba(248, 249, 252, 0.97);
+  --select-bg: #e5e7eb;
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  transition: background 0.5s ease, color 0.5s ease;
+  overflow-x: hidden;
+}
+
+select option {
+  background-color: var(--select-bg);
+  color: var(--fg);
+}
+
+/* Ambient gradient lighting behind the page. */
+.aurora-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(40% 50% at 15% 10%, rgba(59, 130, 255, 0.18), transparent 60%),
+    radial-gradient(45% 55% at 85% 20%, rgba(168, 85, 247, 0.16), transparent 60%),
+    radial-gradient(40% 60% at 50% 100%, rgba(245, 197, 24, 0.08), transparent 60%);
+  pointer-events: none;
+}
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Like .glass but with a solid background instead of backdrop-filter —
+   use on elements that animate (translate/slide), since blur recompute
+   on a moving element causes visible stutter on most hardware. */
+.panel-solid {
+  background: var(--panel-solid);
+  border: 1px solid var(--glass-border);
+}
+
+.neon-text {
+  background: linear-gradient(90deg, #3b82ff, #a855f7, #f5c518);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.btn-glow {
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.btn-glow:hover {
+  box-shadow: 0 0 30px -6px rgba(59, 130, 255, 0.7);
+  transform: translateY(-2px);
+}
+
+/* Hide scrollbar for swipeable rows while keeping scroll. */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
