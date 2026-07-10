@@ -104,6 +104,7 @@ function ShopMenu({ categories }: { categories: string[] }) {
 
 export default function Navbar({ storeName, categories }: { storeName: string; categories: string[] }) {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const count = useCart(selectCount);
   const openCart = useCart((s) => s.open);
   const wishCount = useWishlist((s) => s.ids.length);
@@ -118,6 +119,7 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
   }, []);
 
   return (
+    <>
     <motion.header
       initial={{ opacity: 0, top: 16, left: '3%', right: '3%', borderRadius: 28 }}
       animate={{
@@ -163,6 +165,14 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
         </ul>
 
         <div className="flex items-center gap-3">
+          <button
+            aria-label="Open menu"
+            onClick={() => setMenuOpen(true)}
+            className="rounded-full p-2 text-xl transition hover:bg-white/10 md:hidden"
+          >
+            ☰
+          </button>
+
           <SearchBox />
 
           <button
@@ -218,5 +228,94 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
         </div>
       </nav>
     </motion.header>
+
+    {/* Mobile nav drawer — the header only shows icons on mobile, so this is
+        the one place to reach Collections/About/Contact and the full
+        category list; the bottom tab bar covers quick actions separately. */}
+    <AnimatePresence>
+      {menuOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMenuOpen(false)}
+            className="fixed inset-0 z-[100] bg-black/60 md:hidden"
+          />
+          <motion.aside
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
+            className="panel-solid fixed inset-y-0 right-0 z-[101] flex w-72 max-w-[85vw] flex-col overflow-y-auto p-5 md:hidden"
+            style={{ willChange: 'transform' }}
+          >
+            <div className="mb-6 flex items-center justify-between">
+              <span className="text-lg font-black tracking-[0.3em] neon-text">{storeName}</span>
+              <button
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close menu"
+                className="rounded-lg p-1.5 hover:bg-white/10"
+              >
+                ✕
+              </button>
+            </div>
+
+            <nav className="flex-1 space-y-1">
+              <Link
+                href="/"
+                onClick={() => setMenuOpen(false)}
+                className="block rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
+              >
+                Home
+              </Link>
+              <Link
+                href="/shop"
+                onClick={() => setMenuOpen(false)}
+                className="block rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
+              >
+                Shop — All Products
+              </Link>
+              {categories.length > 0 && (
+                <div className="pl-3">
+                  {categories.map((c) => (
+                    <Link
+                      key={c}
+                      href={`/shop?category=${encodeURIComponent(c)}`}
+                      onClick={() => setMenuOpen(false)}
+                      className="block rounded-xl px-3 py-2 text-sm opacity-60 transition hover:bg-white/10 hover:opacity-100"
+                    >
+                      {c}
+                    </Link>
+                  ))}
+                </div>
+              )}
+              <Link
+                href="/collections"
+                onClick={() => setMenuOpen(false)}
+                className="block rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
+              >
+                Collections
+              </Link>
+              <Link
+                href="/about"
+                onClick={() => setMenuOpen(false)}
+                className="block rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
+              >
+                About
+              </Link>
+              <Link
+                href="/contact"
+                onClick={() => setMenuOpen(false)}
+                className="block rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
+              >
+                Contact
+              </Link>
+            </nav>
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
+    </>
   );
 }
