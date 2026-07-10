@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { upload } from '@vercel/blob/client';
 import { useCart, selectTotal, lineKey } from '@/store/useCart';
 import { useToast } from '@/store/useToast';
 import { formatPrice } from '@/lib/currency';
@@ -62,17 +63,17 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
     }
 
     setUploadingProof(true);
-    const formData = new FormData();
-    Array.from(files).forEach((f) => formData.append('files', f));
-    const res = await fetch('/api/orders/upload-proof', { method: 'POST', body: formData });
-    const data = await res.json().catch(() => ({}));
-    setUploadingProof(false);
-
-    if (!res.ok) {
-      notify(data.error ?? 'Upload failed');
-      return;
+    try {
+      const uploaded = await Promise.all(
+        Array.from(files).map((f) =>
+          upload(`uploads/${f.name}`, f, { access: 'public', handleUploadUrl: '/api/orders/upload-proof' })
+        )
+      );
+      setPaymentProof((prev) => [...prev, ...uploaded.map((b) => b.url)]);
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Upload failed');
     }
-    setPaymentProof((prev) => [...prev, ...data.urls]);
+    setUploadingProof(false);
     e.target.value = '';
   };
 

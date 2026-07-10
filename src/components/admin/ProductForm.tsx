@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { upload } from '@vercel/blob/client';
 import { useToast } from '@/store/useToast';
 import MultiSelectDropdown from './MultiSelectDropdown';
 import SingleSelectDropdown from './SingleSelectDropdown';
@@ -47,16 +48,17 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
     const files = e.target.files;
     if (!files || files.length === 0) return;
     setUploading(true);
-    const formData = new FormData();
-    Array.from(files).forEach((f) => formData.append('files', f));
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-    const data = await res.json().catch(() => ({}));
-    setUploading(false);
-    if (!res.ok) {
-      notify(data.error ?? 'Upload failed');
-      return;
+    try {
+      const uploaded = await Promise.all(
+        Array.from(files).map((f) =>
+          upload(`uploads/${f.name}`, f, { access: 'public', handleUploadUrl: '/api/upload' })
+        )
+      );
+      setImages((prev) => [...prev, ...uploaded.map((b) => b.url)]);
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Upload failed');
     }
-    setImages((prev) => [...prev, ...data.urls]);
+    setUploading(false);
     if (fileInput.current) fileInput.current.value = '';
   };
 
@@ -76,16 +78,17 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
     const files = e.target.files;
     if (!files || files.length === 0) return;
     setUploadingSpin(true);
-    const formData = new FormData();
-    Array.from(files).forEach((f) => formData.append('files', f));
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-    const data = await res.json().catch(() => ({}));
-    setUploadingSpin(false);
-    if (!res.ok) {
-      notify(data.error ?? 'Upload failed');
-      return;
+    try {
+      const uploaded = await Promise.all(
+        Array.from(files).map((f) =>
+          upload(`uploads/${f.name}`, f, { access: 'public', handleUploadUrl: '/api/upload' })
+        )
+      );
+      setSpinImages((prev) => [...prev, ...uploaded.map((b) => b.url)]);
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Upload failed');
     }
-    setSpinImages((prev) => [...prev, ...data.urls]);
+    setUploadingSpin(false);
     if (spinFileInput.current) spinFileInput.current.value = '';
   };
 

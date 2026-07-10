@@ -1,43 +1,37 @@
 import { NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
-import { randomUUID } from 'crypto';
+import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
-const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
-const MAX_FILES = 4;
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB per image
 
+// Issues a short-lived client token instead of proxying the file through this
+// function — Vercel serverless functions cap request bodies at 4.5MB, which
+// several review photos together can exceed. The browser uploads straight to Blob.
 export async function POST(request: Request) {
   const ip = getClientIp(request);
-  if (!rateLimit(`review-upload:${ip}`, 10, 60 * 60 * 1000)) {
-    return NextResponse.json({ error: 'Too many uploads. Please try again later.' }, { status: 429 });
+  const body = (await request.json()) as HandleUploadBody;
+
+  try {
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async () => {
+        if (!rateLimit(`review-upload:${ip}`, 10, 60 * 60 * 1000)) {
+          throw new Error('Too many uploads. Please try again later.');
+        }
+        return {
+          allowedContentTypes: ALLOWED_TYPES,
+          addRandomSuffix: true,
+          maximumSizeInBytes: MAX_SIZE_BYTES
+        };
+      }
+    });
+    return NextResponse.json(jsonResponse);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Upload failed' },
+      { status: 400 }
+    );
   }
-
-  const formData = await request.formData();
-  const files = formData.getAll('files').filter((f): f is File => f instanceof File);
-
-  if (files.length === 0) {
-    return NextResponse.json({ error: 'No files provided' }, { status: 400 });
-  }
-  if (files.length > MAX_FILES) {
-    return NextResponse.json({ error: `You can attach up to ${MAX_FILES} images` }, { status: 400 });
-  }
-
-  const urls: string[] = [];
-
-  for (const file of files) {
-    if (!ALLOWED_TYPES.has(file.type)) {
-      return NextResponse.json({ error: `Unsupported file type: ${file.type}` }, { status: 400 });
-    }
-    if (file.size > MAX_SIZE_BYTES) {
-      return NextResponse.json({ error: 'Each image must be under 5MB' }, { status: 400 });
-    }
-
-    const ext = file.type.split('/')[1];
-    const filename = `${randomUUID()}.${ext}`;
-    const blob = await put(`uploads/${filename}`, file, { access: 'public' });
-    urls.push(blob.url);
-  }
-
-  return NextResponse.json({ urls });
 }
