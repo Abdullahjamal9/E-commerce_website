@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { writeFile } from 'fs/promises';
-import path from 'path';
+import { put } from '@vercel/blob';
 import { randomUUID } from 'crypto';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
@@ -36,9 +35,8 @@ export async function POST(request: Request) {
 
     const ext = file.type.split('/')[1];
     const filename = `${randomUUID()}.${ext}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(process.cwd(), 'public', 'uploads', filename), buffer);
-    urls.push(`/uploads/${filename}`);
+    const blob = await put(`uploads/${filename}`, file, { access: 'public' });
+    urls.push(blob.url);
   }
 
   return NextResponse.json({ urls });

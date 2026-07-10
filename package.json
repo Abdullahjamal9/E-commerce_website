@@ -13,10 +13,11 @@
     "db:backup": "node scripts/backup-db.js"
   },
   "dependencies": {
-    "@prisma/adapter-better-sqlite3": "^7.8.0",
+    "@libsql/client": "^0.17.4",
+    "@prisma/adapter-libsql": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@vercel/blob": "^2.6.1",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.11.1",
     "framer-motion": "^11.11.0",
     "jose": "^6.2.3",
     "next": "14.2.15",
