@@ -55,6 +55,10 @@ export default function ScrollVideo() {
   };
 
   useEffect(() => {
+    // Skip preloading 151 frames on small screens — MobileHero renders a
+    // static image there instead, so this canvas stays hidden and unused.
+    if (window.matchMedia('(max-width: 767px)').matches) return;
+
     let cancelled = false;
     const images: HTMLImageElement[] = [];
 
@@ -95,7 +99,7 @@ export default function ScrollVideo() {
   }, [scrollYProgress]);
 
   return (
-    <section ref={wrapperRef} className="relative h-[400vh]">
+    <section ref={wrapperRef} className="relative hidden h-[400vh] md:block">
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
         <canvas ref={canvasRef} className="h-full w-full" />
 

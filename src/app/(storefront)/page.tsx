@@ -1,4 +1,5 @@
 import ScrollVideo from '@/components/ScrollVideo';
+import MobileHero from '@/components/MobileHero';
 import ProductGrid from '@/components/ProductGrid';
 import Recommendations from '@/components/Recommendations';
 import { getFeaturedProducts, getRecommendedProducts } from '@/lib/products';
@@ -14,6 +15,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <MobileHero />
       <ScrollVideo />
       <ProductGrid products={featured} tags={tags} />
       <Recommendations picks={picks} storeName={settings.storeName} />
