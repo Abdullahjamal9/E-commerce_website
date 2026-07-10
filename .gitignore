@@ -10,6 +10,7 @@ yarn-error.log*
 .env
 .env*.local
 /dev.db
+prisma/*.db
 /backups
 /public/uploads/*
 !/public/uploads/.gitkeep
