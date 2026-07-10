@@ -7,7 +7,7 @@ import { getSettings } from '@/lib/settings';
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
   return {
-    title: `${settings.storeName} — Step Into the Future of Style`,
+    title: settings.storeName,
     description: 'Shop quality footwear, apparel, and accessories online with fast delivery, Cash on Delivery, and easy returns.'
   };
 }

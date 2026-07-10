@@ -28,7 +28,7 @@ export default function Footer({ storeName, tags }: { storeName: string; tags: s
     <footer className="glass mt-24 px-6 py-12">
       <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-4">
         <div>
-          <p className="flex items-center gap-2 text-xl font-black tracking-[0.3em] neon-text">
+          <p className="flex items-center gap-2 text-xl font-black uppercase tracking-[0.3em] neon-text">
             <Image src={logo} alt={storeName} width={28} height={28} />
             {storeName}
           </p>

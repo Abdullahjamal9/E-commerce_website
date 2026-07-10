@@ -134,7 +134,7 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
       className="glass fixed z-50 shadow-glow"
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 text-xl font-black tracking-[0.3em] neon-text">
+        <Link href="/" className="flex items-center gap-2 text-xl font-black uppercase tracking-[0.3em] neon-text">
           <Image src={logo} alt={storeName} width={28} height={28} priority />
           {storeName}
         </Link>
@@ -254,7 +254,7 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
             style={{ willChange: 'transform' }}
           >
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-lg font-black tracking-[0.3em] neon-text">{storeName}</span>
+              <span className="text-lg font-black uppercase tracking-[0.3em] neon-text">{storeName}</span>
               <button
                 onClick={() => setMenuOpen(false)}
                 aria-label="Close menu"
