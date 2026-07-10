@@ -31,6 +31,7 @@ export default function MobileNav() {
         </Link>
       ))}
       <button
+        data-cart-target
         onClick={openCart}
         className="relative flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] opacity-70"
       >

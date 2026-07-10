@@ -105,6 +105,7 @@ function ShopMenu({ categories }: { categories: string[] }) {
 export default function Navbar({ storeName, categories }: { storeName: string; categories: string[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
   const count = useCart(selectCount);
   const openCart = useCart((s) => s.open);
   const wishCount = useWishlist((s) => s.ids.length);
@@ -165,15 +166,9 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
         </ul>
 
         <div className="flex items-center gap-3">
-          <button
-            aria-label="Open menu"
-            onClick={() => setMenuOpen(true)}
-            className="rounded-full p-2 text-xl transition hover:bg-white/10 md:hidden"
-          >
-            ☰
-          </button>
-
-          <SearchBox />
+          <div className="hidden md:block">
+            <SearchBox />
+          </div>
 
           <button
             aria-label="Toggle theme"
@@ -205,10 +200,10 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
           </Link>
 
           <button
-            id="cart-button"
+            data-cart-target
             aria-label="Open cart"
             onClick={openCart}
-            className="relative rounded-full p-2 transition hover:bg-white/10"
+            className="relative hidden rounded-full p-2 transition hover:bg-white/10 md:block"
           >
             🛍️
             <AnimatePresence>
@@ -224,6 +219,14 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
                 </motion.span>
               )}
             </AnimatePresence>
+          </button>
+
+          <button
+            aria-label="Open menu"
+            onClick={() => setMenuOpen(true)}
+            className="rounded-full p-2 text-xl transition hover:bg-white/10 md:hidden"
+          >
+            ☰
           </button>
         </div>
       </nav>
@@ -250,7 +253,7 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
             className="panel-solid fixed inset-y-0 right-0 z-[101] flex w-72 max-w-[85vw] flex-col overflow-y-auto p-5 md:hidden"
             style={{ willChange: 'transform' }}
           >
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-4 flex items-center justify-between">
               <span className="text-lg font-black tracking-[0.3em] neon-text">{storeName}</span>
               <button
                 onClick={() => setMenuOpen(false)}
@@ -261,7 +264,11 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
               </button>
             </div>
 
-            <nav className="flex-1 space-y-1">
+            <div className="mb-4">
+              <SearchBox variant="inline" onNavigate={() => setMenuOpen(false)} />
+            </div>
+
+            <nav className="flex flex-1 flex-col space-y-1">
               <Link
                 href="/"
                 onClick={() => setMenuOpen(false)}
@@ -269,27 +276,58 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
               >
                 Home
               </Link>
-              <Link
-                href="/shop"
-                onClick={() => setMenuOpen(false)}
-                className="block rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
-              >
-                Shop — All Products
-              </Link>
-              {categories.length > 0 && (
-                <div className="pl-3">
-                  {categories.map((c) => (
-                    <Link
-                      key={c}
-                      href={`/shop?category=${encodeURIComponent(c)}`}
-                      onClick={() => setMenuOpen(false)}
-                      className="block rounded-xl px-3 py-2 text-sm opacity-60 transition hover:bg-white/10 hover:opacity-100"
+
+              <div>
+                <button
+                  onClick={() => setShopOpen((s) => !s)}
+                  className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
+                >
+                  Shop
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={`transition-transform ${shopOpen ? 'rotate-180' : ''}`}
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+                <AnimatePresence initial={false}>
+                  {shopOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden pl-3"
                     >
-                      {c}
-                    </Link>
-                  ))}
-                </div>
-              )}
+                      <Link
+                        href="/shop"
+                        onClick={() => setMenuOpen(false)}
+                        className="block rounded-xl px-3 py-2 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
+                      >
+                        All Products
+                      </Link>
+                      {categories.map((c) => (
+                        <Link
+                          key={c}
+                          href={`/shop?category=${encodeURIComponent(c)}`}
+                          onClick={() => setMenuOpen(false)}
+                          className="block rounded-xl px-3 py-2 text-sm opacity-60 transition hover:bg-white/10 hover:opacity-100"
+                        >
+                          {c}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <Link
                 href="/collections"
                 onClick={() => setMenuOpen(false)}
@@ -311,6 +349,21 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
               >
                 Contact
               </Link>
+
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  openCart();
+                }}
+                className="relative mt-auto flex w-full items-center justify-between rounded-xl bg-white/5 px-3 py-3 text-sm font-semibold opacity-90 transition hover:bg-white/10"
+              >
+                <span className="flex items-center gap-2">🛍️ Cart</span>
+                {count > 0 && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-neon-blue to-neon-purple text-[10px] font-bold text-white">
+                    {count}
+                  </span>
+                )}
+              </button>
             </nav>
           </motion.aside>
         </>

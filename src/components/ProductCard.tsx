@@ -51,14 +51,14 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
       onMouseMove={onMove}
       onMouseLeave={reset}
       style={{ transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)` }}
-      className="group relative"
+      className="group relative h-full"
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.5 }}
     >
-      <Link href={`/product/${shoe.slug}`}>
-        <div className="glass relative overflow-hidden rounded-3xl p-4 transition-shadow duration-300 group-hover:shadow-glow-purple">
+      <Link href={`/product/${shoe.slug}`} className="block h-full">
+        <div className="glass relative flex h-full flex-col overflow-hidden rounded-3xl p-4 transition-shadow duration-300 group-hover:shadow-glow-purple">
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -87,33 +87,35 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition group-hover:opacity-100" />
           </div>
 
-          <div className="mt-4 flex items-start justify-between">
-            <div>
-              <p className="font-semibold">{shoe.name}</p>
-              <p className="text-xs opacity-60">{shoe.tagline}</p>
+          <div className="mt-4 flex flex-1 flex-col">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="line-clamp-2 min-h-[2.5em] font-semibold leading-tight">{shoe.name}</p>
+                <p className="mt-1 line-clamp-1 text-xs opacity-60">{shoe.tagline}</p>
+              </div>
+              <p className="shrink-0 whitespace-nowrap font-bold neon-text">{formatPrice(shoe.price)}</p>
             </div>
-            <p className="font-bold neon-text">{formatPrice(shoe.price)}</p>
-          </div>
 
-          <div className="mt-2 flex gap-1.5">
-            {shoe.colors.map((c) => (
-              <span
-                key={c.hex}
-                className="h-3 w-3 rounded-full ring-1 ring-white/20"
-                style={{ background: c.hex }}
-              />
-            ))}
-          </div>
+            <div className="mt-2 flex gap-1.5">
+              {shoe.colors.map((c) => (
+                <span
+                  key={c.hex}
+                  className="h-3 w-3 rounded-full ring-1 ring-white/20"
+                  style={{ background: c.hex }}
+                />
+              ))}
+            </div>
 
-          <motion.button
-            onClick={quickAdd}
-            disabled={outOfStock}
-            initial={{ opacity: 0, y: 10 }}
-            whileHover={outOfStock ? {} : { scale: 1.02 }}
-            className="btn-glow mt-4 w-full rounded-full bg-gradient-to-r from-neon-blue to-neon-purple py-2 text-sm font-semibold text-white opacity-0 transition group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-0 disabled:group-hover:opacity-60"
-          >
-            {outOfStock ? 'Out of Stock' : 'Add to Cart'}
-          </motion.button>
+            <motion.button
+              onClick={quickAdd}
+              disabled={outOfStock}
+              initial={{ opacity: 0, y: 10 }}
+              whileHover={outOfStock ? {} : { scale: 1.02 }}
+              className="btn-glow mt-4 w-full rounded-full bg-gradient-to-r from-neon-blue to-neon-purple py-2 text-sm font-semibold text-white opacity-0 transition group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-0 disabled:group-hover:opacity-60"
+            >
+              {outOfStock ? 'Out of Stock' : 'Add to Cart'}
+            </motion.button>
+          </div>
         </div>
       </Link>
     </motion.div>

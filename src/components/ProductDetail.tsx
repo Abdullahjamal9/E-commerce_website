@@ -59,7 +59,9 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
     // Trigger the fly-to-cart micro-interaction, then open the drawer.
     // Target is computed relative to the cart button's actual position so the
     // animation lands accurately regardless of viewport size.
-    const cartRect = document.getElementById('cart-button')?.getBoundingClientRect();
+    const cartTargets = Array.from(document.querySelectorAll<HTMLElement>('[data-cart-target]'));
+    const cartEl = cartTargets.find((el) => el.offsetParent !== null);
+    const cartRect = cartEl?.getBoundingClientRect();
     setFlyTarget({
       x: (cartRect ? cartRect.left + cartRect.width / 2 : window.innerWidth * 0.9) - window.innerWidth / 2,
       y: (cartRect ? cartRect.top + cartRect.height / 2 : 16) - window.innerHeight / 2
