@@ -214,7 +214,7 @@ export default function ProductReviews({
                   </span>
                 </div>
                 <Stars value={r.rating} />
-                <p className="mt-1 text-sm opacity-80">{r.comment}</p>
+                <p className="mt-1 whitespace-pre-line text-sm opacity-80">{r.comment}</p>
                 {r.images.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
                     {r.images.map((url) => (
