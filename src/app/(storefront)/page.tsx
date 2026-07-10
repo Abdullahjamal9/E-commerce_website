@@ -12,8 +12,13 @@ export default async function HomePage() {
   const picks = await getRecommendedProducts(featured.map((p) => p.id), 4);
   const [settings, tags] = await Promise.all([getSettings(), getTags()]);
 
+  const nikeDebug = featured.find((p) => p.name === 'Nike') ?? picks.find((p) => p.name === 'Nike');
+
   return (
     <>
+      <div style={{ display: 'none' }} id="debug-marker">
+        {JSON.stringify(nikeDebug?.images ?? 'not-found')}
+      </div>
       <ScrollVideo />
       <ProductGrid products={featured} tags={tags} />
       <Recommendations picks={picks} storeName={settings.storeName} />
