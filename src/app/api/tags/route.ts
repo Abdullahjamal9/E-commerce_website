@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
@@ -26,5 +27,8 @@ export async function POST(request: Request) {
   }
 
   const tag = await prisma.tag.create({ data: { name: parsed.data.name } });
+  revalidatePath('/admin/tags');
+  revalidatePath('/');
+  revalidatePath('/shop');
   return NextResponse.json(tag);
 }

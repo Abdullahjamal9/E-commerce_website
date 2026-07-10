@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
@@ -29,6 +30,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   }
 
   const product = await prisma.product.update({ where: { id: params.id }, data: parsed.data });
+  revalidatePath('/admin/products');
+  revalidatePath('/');
+  revalidatePath('/shop');
+  revalidatePath(`/product/${product.slug}`);
   return NextResponse.json(product);
 }
 
@@ -37,5 +42,8 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await prisma.product.delete({ where: { id: params.id } });
+  revalidatePath('/admin/products');
+  revalidatePath('/');
+  revalidatePath('/shop');
   return NextResponse.json({ ok: true });
 }

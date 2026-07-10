@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
@@ -42,5 +43,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const review = await prisma.review.create({
     data: { ...parsed.data, productId: params.id }
   });
+  revalidatePath(`/product/${product.slug}`);
+  revalidatePath('/admin/reviews');
   return NextResponse.json(review);
 }

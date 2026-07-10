@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
@@ -32,5 +33,6 @@ export async function PATCH(request: Request) {
     update: parsed.data,
     create: { id: 1, ...parsed.data }
   });
+  revalidatePath('/', 'layout');
   return NextResponse.json(settings);
 }

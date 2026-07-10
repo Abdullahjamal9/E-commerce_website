@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
@@ -61,5 +62,8 @@ export async function POST(request: Request) {
 
   const slug = await uniqueSlug(parsed.data.name);
   const product = await prisma.product.create({ data: { ...parsed.data, slug } });
+  revalidatePath('/admin/products');
+  revalidatePath('/');
+  revalidatePath('/shop');
   return NextResponse.json(product);
 }

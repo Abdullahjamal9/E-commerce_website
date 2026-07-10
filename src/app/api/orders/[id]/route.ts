@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
@@ -29,6 +30,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     where: { id: params.id },
     data: parsed.data
   });
+  revalidatePath('/admin/orders');
+  revalidatePath(`/admin/orders/${params.id}`);
   return NextResponse.json(order);
 }
 
@@ -37,5 +40,7 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await prisma.order.delete({ where: { id: params.id } });
+  revalidatePath('/admin/orders');
+  revalidatePath(`/admin/orders/${params.id}`);
   return NextResponse.json({ ok: true });
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
@@ -17,5 +18,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     where: { id: params.id },
     data: { featuredAt: parsed.data.featured ? new Date() : null }
   });
+  revalidatePath('/admin/products');
+  revalidatePath('/');
   return NextResponse.json(product);
 }

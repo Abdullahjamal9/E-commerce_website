@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
@@ -111,6 +112,8 @@ export async function POST(request: Request) {
     });
 
     await sendOrderEmails(order);
+    revalidatePath('/admin/orders');
+    revalidatePath('/admin');
 
     return NextResponse.json({ id: order.id, orderNumber: order.orderNumber });
   } catch (err) {
