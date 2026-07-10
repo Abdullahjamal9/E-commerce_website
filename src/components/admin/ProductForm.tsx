@@ -62,6 +62,16 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
 
   const removeImage = (url: string) => setImages((prev) => prev.filter((u) => u !== url));
 
+  const moveImage = (index: number, direction: -1 | 1) => {
+    setImages((prev) => {
+      const target = index + direction;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
   const onSpinFilesSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -81,6 +91,16 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
 
   const removeSpinImage = (url: string) =>
     setSpinImages((prev) => prev.filter((u) => u !== url));
+
+  const moveSpinImage = (index: number, direction: -1 | 1) => {
+    setSpinImages((prev) => {
+      const target = index + direction;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -296,11 +316,21 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
       <div>
         <p className="mb-2 text-sm font-medium opacity-80">Images</p>
         {images.length > 0 && (
+          <div className="mb-1 text-xs opacity-50">
+            First image is the product cover. Use the arrows to reorder.
+          </div>
+        )}
+        {images.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-3">
-            {images.map((url) => (
+            {images.map((url, i) => (
               <div key={url} className="group relative h-20 w-20 overflow-hidden rounded-xl">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={url} alt="" className="h-full w-full object-cover" />
+                {i === 0 && (
+                  <span className="absolute left-1 top-1 rounded bg-black/60 px-1 text-[10px] text-white">
+                    Cover
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => removeImage(url)}
@@ -308,6 +338,24 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
                 >
                   ✕
                 </button>
+                <div className="absolute inset-x-0 bottom-1 flex justify-center gap-1 opacity-0 transition group-hover:opacity-100">
+                  <button
+                    type="button"
+                    onClick={() => moveImage(i, -1)}
+                    disabled={i === 0}
+                    className="rounded-full bg-black/60 px-1.5 text-xs text-white disabled:opacity-30"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveImage(i, 1)}
+                    disabled={i === images.length - 1}
+                    className="rounded-full bg-black/60 px-1.5 text-xs text-white disabled:opacity-30"
+                  >
+                    →
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -336,7 +384,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
               <div key={url} className="group relative h-20 w-20 overflow-hidden rounded-xl">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={url} alt="" className="h-full w-full object-cover" />
-                <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1 text-[10px] text-white">
+                <span className="absolute left-1 top-1 rounded bg-black/60 px-1 text-[10px] text-white">
                   {i + 1}
                 </span>
                 <button
@@ -346,6 +394,24 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
                 >
                   ✕
                 </button>
+                <div className="absolute inset-x-0 bottom-1 flex justify-center gap-1 opacity-0 transition group-hover:opacity-100">
+                  <button
+                    type="button"
+                    onClick={() => moveSpinImage(i, -1)}
+                    disabled={i === 0}
+                    className="rounded-full bg-black/60 px-1.5 text-xs text-white disabled:opacity-30"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveSpinImage(i, 1)}
+                    disabled={i === spinImages.length - 1}
+                    className="rounded-full bg-black/60 px-1.5 text-xs text-white disabled:opacity-30"
+                  >
+                    →
+                  </button>
+                </div>
               </div>
             ))}
           </div>
