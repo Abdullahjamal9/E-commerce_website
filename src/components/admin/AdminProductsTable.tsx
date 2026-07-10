@@ -2,20 +2,37 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { formatPrice } from '@/lib/currency';
 import { useToast } from '@/store/useToast';
 import type { Shoe } from '@/lib/types';
+import Pagination from './Pagination';
 
 const MAX_FEATURED = 8;
+const PAGE_SIZE = 50;
 
 export default function AdminProductsTable({ products }: { products: Shoe[] }) {
   const router = useRouter();
   const notify = useToast((s) => s.show);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   const featuredCount = products.filter((p) => p.featuredAt).length;
+  const totalPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
+
+  useEffect(() => {
+    setPage(1);
+  }, [products]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  const visible = useMemo(
+    () => products.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [products, page]
+  );
 
   const onDelete = async (id: string, name: string) => {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
@@ -86,7 +103,7 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
           </tr>
         </thead>
         <tbody>
-          {products.map((p) => (
+          {visible.map((p) => (
             <tr key={p.id} className="border-b border-white/5">
               <td className="py-3 pr-4">
                 <div className="flex items-center gap-3">
@@ -151,6 +168,7 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
           ))}
         </tbody>
       </table>
+      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </div>
   );
 }

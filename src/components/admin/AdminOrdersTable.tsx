@@ -1,9 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/currency';
+import Pagination from './Pagination';
+
+const PAGE_SIZE = 50;
 
 interface OrderRow {
   id: string;
@@ -32,10 +35,26 @@ export default function AdminOrdersTable({ orders }: { orders: OrderRow[] }) {
   const [filter, setFilter] = useState('All');
   const [rows, setRows] = useState(orders);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
-  const visible = useMemo(
+  const filtered = useMemo(
     () => (filter === 'All' ? rows : rows.filter((o) => o.orderStatus === filter)),
     [rows, filter]
+  );
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  const visible = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page]
   );
 
   const deleteOrder = async (id: string, orderNumber: string) => {
@@ -67,7 +86,7 @@ export default function AdminOrdersTable({ orders }: { orders: OrderRow[] }) {
         ))}
       </div>
 
-      {visible.length === 0 ? (
+      {filtered.length === 0 ? (
         <p className="py-12 text-center text-sm opacity-60">No orders here.</p>
       ) : (
         <div className="overflow-x-auto">
@@ -115,6 +134,7 @@ export default function AdminOrdersTable({ orders }: { orders: OrderRow[] }) {
               ))}
             </tbody>
           </table>
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
       )}
     </div>
