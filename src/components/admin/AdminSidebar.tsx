@@ -73,7 +73,7 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
     <>
       {/* Mobile top bar */}
       <div className="glass sticky top-0 z-30 flex items-center justify-between px-4 py-3 md:hidden">
-        <Link href="/admin" className="flex items-center gap-2 text-base font-black tracking-widest neon-text">
+        <Link href="/admin" className="flex items-center gap-2 text-base font-black uppercase tracking-widest neon-text">
           <Image src={logo} alt={storeName} width={22} height={22} />
           {storeName}
         </Link>
@@ -109,7 +109,7 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
                 <Link
                   href="/admin"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 text-lg font-black tracking-[0.3em] neon-text"
+                  className="flex items-center gap-2 text-lg font-black uppercase tracking-[0.3em] neon-text"
                 >
                   <Image src={logo} alt={storeName} width={24} height={24} />
                   {storeName}
@@ -151,7 +151,7 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
           <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-200 group-hover:left-3 group-hover:translate-x-0">
             <Image src={logo} alt={storeName} width={32} height={32} className="flex-shrink-0" />
           </span>
-          <span className="neon-text absolute left-14 top-[58%] -translate-y-1/2 overflow-hidden whitespace-nowrap text-sm leading-[16px] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <span className="neon-text absolute left-14 top-[58%] -translate-y-1/2 overflow-hidden whitespace-nowrap text-sm uppercase leading-[16px] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
             {storeName.split(' ').map((word) => (
               <span key={word} className="block">
                 {word}
