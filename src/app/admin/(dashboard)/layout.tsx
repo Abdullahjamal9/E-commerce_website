@@ -10,9 +10,9 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   const settings = await getSettings();
 
   return (
-    <div className="flex">
+    <div className="min-h-screen">
       <AdminSidebar storeName={settings.storeName} />
-      <main className="flex-1 overflow-y-auto p-6 sm:p-10">{children}</main>
+      <main className="overflow-y-auto p-4 sm:p-6 md:ml-16 md:p-10">{children}</main>
     </div>
   );
 }
