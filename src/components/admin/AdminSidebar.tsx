@@ -133,10 +133,14 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
 
       {/* Desktop sidebar — collapsed to icons, expands on hover */}
       <aside className="group glass fixed inset-y-0 left-0 z-30 hidden h-screen w-16 flex-col overflow-hidden p-3 transition-all duration-300 ease-out hover:w-60 hover:p-5 md:flex">
-        <Link href="/admin" className="mb-8 flex items-center gap-2 text-lg font-black tracking-[0.3em] neon-text">
-          <Image src={logo} alt={storeName} width={24} height={24} className="flex-shrink-0" />
-          <span className="overflow-hidden whitespace-nowrap opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-            {storeName}
+        <Link href="/admin" className="mb-8 flex flex-col items-center gap-2 text-center font-black tracking-[0.2em] neon-text">
+          <Image src={logo} alt={storeName} width={28} height={28} className="flex-shrink-0" />
+          <span className="overflow-hidden whitespace-nowrap text-xs leading-tight opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            {storeName.split(' ').map((word) => (
+              <span key={word} className="block">
+                {word}
+              </span>
+            ))}
           </span>
         </Link>
 
