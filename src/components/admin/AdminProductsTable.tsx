@@ -152,6 +152,7 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
               <td className="py-3 pr-4 text-right">
                 <Link
                   href={`/admin/products/${p.id}/edit`}
+                  prefetch={false}
                   className="mr-3 text-sm opacity-70 hover:opacity-100"
                 >
                   Edit
