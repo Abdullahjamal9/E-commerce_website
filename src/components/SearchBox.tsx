@@ -85,7 +85,7 @@ export default function SearchBox({
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="glass absolute left-0 right-0 top-full mt-2 max-h-72 overflow-y-auto overflow-x-hidden rounded-2xl p-2 shadow-glow"
+              className="glass absolute left-0 right-0 top-full z-20 mt-2 max-h-72 overflow-y-auto overflow-x-hidden rounded-2xl p-2 shadow-glow"
             >
               {loading && <p className="px-3 py-3 text-sm opacity-60">Searching…</p>}
 
