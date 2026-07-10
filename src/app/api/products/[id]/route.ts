@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
+import { slugify } from '@/lib/slugify';
 
 const productSchema = z.object({
   name: z.string().min(2),
@@ -19,6 +20,16 @@ const productSchema = z.object({
   isActive: z.boolean().default(true)
 });
 
+async function uniqueSlug(name: string, excludeId: string) {
+  const base = slugify(name) || 'shoe';
+  let slug = base;
+  let i = 1;
+  while (await prisma.product.findFirst({ where: { slug, id: { not: excludeId } } })) {
+    slug = `${base}-${i++}`;
+  }
+  return slug;
+}
+
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -29,10 +40,17 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid product' }, { status: 400 });
   }
 
-  const product = await prisma.product.update({ where: { id: params.id }, data: parsed.data });
+  const existing = await prisma.product.findUnique({ where: { id: params.id } });
+  const data =
+    existing && existing.name !== parsed.data.name
+      ? { ...parsed.data, slug: await uniqueSlug(parsed.data.name, params.id) }
+      : parsed.data;
+
+  const product = await prisma.product.update({ where: { id: params.id }, data });
   revalidatePath('/admin/products');
   revalidatePath('/');
   revalidatePath('/shop');
+  if (existing && existing.slug !== product.slug) revalidatePath(`/product/${existing.slug}`);
   revalidatePath(`/product/${product.slug}`);
   return NextResponse.json(product);
 }
