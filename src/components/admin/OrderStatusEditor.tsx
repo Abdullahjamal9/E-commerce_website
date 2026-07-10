@@ -20,6 +20,7 @@ export default function OrderStatusEditor({
   const notify = useToast((s) => s.show);
   const [saving, setSaving] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const update = async (field: 'paymentStatus' | 'orderStatus', value: string) => {
     setSaving(true);
@@ -46,6 +47,20 @@ export default function OrderStatusEditor({
       return;
     }
     notify('Payment verified — confirmation email sent to customer');
+    router.refresh();
+  };
+
+  const deleteOrder = async () => {
+    if (!confirm('Delete this order? This cannot be undone.')) return;
+    setDeleting(true);
+    const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+    if (!res.ok) {
+      setDeleting(false);
+      notify('Could not delete order');
+      return;
+    }
+    notify('Order deleted');
+    router.push('/admin/orders');
     router.refresh();
   };
 
@@ -92,6 +107,13 @@ export default function OrderStatusEditor({
         </select>
       </div>
       </div>
+      <button
+        onClick={deleteOrder}
+        disabled={deleting}
+        className="mt-4 w-full rounded-full py-2.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:opacity-50"
+      >
+        {deleting ? 'Deleting…' : 'Delete Order'}
+      </button>
     </div>
   );
 }

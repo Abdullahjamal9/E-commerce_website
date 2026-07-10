@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/currency';
 
 interface OrderRow {
@@ -27,12 +28,28 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function AdminOrdersTable({ orders }: { orders: OrderRow[] }) {
+  const router = useRouter();
   const [filter, setFilter] = useState('All');
+  const [rows, setRows] = useState(orders);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const visible = useMemo(
-    () => (filter === 'All' ? orders : orders.filter((o) => o.orderStatus === filter)),
-    [orders, filter]
+    () => (filter === 'All' ? rows : rows.filter((o) => o.orderStatus === filter)),
+    [rows, filter]
   );
+
+  const deleteOrder = async (id: string, orderNumber: string) => {
+    if (!confirm(`Delete order ${orderNumber}? This cannot be undone.`)) return;
+    setDeletingId(id);
+    const res = await fetch(`/api/orders/${id}`, { method: 'DELETE' });
+    setDeletingId(null);
+    if (!res.ok) {
+      alert('Failed to delete order.');
+      return;
+    }
+    setRows((prev) => prev.filter((o) => o.id !== id));
+    router.refresh();
+  };
 
   return (
     <div>
@@ -62,6 +79,7 @@ export default function AdminOrdersTable({ orders }: { orders: OrderRow[] }) {
                 <th className="py-3 pr-4">Payment</th>
                 <th className="py-3 pr-4">Status</th>
                 <th className="py-3 pr-4">Total</th>
+                <th className="py-3 pr-4" />
               </tr>
             </thead>
             <tbody>
@@ -84,6 +102,15 @@ export default function AdminOrdersTable({ orders }: { orders: OrderRow[] }) {
                     </span>
                   </td>
                   <td className="py-3 pr-4 font-semibold">{formatPrice(o.total)}</td>
+                  <td className="py-3 pr-4">
+                    <button
+                      onClick={() => deleteOrder(o.id, o.orderNumber)}
+                      disabled={deletingId === o.id}
+                      className="rounded-full px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/10 disabled:opacity-40"
+                    >
+                      {deletingId === o.id ? 'Deleting…' : 'Delete'}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

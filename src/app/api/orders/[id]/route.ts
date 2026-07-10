@@ -31,3 +31,11 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   });
   return NextResponse.json(order);
 }
+
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+  const session = await getAdminSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  await prisma.order.delete({ where: { id: params.id } });
+  return NextResponse.json({ ok: true });
+}
