@@ -12,7 +12,9 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   return (
     <div className="min-h-screen">
       <AdminSidebar storeName={settings.storeName} />
-      <main className="overflow-y-auto p-4 sm:p-6 md:ml-16 md:p-10">{children}</main>
+      <main className="overflow-y-auto p-4 transition-all duration-300 ease-out sm:p-6 md:ml-16 md:p-10 md:peer-hover:ml-60">
+        {children}
+      </main>
     </div>
   );
 }
