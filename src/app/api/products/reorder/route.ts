@@ -16,10 +16,17 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Invalid order' }, { status: 400 });
   }
 
+  // `ids` is only the reordered subset currently visible in the admin table
+  // (e.g. one category, one page) — not the whole catalogue. Splice that new
+  // sequence back into the subset's original slots within the full order, so
+  // reordering a filtered view never disturbs products outside it.
+  const all = await prisma.product.findMany({ orderBy: { sortOrder: 'asc' }, select: { id: true } });
+  const subsetIds = new Set(parsed.data.ids);
+  const reordered = [...parsed.data.ids];
+  const finalOrder = all.map((p) => (subsetIds.has(p.id) ? reordered.shift()! : p.id));
+
   await prisma.$transaction(
-    parsed.data.ids.map((id, index) =>
-      prisma.product.update({ where: { id }, data: { sortOrder: index } })
-    )
+    finalOrder.map((id, index) => prisma.product.update({ where: { id }, data: { sortOrder: index } }))
   );
 
   revalidatePath('/admin/products');

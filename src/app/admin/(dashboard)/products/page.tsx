@@ -22,10 +22,6 @@ export default async function AdminProductsPage({
   if (searchParams.stock === 'in') products = products.filter((p) => p.stock > 0);
   if (searchParams.stock === 'out') products = products.filter((p) => p.stock <= 0);
 
-  const isFiltered = Boolean(
-    searchParams.search || category || searchParams.status || searchParams.stock
-  );
-
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -40,7 +36,7 @@ export default async function AdminProductsPage({
 
       <div className="glass rounded-2xl p-6">
         <AdminProductsFilters categoryOptions={categoryOptions} />
-        <AdminProductsTable products={products} reorderable={!isFiltered} />
+        <AdminProductsTable products={products} />
       </div>
     </div>
   );

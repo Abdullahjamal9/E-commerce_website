@@ -12,13 +12,7 @@ import Pagination from './Pagination';
 const MAX_FEATURED = 8;
 const PAGE_SIZE = 50;
 
-export default function AdminProductsTable({
-  products,
-  reorderable
-}: {
-  products: Shoe[];
-  reorderable: boolean;
-}) {
+export default function AdminProductsTable({ products }: { products: Shoe[] }) {
   const router = useRouter();
   const notify = useToast((s) => s.show);
   const [items, setItems] = useState(products);
@@ -28,10 +22,6 @@ export default function AdminProductsTable({
 
   const featuredCount = items.filter((p) => p.featuredAt).length;
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
-  // Dragging only reorders what's on screen, so it's only reliable when every
-  // product fits on a single page — otherwise "reordering" would silently
-  // scramble items outside the visible slice.
-  const canReorder = reorderable && totalPages === 1;
 
   useEffect(() => {
     setItems(products);
@@ -115,7 +105,7 @@ export default function AdminProductsTable({
 
   const columns = (
     <tr className="border-b border-white/10 text-xs uppercase tracking-wide opacity-50">
-      {canReorder && <th className="w-8 py-3" />}
+      <th className="w-8 py-3" />
       <th className="py-3 pr-4">S.No</th>
       <th className="py-3 pr-4">Product</th>
       <th className="py-3 pr-4">Category</th>
@@ -151,33 +141,31 @@ export default function AdminProductsTable({
         .
       </p>
       <p className="mb-3 text-xs opacity-60">
-        {canReorder
-          ? 'Drag rows by the ⠿ handle to control the order products appear in on the homepage and shop.'
-          : 'Clear all filters (and view a single page) to drag-reorder products.'}
+        Drag rows by the ⠿ handle to reorder — this only reorders within whatever&apos;s currently
+        visible (e.g. a filtered category, or this page), leaving everything else untouched.
       </p>
       <table className="w-full text-left text-sm">
         <thead>{columns}</thead>
-        {canReorder ? (
-          <Reorder.Group
-            as="tbody"
-            axis="y"
-            values={visible}
-            onReorder={(newOrder) => {
-              setItems(newOrder);
-              persistOrder(newOrder);
-            }}
-          >
-            {visible.map((p, i) => (
-              <Row key={p.id} p={p} sNo={(page - 1) * PAGE_SIZE + i + 1} draggable {...rowProps} />
-            ))}
-          </Reorder.Group>
-        ) : (
-          <tbody>
-            {visible.map((p, i) => (
-              <Row key={p.id} p={p} sNo={(page - 1) * PAGE_SIZE + i + 1} draggable={false} {...rowProps} />
-            ))}
-          </tbody>
-        )}
+        <Reorder.Group
+          as="tbody"
+          axis="y"
+          values={visible}
+          onReorder={(newOrder) => {
+            setItems((prev) => {
+              const start = (page - 1) * PAGE_SIZE;
+              const next = [...prev];
+              newOrder.forEach((p, i) => {
+                next[start + i] = p;
+              });
+              return next;
+            });
+            persistOrder(newOrder);
+          }}
+        >
+          {visible.map((p, i) => (
+            <Row key={p.id} p={p} sNo={(page - 1) * PAGE_SIZE + i + 1} {...rowProps} />
+          ))}
+        </Reorder.Group>
       </table>
       <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </div>
@@ -187,7 +175,6 @@ export default function AdminProductsTable({
 function Row({
   p,
   sNo,
-  draggable,
   onDelete,
   onToggleFeatured,
   onToggleActive,
@@ -196,7 +183,6 @@ function Row({
 }: {
   p: Shoe;
   sNo: number;
-  draggable: boolean;
   onDelete: (id: string, name: string) => void;
   onToggleFeatured: (id: string, featured: boolean) => void;
   onToggleActive: (id: string, active: boolean, name: string) => void;
@@ -207,16 +193,14 @@ function Row({
 
   const cells = (
     <>
-      {draggable && (
-        <td className="py-3 pr-2">
-          <span
-            onPointerDown={(e) => controls.start(e)}
-            className="block cursor-grab touch-none select-none px-1 text-lg opacity-40 hover:opacity-80 active:cursor-grabbing"
-          >
-            ⠿
-          </span>
-        </td>
-      )}
+      <td className="py-3 pr-2">
+        <span
+          onPointerDown={(e) => controls.start(e)}
+          className="block cursor-grab touch-none select-none px-1 text-lg opacity-40 hover:opacity-80 active:cursor-grabbing"
+        >
+          ⠿
+        </span>
+      </td>
       <td className="py-3 pr-4 opacity-60">{sNo}</td>
       <td className="py-3 pr-4">
         <div className="flex items-center gap-3">
@@ -281,20 +265,16 @@ function Row({
     </>
   );
 
-  if (draggable) {
-    return (
-      <Reorder.Item
-        as="tr"
-        value={p}
-        dragListener={false}
-        dragControls={controls}
-        className="panel-solid border-b border-white/5"
-        whileDrag={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}
-      >
-        {cells}
-      </Reorder.Item>
-    );
-  }
-
-  return <tr className="border-b border-white/5">{cells}</tr>;
+  return (
+    <Reorder.Item
+      as="tr"
+      value={p}
+      dragListener={false}
+      dragControls={controls}
+      className="panel-solid border-b border-white/5"
+      whileDrag={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}
+    >
+      {cells}
+    </Reorder.Item>
+  );
 }
