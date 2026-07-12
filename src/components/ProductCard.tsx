@@ -82,6 +82,8 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
             <img
               src={shoe.image}
               alt={shoe.name}
+              loading="lazy"
+              decoding="async"
               className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-110 ${outOfStock ? 'grayscale' : ''}`}
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition group-hover:opacity-100" />

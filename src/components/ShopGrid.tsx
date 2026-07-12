@@ -8,6 +8,7 @@ import type { Category, Shoe, Tag } from '@/lib/types';
 type Sort = 'newest' | 'price-asc' | 'price-desc';
 
 const TEXT_SIZE_ORDER = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL', 'XXXL'];
+const PAGE_SIZE = 24;
 
 /** Numeric sizes sort low-to-high; text sizes (S, M, L…) follow a known
  * size order; anything else falls back to alphabetical. */
@@ -321,6 +322,7 @@ export default function ShopGrid({
   const [sort, setSort] = useState<Sort>('newest');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const tagFilters: (Tag | 'All')[] = ['All', ...tags];
 
@@ -358,6 +360,14 @@ export default function ShopGrid({
 
     return list;
   }, [inCategory, activeTag, activeSize, search, sort, minPrice, maxPrice]);
+
+  // Reset how many cards are rendered whenever the filtered set changes, so
+  // switching category/tag/search doesn't leave a stale "Load more" position.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [visible]);
+
+  const shown = visible.slice(0, visibleCount);
 
   return (
     <section className="mx-auto max-w-7xl px-4 pb-20 pt-28 sm:px-6">
@@ -424,14 +434,27 @@ export default function ShopGrid({
               : 'No products available yet.'}
         </p>
       ) : (
-        <motion.div
-          layout
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        >
-          {visible.map((shoe) => (
-            <ProductCard key={shoe.id} shoe={shoe} />
-          ))}
-        </motion.div>
+        <>
+          <motion.div
+            layout
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
+            {shown.map((shoe) => (
+              <ProductCard key={shoe.id} shoe={shoe} />
+            ))}
+          </motion.div>
+
+          {visibleCount < visible.length && (
+            <div className="mt-10 flex justify-center">
+              <button
+                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                className="glass rounded-full px-6 py-2.5 text-sm font-semibold transition hover:bg-white/10"
+              >
+                Load More ({visible.length - visibleCount} more)
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
