@@ -17,7 +17,7 @@ export default function MobileNav() {
   const openCart = useCart((s) => s.open);
 
   return (
-    <nav className="glass fixed inset-x-0 bottom-0 z-50 flex items-center justify-around py-2 md:hidden">
+    <nav className="glass fixed inset-x-0 bottom-0 z-50 flex items-center justify-around py-2 lg:hidden">
       {ITEMS.map((i) => (
         <Link
           key={i.href}

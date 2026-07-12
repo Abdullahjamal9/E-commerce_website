@@ -139,7 +139,7 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
           {storeName}
         </Link>
 
-        <ul className="hidden items-center gap-8 md:flex">
+        <ul className="hidden items-center gap-8 lg:flex">
           {LINKS.slice(0, 1).map((l) => (
             <li key={l.href}>
               <Link
@@ -166,7 +166,7 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
         </ul>
 
         <div className="flex items-center gap-3">
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <SearchBox />
           </div>
 
@@ -203,7 +203,7 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
             data-cart-target
             aria-label="Open cart"
             onClick={openCart}
-            className="relative hidden rounded-full p-2 transition hover:bg-white/10 md:block"
+            className="relative hidden rounded-full p-2 transition hover:bg-white/10 lg:block"
           >
             🛍️
             <AnimatePresence>
@@ -224,7 +224,7 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
           <button
             aria-label="Open menu"
             onClick={() => setMenuOpen(true)}
-            className="rounded-full p-2 text-xl transition hover:bg-white/10 md:hidden"
+            className="rounded-full p-2 text-xl transition hover:bg-white/10 lg:hidden"
           >
             ☰
           </button>
@@ -243,14 +243,14 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setMenuOpen(false)}
-            className="fixed inset-0 z-[100] bg-black/60 md:hidden"
+            className="fixed inset-0 z-[100] bg-black/60 lg:hidden"
           />
           <motion.aside
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
-            className="panel-solid fixed inset-y-0 right-0 z-[101] flex w-72 max-w-[85vw] flex-col overflow-y-auto p-5 md:hidden"
+            className="panel-solid fixed inset-y-0 right-0 z-[101] flex w-72 max-w-[85vw] flex-col overflow-y-auto p-5 lg:hidden"
             style={{ willChange: 'transform' }}
           >
             <div className="mb-4 flex items-center justify-between">
