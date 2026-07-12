@@ -3,13 +3,18 @@ import { prisma } from '@/lib/db';
 import { formatPrice } from '@/lib/currency';
 
 export default async function AdminDashboardPage() {
-  const [productCount, pendingOrders, paidOrders, recentOrders] = await Promise.all([
-    prisma.product.count(),
-    prisma.order.count({ where: { orderStatus: 'PENDING' } }),
+  // Prisma's .count() can return a stale aggregate on Turso shortly after bulk
+  // writes (the underlying COUNT(*) pushdown doesn't always see recent rows),
+  // so these tally actual rows instead of trusting the aggregate.
+  const [productIds, pendingOrderIds, paidOrders, recentOrders] = await Promise.all([
+    prisma.product.findMany({ select: { id: true } }),
+    prisma.order.findMany({ where: { orderStatus: 'PENDING' }, select: { id: true } }),
     prisma.order.findMany({ where: { paymentStatus: 'PAID' }, select: { total: true } }),
     prisma.order.findMany({ orderBy: { createdAt: 'desc' }, take: 5 })
   ]);
 
+  const productCount = productIds.length;
+  const pendingOrders = pendingOrderIds.length;
   const revenue = paidOrders.reduce((sum, o) => sum + o.total, 0);
 
   const stats = [
