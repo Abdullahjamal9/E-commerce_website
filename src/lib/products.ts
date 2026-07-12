@@ -17,6 +17,7 @@ type ProductRow = {
   spinImages?: unknown;
   featuredAt?: Date | null;
   isActive: boolean;
+  sortOrder: number;
 };
 
 function mapProduct(p: ProductRow): Shoe {
@@ -58,7 +59,7 @@ export async function getProducts(filters: ProductFilters = {}): Promise<Shoe[]>
         ? { price: 'asc' }
         : filters.sort === 'price-desc'
           ? { price: 'desc' }
-          : { createdAt: 'desc' }
+          : { sortOrder: 'asc' }
   });
 
   let shoes = rows.map(mapProduct);
@@ -120,7 +121,7 @@ export async function getRelated(id: string, count = 4): Promise<Shoe[]> {
 export async function getFeaturedProducts(maxCount = 8): Promise<Shoe[]> {
   const featuredRows = await prisma.product.findMany({
     where: { featuredAt: { not: null }, isActive: true },
-    orderBy: { featuredAt: 'desc' },
+    orderBy: { sortOrder: 'asc' },
     take: maxCount
   });
   return featuredRows.map(mapProduct);

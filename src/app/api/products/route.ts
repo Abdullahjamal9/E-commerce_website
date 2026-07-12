@@ -61,7 +61,11 @@ export async function POST(request: Request) {
   }
 
   const slug = await uniqueSlug(parsed.data.name);
-  const product = await prisma.product.create({ data: { ...parsed.data, slug } });
+  // New products default to the top of the manual order, matching the old
+  // "newest first" behaviour, while staying fully draggable afterwards.
+  const first = await prisma.product.findFirst({ orderBy: { sortOrder: 'asc' } });
+  const sortOrder = first ? first.sortOrder - 1 : 0;
+  const product = await prisma.product.create({ data: { ...parsed.data, slug, sortOrder } });
   revalidatePath('/admin/products');
   revalidatePath('/');
   revalidatePath('/shop');

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { Reorder, useDragControls } from 'framer-motion';
 import { formatPrice } from '@/lib/currency';
 import { useToast } from '@/store/useToast';
 import type { Shoe } from '@/lib/types';
@@ -11,15 +12,30 @@ import Pagination from './Pagination';
 const MAX_FEATURED = 8;
 const PAGE_SIZE = 50;
 
-export default function AdminProductsTable({ products }: { products: Shoe[] }) {
+export default function AdminProductsTable({
+  products,
+  reorderable
+}: {
+  products: Shoe[];
+  reorderable: boolean;
+}) {
   const router = useRouter();
   const notify = useToast((s) => s.show);
+  const [items, setItems] = useState(products);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  const featuredCount = products.filter((p) => p.featuredAt).length;
-  const totalPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
+  const featuredCount = items.filter((p) => p.featuredAt).length;
+  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  // Dragging only reorders what's on screen, so it's only reliable when every
+  // product fits on a single page — otherwise "reordering" would silently
+  // scramble items outside the visible slice.
+  const canReorder = reorderable && totalPages === 1;
+
+  useEffect(() => {
+    setItems(products);
+  }, [products]);
 
   useEffect(() => {
     setPage(1);
@@ -30,9 +46,23 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
   }, [page, totalPages]);
 
   const visible = useMemo(
-    () => products.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [products, page]
+    () => items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [items, page]
   );
+
+  const persistOrder = async (ordered: Shoe[]) => {
+    const res = await fetch('/api/products/reorder', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: ordered.map((p) => p.id) })
+    });
+    if (!res.ok) {
+      notify('Could not save the new order');
+      router.refresh();
+      return;
+    }
+    router.refresh();
+  };
 
   const onDelete = async (id: string, name: string) => {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
@@ -79,97 +109,180 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
     router.refresh();
   };
 
-  if (products.length === 0) {
+  if (items.length === 0) {
     return <p className="py-12 text-center text-sm opacity-60">No products yet. Add your first one.</p>;
   }
 
+  const columns = (
+    <tr className="border-b border-white/10 text-xs uppercase tracking-wide opacity-50">
+      {canReorder && <th className="w-8 py-3" />}
+      <th className="py-3 pr-4">Product</th>
+      <th className="py-3 pr-4">Category</th>
+      <th className="py-3 pr-4">Tags</th>
+      <th className="py-3 pr-4">Price</th>
+      <th className="py-3 pr-4">Stock</th>
+      <th className="py-3 pr-4">Status</th>
+      <th className="py-3 pr-4">Featured</th>
+      <th className="py-3 pr-4" />
+    </tr>
+  );
+
+  const rowProps = {
+    onDelete,
+    onToggleFeatured,
+    onToggleActive,
+    deletingId,
+    togglingId
+  };
+
   return (
     <div className="overflow-x-auto">
-      <p className="mb-3 text-xs opacity-60">
+      <p className="mb-1 text-xs opacity-60">
         {featuredCount}/{MAX_FEATURED} products featured on homepage — only the most recently
         featured {MAX_FEATURED} will show if you select more.
       </p>
+      <p className="mb-3 text-xs opacity-60">
+        {canReorder
+          ? 'Drag rows by the ⠿ handle to control the order products appear in on the homepage and shop.'
+          : 'Clear all filters (and view a single page) to drag-reorder products.'}
+      </p>
       <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-white/10 text-xs uppercase tracking-wide opacity-50">
-            <th className="py-3 pr-4">Product</th>
-            <th className="py-3 pr-4">Category</th>
-            <th className="py-3 pr-4">Tags</th>
-            <th className="py-3 pr-4">Price</th>
-            <th className="py-3 pr-4">Stock</th>
-            <th className="py-3 pr-4">Status</th>
-            <th className="py-3 pr-4">Featured</th>
-            <th className="py-3 pr-4" />
-          </tr>
-        </thead>
-        <tbody>
-          {visible.map((p) => (
-            <tr key={p.id} className="border-b border-white/5">
-              <td className="py-3 pr-4">
-                <div className="flex items-center gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.image} alt={p.name} className="h-10 w-10 rounded-lg object-cover" />
-                  <div>
-                    <p className="font-medium">{p.name}</p>
-                    <p className="text-xs opacity-50">{p.tagline}</p>
-                  </div>
-                </div>
-              </td>
-              <td className="py-3 pr-4 opacity-70">{p.category}</td>
-              <td className="py-3 pr-4 opacity-70">{p.tags.join(', ')}</td>
-              <td className="py-3 pr-4 font-medium">{formatPrice(p.price)}</td>
-              <td className="py-3 pr-4">
-                <span className={p.stock <= 0 ? 'text-red-400' : 'opacity-70'}>{p.stock}</span>
-                {p.stock <= 0 && (
-                  <span className="ml-2 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-400">
-                    Out of stock
-                  </span>
-                )}
-              </td>
-              <td className="py-3 pr-4">
-                <button
-                  type="button"
-                  onClick={() => onToggleActive(p.id, !p.isActive, p.name)}
-                  disabled={togglingId === p.id}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide disabled:opacity-50 ${
-                    p.isActive
-                      ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
-                      : 'bg-white/10 text-white/50 hover:bg-white/20'
-                  }`}
-                >
-                  {p.isActive ? 'Active' : 'Inactive'}
-                </button>
-              </td>
-              <td className="py-3 pr-4">
-                <input
-                  type="checkbox"
-                  checked={!!p.featuredAt}
-                  disabled={togglingId === p.id}
-                  onChange={(e) => onToggleFeatured(p.id, e.target.checked)}
-                  className="h-4 w-4"
-                />
-              </td>
-              <td className="py-3 pr-4 text-right">
-                <Link
-                  href={`/admin/products/${p.id}/edit`}
-                  prefetch={false}
-                  className="mr-3 text-sm opacity-70 hover:opacity-100"
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={() => onDelete(p.id, p.name)}
-                  disabled={deletingId === p.id}
-                  className="text-sm text-red-400 hover:text-red-300 disabled:opacity-50"
-                >
-                  {deletingId === p.id ? 'Deleting…' : 'Delete'}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+        <thead>{columns}</thead>
+        {canReorder ? (
+          <Reorder.Group
+            as="tbody"
+            axis="y"
+            values={visible}
+            onReorder={(newOrder) => {
+              setItems(newOrder);
+              persistOrder(newOrder);
+            }}
+          >
+            {visible.map((p) => (
+              <Row key={p.id} p={p} draggable {...rowProps} />
+            ))}
+          </Reorder.Group>
+        ) : (
+          <tbody>
+            {visible.map((p) => (
+              <Row key={p.id} p={p} draggable={false} {...rowProps} />
+            ))}
+          </tbody>
+        )}
       </table>
       <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </div>
   );
+}
+
+function Row({
+  p,
+  draggable,
+  onDelete,
+  onToggleFeatured,
+  onToggleActive,
+  deletingId,
+  togglingId
+}: {
+  p: Shoe;
+  draggable: boolean;
+  onDelete: (id: string, name: string) => void;
+  onToggleFeatured: (id: string, featured: boolean) => void;
+  onToggleActive: (id: string, active: boolean, name: string) => void;
+  deletingId: string | null;
+  togglingId: string | null;
+}) {
+  const controls = useDragControls();
+
+  const cells = (
+    <>
+      {draggable && (
+        <td className="py-3 pr-2">
+          <span
+            onPointerDown={(e) => controls.start(e)}
+            className="block cursor-grab touch-none select-none px-1 text-lg opacity-40 hover:opacity-80 active:cursor-grabbing"
+          >
+            ⠿
+          </span>
+        </td>
+      )}
+      <td className="py-3 pr-4">
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={p.image} alt={p.name} className="h-10 w-10 rounded-lg object-cover" />
+          <div>
+            <p className="font-medium">{p.name}</p>
+            <p className="text-xs opacity-50">{p.tagline}</p>
+          </div>
+        </div>
+      </td>
+      <td className="py-3 pr-4 opacity-70">{p.category}</td>
+      <td className="py-3 pr-4 opacity-70">{p.tags.join(', ')}</td>
+      <td className="py-3 pr-4 font-medium">{formatPrice(p.price)}</td>
+      <td className="py-3 pr-4">
+        <span className={p.stock <= 0 ? 'text-red-400' : 'opacity-70'}>{p.stock}</span>
+        {p.stock <= 0 && (
+          <span className="ml-2 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-400">
+            Out of stock
+          </span>
+        )}
+      </td>
+      <td className="py-3 pr-4">
+        <button
+          type="button"
+          onClick={() => onToggleActive(p.id, !p.isActive, p.name)}
+          disabled={togglingId === p.id}
+          className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide disabled:opacity-50 ${
+            p.isActive
+              ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+              : 'bg-white/10 text-white/50 hover:bg-white/20'
+          }`}
+        >
+          {p.isActive ? 'Active' : 'Inactive'}
+        </button>
+      </td>
+      <td className="py-3 pr-4">
+        <input
+          type="checkbox"
+          checked={!!p.featuredAt}
+          disabled={togglingId === p.id}
+          onChange={(e) => onToggleFeatured(p.id, e.target.checked)}
+          className="h-4 w-4"
+        />
+      </td>
+      <td className="py-3 pr-4 text-right">
+        <Link
+          href={`/admin/products/${p.id}/edit`}
+          prefetch={false}
+          className="mr-3 text-sm opacity-70 hover:opacity-100"
+        >
+          Edit
+        </Link>
+        <button
+          onClick={() => onDelete(p.id, p.name)}
+          disabled={deletingId === p.id}
+          className="text-sm text-red-400 hover:text-red-300 disabled:opacity-50"
+        >
+          {deletingId === p.id ? 'Deleting…' : 'Delete'}
+        </button>
+      </td>
+    </>
+  );
+
+  if (draggable) {
+    return (
+      <Reorder.Item
+        as="tr"
+        value={p}
+        dragListener={false}
+        dragControls={controls}
+        className="panel-solid border-b border-white/5"
+        whileDrag={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}
+      >
+        {cells}
+      </Reorder.Item>
+    );
+  }
+
+  return <tr className="border-b border-white/5">{cells}</tr>;
 }
