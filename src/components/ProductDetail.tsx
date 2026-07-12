@@ -175,6 +175,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
                 {[shoe.category, ...shoe.tags].join(' · ')}
               </p>
               <h1 className="mt-1 text-3xl font-black sm:text-4xl">{shoe.name}</h1>
+              <p className="mt-1 text-sm opacity-60">{shoe.tagline}</p>
             </div>
             <button
               onClick={() => {
