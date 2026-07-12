@@ -16,6 +16,8 @@ export default async function AdminDashboardPage() {
   ]);
   await prisma.$disconnect();
 
+  console.error('[dashboard-debug] productIds.length =', productIds.length, 'at', new Date().toISOString());
+
   const productCount = productIds.length;
   const pendingOrders = pendingOrderIds.length;
   const revenue = paidOrders.reduce((sum, o) => sum + o.total, 0);
