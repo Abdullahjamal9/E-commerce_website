@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import ProductCard from './ProductCard';
+import ScrollableChipRow from './ScrollableChipRow';
 import type { Shoe, Tag } from '@/lib/types';
 
 export default function ProductGrid({
@@ -32,20 +33,22 @@ export default function ProductGrid({
         <p className="mt-2 opacity-60">Engineered silhouettes for every dimension.</p>
       </div>
 
-      <div className="no-scrollbar mb-10 flex justify-start gap-2 overflow-x-auto pb-2 sm:justify-center">
-        {filters.map((f) => (
-          <button
-            key={f}
-            onClick={() => setActive(f)}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition ${
-              active === f
-                ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white shadow-glow'
-                : 'glass opacity-70 hover:opacity-100'
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+      <div className="mb-10">
+        <ScrollableChipRow className="pb-2">
+          {filters.map((f) => (
+            <button
+              key={f}
+              onClick={() => setActive(f)}
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition ${
+                active === f
+                  ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white shadow-glow'
+                  : 'glass opacity-70 hover:opacity-100'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </ScrollableChipRow>
       </div>
 
       <motion.div

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from './ProductCard';
+import ScrollableChipRow from './ScrollableChipRow';
 import type { Category, Shoe, Tag } from '@/lib/types';
 
 type Sort = 'newest' | 'price-asc' | 'price-desc';
@@ -387,7 +388,7 @@ export default function ShopGrid({
       </div>
 
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+        <ScrollableChipRow className="pb-1">
           {tagFilters.map((f) => (
             <button
               key={f}
@@ -401,7 +402,7 @@ export default function ShopGrid({
               {f}
             </button>
           ))}
-        </div>
+        </ScrollableChipRow>
 
         <div className="flex gap-2">
           <input
