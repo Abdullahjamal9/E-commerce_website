@@ -57,59 +57,66 @@ export async function POST(request: Request) {
   const data = parsed.data;
 
   try {
-    const order = await prisma.$transaction(async (tx) => {
-      let total = 0;
-      const itemsToCreate = [];
+    const order = await prisma.$transaction(
+      async (tx) => {
+        let total = 0;
+        const itemsToCreate = [];
 
-      for (const item of data.items) {
-        const product = await tx.product.findUnique({ where: { id: item.shoeId } });
-        if (!product) throw new Error(`Product ${item.shoeId} not found`);
-        if (product.stock < item.qty) {
-          throw new Error(`${product.name} is out of stock`);
+        for (const item of data.items) {
+          const product = await tx.product.findUnique({ where: { id: item.shoeId } });
+          if (!product) throw new Error(`Product ${item.shoeId} not found`);
+          if (product.stock < item.qty) {
+            throw new Error(`${product.name} is out of stock`);
+          }
+
+          await tx.product.update({
+            where: { id: product.id },
+            data: { stock: product.stock - item.qty }
+          });
+
+          const colors = (product.colors as { name: string; hex: string }[]) ?? [];
+          const color = colors.find((c) => c.hex === item.colorHex);
+          const images = (product.images as string[]) ?? [];
+
+          total += product.price * item.qty;
+          itemsToCreate.push({
+            productId: product.id,
+            productName: product.name,
+            price: product.price,
+            colorName: color?.name ?? item.colorHex,
+            colorHex: item.colorHex,
+            size: item.size,
+            qty: item.qty,
+            image: images[0] ?? ''
+          });
         }
 
-        await tx.product.update({
-          where: { id: product.id },
-          data: { stock: product.stock - item.qty }
+        const orderNumber = `ORD-${1000 + (await tx.order.count()) + 1}`;
+
+        return tx.order.create({
+          data: {
+            orderNumber,
+            customerName: data.customerName,
+            email: data.email,
+            phone: data.phone,
+            address: data.address,
+            city: data.city,
+            paymentMethod: data.paymentMethod,
+            paymentStatus: data.paymentMethod === 'BANK_TRANSFER' ? 'AWAITING_VERIFICATION' : 'PENDING',
+            transactionRef: data.transactionRef,
+            paymentProof: data.paymentProof,
+            total,
+            items: { create: itemsToCreate }
+          },
+          include: { items: true }
         });
-
-        const colors = (product.colors as { name: string; hex: string }[]) ?? [];
-        const color = colors.find((c) => c.hex === item.colorHex);
-        const images = (product.images as string[]) ?? [];
-
-        total += product.price * item.qty;
-        itemsToCreate.push({
-          productId: product.id,
-          productName: product.name,
-          price: product.price,
-          colorName: color?.name ?? item.colorHex,
-          colorHex: item.colorHex,
-          size: item.size,
-          qty: item.qty,
-          image: images[0] ?? ''
-        });
-      }
-
-      const orderNumber = `ORD-${1000 + (await tx.order.count()) + 1}`;
-
-      return tx.order.create({
-        data: {
-          orderNumber,
-          customerName: data.customerName,
-          email: data.email,
-          phone: data.phone,
-          address: data.address,
-          city: data.city,
-          paymentMethod: data.paymentMethod,
-          paymentStatus: data.paymentMethod === 'BANK_TRANSFER' ? 'AWAITING_VERIFICATION' : 'PENDING',
-          transactionRef: data.transactionRef,
-          paymentProof: data.paymentProof,
-          total,
-          items: { create: itemsToCreate }
-        },
-        include: { items: true }
-      });
-    });
+      },
+      // Default 5s is tight for Turso's per-query network latency once a
+      // cart has several line items (each does a sequential read + write) —
+      // matches the timeout bump that fixed the same class of failure in
+      // the product reorder endpoint.
+      { timeout: 15000 }
+    );
 
     await sendOrderEmails(order);
     revalidatePath('/admin/orders');

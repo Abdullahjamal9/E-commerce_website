@@ -25,7 +25,12 @@ export async function PATCH(request: Request) {
   const reordered = [...parsed.data.ids];
   const finalOrder = all.map((p) => (subsetIds.has(p.id) ? reordered.shift()! : p.id));
 
-  await prisma.$transaction(
+  // Each row's new sortOrder is independent of the others, so these don't need
+  // transactional atomicity — running them concurrently instead of inside a
+  // $transaction avoids Prisma's 5s interactive-transaction timeout, which
+  // Turso's per-query network latency blew past once there were ~20 rows to
+  // update sequentially.
+  await Promise.all(
     finalOrder.map((id, index) => prisma.product.update({ where: { id }, data: { sortOrder: index } }))
   );
 
