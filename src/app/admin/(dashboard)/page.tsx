@@ -16,7 +16,16 @@ export default async function AdminDashboardPage() {
   ]);
   await prisma.$disconnect();
 
-  console.error('[dashboard-debug] productIds.length =', productIds.length, 'at', new Date().toISOString());
+  console.error(
+    '[dashboard-debug]',
+    JSON.stringify({
+      length: productIds.length,
+      ids: productIds.map((p) => p.id),
+      dbUrl: process.env.DATABASE_URL,
+      tokenTail: process.env.DATABASE_AUTH_TOKEN?.slice(-12),
+      at: new Date().toISOString()
+    })
+  );
 
   const productCount = productIds.length;
   const pendingOrders = pendingOrderIds.length;
