@@ -41,6 +41,7 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
         <Link
           key={l.href}
           href={l.href}
+          prefetch={false}
           onClick={onNavigate}
           className={`relative block h-11 rounded-xl text-sm font-medium transition ${
             isActive(l.href) ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white' : 'opacity-70 hover:bg-white/10 hover:opacity-100'
