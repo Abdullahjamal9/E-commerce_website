@@ -1,31 +1,14 @@
 import Link from 'next/link';
-import { createFreshPrismaClient } from '@/lib/db';
+import { prisma } from '@/lib/db';
 import { formatPrice } from '@/lib/currency';
 
 export default async function AdminDashboardPage() {
-  // A long-warm serverless instance was found to serve a frozen row count
-  // over the shared connection minutes after real writes elsewhere (Turso
-  // connection-level staleness, not a caching layer we control) — a fresh
-  // connection per request sidesteps it for this page's stats.
-  const prisma = createFreshPrismaClient();
   const [productIds, pendingOrderIds, paidOrders, recentOrders] = await Promise.all([
     prisma.product.findMany({ select: { id: true } }),
     prisma.order.findMany({ where: { orderStatus: 'PENDING' }, select: { id: true } }),
     prisma.order.findMany({ where: { paymentStatus: 'PAID' }, select: { total: true } }),
     prisma.order.findMany({ orderBy: { createdAt: 'desc' }, take: 5 })
   ]);
-  await prisma.$disconnect();
-
-  console.error(
-    '[dashboard-debug]',
-    JSON.stringify({
-      length: productIds.length,
-      ids: productIds.map((p) => p.id),
-      dbUrl: process.env.DATABASE_URL,
-      tokenTail: process.env.DATABASE_AUTH_TOKEN?.slice(-12),
-      at: new Date().toISOString()
-    })
-  );
 
   const productCount = productIds.length;
   const pendingOrders = pendingOrderIds.length;
