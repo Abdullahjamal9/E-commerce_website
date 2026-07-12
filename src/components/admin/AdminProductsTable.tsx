@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Reorder, useDragControls } from 'framer-motion';
 import { formatPrice } from '@/lib/currency';
 import { useToast } from '@/store/useToast';
@@ -19,6 +19,17 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+
+  // Reorder.Group's onReorder fires repeatedly mid-drag (every time the
+  // dragged row crosses a sibling), not just once on drop. Persisting on
+  // every one of those meant a full drag fired a burst of overlapping
+  // requests that resolved out of order, so the row visibly kept crawling
+  // for seconds after the drag ended. Keeping only a ref here lets the
+  // drag-end handler read the final order once, without re-rendering.
+  const itemsRef = useRef(items);
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   const featuredCount = items.filter((p) => p.featuredAt).length;
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
@@ -52,6 +63,13 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
       return;
     }
     router.refresh();
+  };
+
+  // Called once when a drag actually ends — reads the ref so it always saves
+  // the final order, not whatever it was mid-drag.
+  const commitOrder = () => {
+    const start = (page - 1) * PAGE_SIZE;
+    persistOrder(itemsRef.current.slice(start, start + PAGE_SIZE));
   };
 
   const onDelete = async (id: string, name: string) => {
@@ -159,11 +177,16 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
               });
               return next;
             });
-            persistOrder(newOrder);
           }}
         >
           {visible.map((p, i) => (
-            <Row key={p.id} p={p} sNo={(page - 1) * PAGE_SIZE + i + 1} {...rowProps} />
+            <Row
+              key={p.id}
+              p={p}
+              sNo={(page - 1) * PAGE_SIZE + i + 1}
+              onDragEnd={commitOrder}
+              {...rowProps}
+            />
           ))}
         </Reorder.Group>
       </table>
@@ -175,6 +198,7 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
 function Row({
   p,
   sNo,
+  onDragEnd,
   onDelete,
   onToggleFeatured,
   onToggleActive,
@@ -183,6 +207,7 @@ function Row({
 }: {
   p: Shoe;
   sNo: number;
+  onDragEnd: () => void;
   onDelete: (id: string, name: string) => void;
   onToggleFeatured: (id: string, featured: boolean) => void;
   onToggleActive: (id: string, active: boolean, name: string) => void;
@@ -271,6 +296,7 @@ function Row({
       value={p}
       dragListener={false}
       dragControls={controls}
+      onDragEnd={onDragEnd}
       className="panel-solid border-b border-white/5"
       whileDrag={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}
     >
