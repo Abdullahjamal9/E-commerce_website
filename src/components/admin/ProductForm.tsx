@@ -2,8 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { upload } from '@vercel/blob/client';
-import { compressImage } from '@/lib/compressImage';
+import { uploadToCloudinary } from '@/lib/uploadToCloudinary';
 import { useToast } from '@/store/useToast';
 import MultiSelectDropdown from './MultiSelectDropdown';
 import SingleSelectDropdown from './SingleSelectDropdown';
@@ -67,15 +66,9 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
     setUploading(true);
     try {
       const uploaded = await Promise.all(
-        Array.from(files).map(async (f) => {
-          const compressed = await compressImage(f);
-          return upload(`uploads/${compressed.name}`, compressed, {
-            access: 'public',
-            handleUploadUrl: '/api/upload'
-          });
-        })
+        Array.from(files).map((f) => uploadToCloudinary(f, '/api/upload'))
       );
-      setImages((prev) => [...prev, ...uploaded.map((b) => b.url)]);
+      setImages((prev) => [...prev, ...uploaded]);
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Upload failed');
     }
@@ -104,15 +97,9 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
     setUploadingSpin(true);
     try {
       const uploaded = await Promise.all(
-        Array.from(files).map(async (f) => {
-          const compressed = await compressImage(f);
-          return upload(`uploads/${compressed.name}`, compressed, {
-            access: 'public',
-            handleUploadUrl: '/api/upload'
-          });
-        })
+        Array.from(files).map((f) => uploadToCloudinary(f, '/api/upload'))
       );
-      setSpinImages((prev) => [...prev, ...uploaded.map((b) => b.url)]);
+      setSpinImages((prev) => [...prev, ...uploaded]);
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Upload failed');
     }

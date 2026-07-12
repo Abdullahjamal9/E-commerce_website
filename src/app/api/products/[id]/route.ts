@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
 import { slugify } from '@/lib/slugify';
-import { deleteBlobs } from '@/lib/blob';
+import { deleteImages } from '@/lib/images';
 
 const productSchema = z.object({
   name: z.string().min(2),
@@ -57,7 +57,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   if (existing) {
     const oldUrls = [...(existing.images as string[]), ...(existing.spinImages as string[])];
     const newUrls = new Set([...parsed.data.images, ...parsed.data.spinImages]);
-    await deleteBlobs(oldUrls.filter((u) => !newUrls.has(u)));
+    await deleteImages(oldUrls.filter((u) => !newUrls.has(u)));
   }
 
   return NextResponse.json(product);
@@ -74,7 +74,7 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
   revalidatePath('/shop');
 
   if (existing) {
-    await deleteBlobs([...(existing.images as string[]), ...(existing.spinImages as string[])]);
+    await deleteImages([...(existing.images as string[]), ...(existing.spinImages as string[])]);
   }
 
   return NextResponse.json({ ok: true });

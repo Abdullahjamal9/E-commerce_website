@@ -3,8 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { upload } from '@vercel/blob/client';
-import { compressImage } from '@/lib/compressImage';
+import { uploadToCloudinary } from '@/lib/uploadToCloudinary';
 import { useCart, selectTotal, lineKey } from '@/store/useCart';
 import { useToast } from '@/store/useToast';
 import { formatPrice } from '@/lib/currency';
@@ -66,15 +65,9 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
     setUploadingProof(true);
     try {
       const uploaded = await Promise.all(
-        Array.from(files).map(async (f) => {
-          const compressed = await compressImage(f);
-          return upload(`uploads/${compressed.name}`, compressed, {
-            access: 'public',
-            handleUploadUrl: '/api/orders/upload-proof'
-          });
-        })
+        Array.from(files).map((f) => uploadToCloudinary(f, '/api/orders/upload-proof'))
       );
-      setPaymentProof((prev) => [...prev, ...uploaded.map((b) => b.url)]);
+      setPaymentProof((prev) => [...prev, ...uploaded]);
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Upload failed');
     }
