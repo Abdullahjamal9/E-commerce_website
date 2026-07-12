@@ -116,6 +116,7 @@ export default function AdminProductsTable({
   const columns = (
     <tr className="border-b border-white/10 text-xs uppercase tracking-wide opacity-50">
       {canReorder && <th className="w-8 py-3" />}
+      <th className="py-3 pr-4">S.No</th>
       <th className="py-3 pr-4">Product</th>
       <th className="py-3 pr-4">Category</th>
       <th className="py-3 pr-4">Tags</th>
@@ -138,8 +139,16 @@ export default function AdminProductsTable({
   return (
     <div className="overflow-x-auto">
       <p className="mb-1 text-xs opacity-60">
-        {featuredCount}/{MAX_FEATURED} products featured on homepage — only the most recently
-        featured {MAX_FEATURED} will show if you select more.
+        {featuredCount} product{featuredCount === 1 ? '' : 's'} marked as Featured (homepage shows
+        at most {MAX_FEATURED}, picked by their order below)
+        {featuredCount > MAX_FEATURED && (
+          <span className="text-amber-400">
+            {' '}
+            — {featuredCount - MAX_FEATURED} of them won&apos;t appear; uncheck some or drag the rest
+            higher.
+          </span>
+        )}
+        .
       </p>
       <p className="mb-3 text-xs opacity-60">
         {canReorder
@@ -158,14 +167,14 @@ export default function AdminProductsTable({
               persistOrder(newOrder);
             }}
           >
-            {visible.map((p) => (
-              <Row key={p.id} p={p} draggable {...rowProps} />
+            {visible.map((p, i) => (
+              <Row key={p.id} p={p} sNo={(page - 1) * PAGE_SIZE + i + 1} draggable {...rowProps} />
             ))}
           </Reorder.Group>
         ) : (
           <tbody>
-            {visible.map((p) => (
-              <Row key={p.id} p={p} draggable={false} {...rowProps} />
+            {visible.map((p, i) => (
+              <Row key={p.id} p={p} sNo={(page - 1) * PAGE_SIZE + i + 1} draggable={false} {...rowProps} />
             ))}
           </tbody>
         )}
@@ -177,6 +186,7 @@ export default function AdminProductsTable({
 
 function Row({
   p,
+  sNo,
   draggable,
   onDelete,
   onToggleFeatured,
@@ -185,6 +195,7 @@ function Row({
   togglingId
 }: {
   p: Shoe;
+  sNo: number;
   draggable: boolean;
   onDelete: (id: string, name: string) => void;
   onToggleFeatured: (id: string, featured: boolean) => void;
@@ -206,6 +217,7 @@ function Row({
           </span>
         </td>
       )}
+      <td className="py-3 pr-4 opacity-60">{sNo}</td>
       <td className="py-3 pr-4">
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
