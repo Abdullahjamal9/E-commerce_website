@@ -451,7 +451,7 @@ export default function ShopGrid({
                 onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
                 className="glass rounded-full px-6 py-2.5 text-sm font-semibold transition hover:bg-white/10"
               >
-                Load More ({visible.length - visibleCount} more)
+                Load More
               </button>
             </div>
           )}
