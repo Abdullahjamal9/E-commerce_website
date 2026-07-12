@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
+import { deleteBlobs } from '@/lib/blob';
 
 export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
   const session = await getAdminSession();
@@ -13,5 +14,6 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
   });
   revalidatePath('/admin/reviews');
   revalidatePath(`/product/${review.product.slug}`);
+  await deleteBlobs(review.images as string[]);
   return NextResponse.json({ ok: true });
 }

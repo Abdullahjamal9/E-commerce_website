@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { upload } from '@vercel/blob/client';
+import { compressImage } from '@/lib/compressImage';
 import { useToast } from '@/store/useToast';
 
 interface Review {
@@ -69,9 +70,13 @@ export default function ProductReviews({
     setUploading(true);
     try {
       const uploaded = await Promise.all(
-        Array.from(files).map((f) =>
-          upload(`uploads/${f.name}`, f, { access: 'public', handleUploadUrl: '/api/reviews/upload' })
-        )
+        Array.from(files).map(async (f) => {
+          const compressed = await compressImage(f);
+          return upload(`uploads/${compressed.name}`, compressed, {
+            access: 'public',
+            handleUploadUrl: '/api/reviews/upload'
+          });
+        })
       );
       setImages((prev) => [...prev, ...uploaded.map((b) => b.url)]);
     } catch (err) {

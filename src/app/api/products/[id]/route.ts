@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
 import { slugify } from '@/lib/slugify';
+import { deleteBlobs } from '@/lib/blob';
 
 const productSchema = z.object({
   name: z.string().min(2),
@@ -52,6 +53,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   revalidatePath('/shop');
   if (existing && existing.slug !== product.slug) revalidatePath(`/product/${existing.slug}`);
   revalidatePath(`/product/${product.slug}`);
+
+  if (existing) {
+    const oldUrls = [...(existing.images as string[]), ...(existing.spinImages as string[])];
+    const newUrls = new Set([...parsed.data.images, ...parsed.data.spinImages]);
+    await deleteBlobs(oldUrls.filter((u) => !newUrls.has(u)));
+  }
+
   return NextResponse.json(product);
 }
 
@@ -59,9 +67,15 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const existing = await prisma.product.findUnique({ where: { id: params.id } });
   await prisma.product.delete({ where: { id: params.id } });
   revalidatePath('/admin/products');
   revalidatePath('/');
   revalidatePath('/shop');
+
+  if (existing) {
+    await deleteBlobs([...(existing.images as string[]), ...(existing.spinImages as string[])]);
+  }
+
   return NextResponse.json({ ok: true });
 }

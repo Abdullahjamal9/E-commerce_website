@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { upload } from '@vercel/blob/client';
+import { compressImage } from '@/lib/compressImage';
 import { useToast } from '@/store/useToast';
 import MultiSelectDropdown from './MultiSelectDropdown';
 import SingleSelectDropdown from './SingleSelectDropdown';
@@ -38,6 +39,22 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  // Images already saved on the product shouldn't be deleted from storage
+  // just because the admin clicked "remove" — only once the edit is actually
+  // saved (the PATCH route diffs old vs new and cleans those up). Freshly
+  // uploaded-this-session images aren't referenced anywhere yet, so removing
+  // them can delete the blob immediately instead of leaving it an orphan.
+  const initialUrlsRef = useRef(new Set([...(initial?.images ?? []), ...(initial?.spinImages ?? [])]));
+
+  const deleteIfUnsaved = (url: string) => {
+    if (initialUrlsRef.current.has(url)) return;
+    fetch('/api/upload', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    }).catch(() => {});
+  };
+
   const updateColor = (i: number, field: 'name' | 'hex', value: string) =>
     setColors((prev) => prev.map((c, idx) => (idx === i ? { ...c, [field]: value } : c)));
 
@@ -50,9 +67,13 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
     setUploading(true);
     try {
       const uploaded = await Promise.all(
-        Array.from(files).map((f) =>
-          upload(`uploads/${f.name}`, f, { access: 'public', handleUploadUrl: '/api/upload' })
-        )
+        Array.from(files).map(async (f) => {
+          const compressed = await compressImage(f);
+          return upload(`uploads/${compressed.name}`, compressed, {
+            access: 'public',
+            handleUploadUrl: '/api/upload'
+          });
+        })
       );
       setImages((prev) => [...prev, ...uploaded.map((b) => b.url)]);
     } catch (err) {
@@ -62,7 +83,10 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
     if (fileInput.current) fileInput.current.value = '';
   };
 
-  const removeImage = (url: string) => setImages((prev) => prev.filter((u) => u !== url));
+  const removeImage = (url: string) => {
+    setImages((prev) => prev.filter((u) => u !== url));
+    deleteIfUnsaved(url);
+  };
 
   const moveImage = (index: number, direction: -1 | 1) => {
     setImages((prev) => {
@@ -80,9 +104,13 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
     setUploadingSpin(true);
     try {
       const uploaded = await Promise.all(
-        Array.from(files).map((f) =>
-          upload(`uploads/${f.name}`, f, { access: 'public', handleUploadUrl: '/api/upload' })
-        )
+        Array.from(files).map(async (f) => {
+          const compressed = await compressImage(f);
+          return upload(`uploads/${compressed.name}`, compressed, {
+            access: 'public',
+            handleUploadUrl: '/api/upload'
+          });
+        })
       );
       setSpinImages((prev) => [...prev, ...uploaded.map((b) => b.url)]);
     } catch (err) {
@@ -92,8 +120,10 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
     if (spinFileInput.current) spinFileInput.current.value = '';
   };
 
-  const removeSpinImage = (url: string) =>
+  const removeSpinImage = (url: string) => {
     setSpinImages((prev) => prev.filter((u) => u !== url));
+    deleteIfUnsaved(url);
+  };
 
   const moveSpinImage = (index: number, direction: -1 | 1) => {
     setSpinImages((prev) => {

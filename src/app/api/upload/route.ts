@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { getAdminSession } from '@/lib/session';
+import { deleteBlobs } from '@/lib/blob';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
@@ -31,4 +32,19 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
+}
+
+// Lets the admin product form immediately reclaim storage when a photo is
+// removed before the product is ever saved — otherwise that upload would
+// never be referenced by any product and would sit as a permanent orphan.
+export async function DELETE(request: Request) {
+  const session = await getAdminSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const body = await request.json().catch(() => null);
+  const url = typeof body?.url === 'string' ? body.url : null;
+  if (!url) return NextResponse.json({ error: 'Missing url' }, { status: 400 });
+
+  await deleteBlobs([url]);
+  return NextResponse.json({ ok: true });
 }
