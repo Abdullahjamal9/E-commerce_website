@@ -307,16 +307,19 @@ function SizeFilter({
 export default function ShopGrid({
   products,
   tags,
+  categories,
   category,
   initialTag,
   storeName
 }: {
   products: Shoe[];
   tags: Tag[];
+  categories: Category[];
   category?: Category;
   initialTag?: Tag;
   storeName: string;
 }) {
+  const [activeCategory, setActiveCategory] = useState<Category | 'All'>(category ?? 'All');
   const [activeTag, setActiveTag] = useState<Tag | 'All'>(initialTag ?? 'All');
   const [activeSize, setActiveSize] = useState<string | 'All'>('All');
   const [search, setSearch] = useState('');
@@ -325,19 +328,29 @@ export default function ShopGrid({
   const [maxPrice, setMaxPrice] = useState('');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+  const categoryFilters: (Category | 'All')[] = ['All', ...categories];
   const tagFilters: (Tag | 'All')[] = ['All', ...tags];
 
   const inCategory = useMemo(
-    () => (category ? products.filter((p) => p.category === category) : products),
-    [products, category]
+    () => (activeCategory === 'All' ? products : products.filter((p) => p.category === activeCategory)),
+    [products, activeCategory]
   );
 
   // Sizes only make sense within a single product category (e.g. shoe sizes
   // vs. clothing sizes), so this filter is hidden on the all-categories view.
   const availableSizes = useMemo(
-    () => (category ? Array.from(new Set(inCategory.flatMap((p) => p.sizes))).sort(compareSizes) : []),
-    [inCategory, category]
+    () =>
+      activeCategory === 'All'
+        ? []
+        : Array.from(new Set(inCategory.flatMap((p) => p.sizes))).sort(compareSizes),
+    [inCategory, activeCategory]
   );
+
+  // A size chosen under one category may not exist under another, so drop it
+  // whenever the category changes rather than leaving a filter that hides everything.
+  useEffect(() => {
+    setActiveSize('All');
+  }, [activeCategory]);
 
   const visible = useMemo(() => {
     let list = activeTag === 'All' ? inCategory : inCategory.filter((p) => p.tags.includes(activeTag));
@@ -374,18 +387,39 @@ export default function ShopGrid({
     <section className="mx-auto max-w-7xl px-4 pb-20 pt-28 sm:px-6">
       <div className="mb-10 text-center">
         <h1 className="text-3xl font-black sm:text-4xl">
-          {category ? (
+          {activeCategory === 'All' ? (
             <>
-              Shop <span className="neon-text">{category}</span>
+              Full <span className="neon-text">Shop</span>
             </>
           ) : (
             <>
-              Full <span className="neon-text">Shop</span>
+              Shop <span className="neon-text">{activeCategory}</span>
             </>
           )}
         </h1>
         <p className="mt-2 opacity-60">Browse the entire {storeName} catalogue.</p>
       </div>
+
+      <ScrollableChipRow className="mb-6 justify-center !gap-8 pb-2">
+        {categoryFilters.map((c) => (
+          <button
+            key={c}
+            onClick={() => setActiveCategory(c)}
+            className={`relative whitespace-nowrap pb-2 text-base font-bold uppercase tracking-wide transition-colors sm:text-lg ${
+              activeCategory === c ? 'text-[var(--fg)]' : 'opacity-45 hover:opacity-80'
+            }`}
+          >
+            {c}
+            {activeCategory === c && (
+              <motion.span
+                layoutId="category-tab-underline"
+                className="absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple shadow-glow"
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+          </button>
+        ))}
+      </ScrollableChipRow>
 
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <ScrollableChipRow className="pb-1">
@@ -420,7 +454,7 @@ export default function ShopGrid({
               setMaxPrice(max);
             }}
           />
-          {category && availableSizes.length > 0 && (
+          {activeCategory !== 'All' && availableSizes.length > 0 && (
             <SizeFilter sizes={availableSizes} activeSize={activeSize} onChange={setActiveSize} />
           )}
         </div>
@@ -430,8 +464,8 @@ export default function ShopGrid({
         <p className="py-20 text-center opacity-60">
           {search.trim() || minPrice !== '' || maxPrice !== '' || activeSize !== 'All'
             ? 'No products match your filters.'
-            : category
-              ? `No products available in "${category}" yet. Check back soon!`
+            : activeCategory !== 'All'
+              ? `No products available in "${activeCategory}" yet. Check back soon!`
               : 'No products available yet.'}
         </p>
       ) : (

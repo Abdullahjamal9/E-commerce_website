@@ -39,6 +39,7 @@ export default async function ShopPage({
     <ShopGrid
       products={products}
       tags={tags}
+      categories={categories}
       category={category}
       initialTag={initialTag}
       storeName={settings.storeName}
