@@ -5,16 +5,11 @@ import Footer from '@/components/Footer';
 import PageTransition from '@/components/PageTransition';
 import { getSettings } from '@/lib/settings';
 import { getCategories } from '@/lib/categories';
-import { getTags } from '@/lib/tags';
 
 export const dynamic = 'force-dynamic';
 
 export default async function StorefrontLayout({ children }: { children: React.ReactNode }) {
-  const [settings, categories, tags] = await Promise.all([
-    getSettings(),
-    getCategories(),
-    getTags()
-  ]);
+  const [settings, categories] = await Promise.all([getSettings(), getCategories()]);
 
   return (
     <>
@@ -22,7 +17,11 @@ export default async function StorefrontLayout({ children }: { children: React.R
       <main className="pb-24 md:pb-0">
         <PageTransition>{children}</PageTransition>
       </main>
-      <Footer storeName={settings.storeName} tags={tags} />
+      <Footer
+        storeName={settings.storeName}
+        contactEmail={settings.contactEmail}
+        contactPhone={settings.contactPhone}
+      />
       <CartDrawer />
       <MobileNav />
     </>
