@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { Shoe } from '@/lib/types';
 import ProductCard from './ProductCard';
@@ -37,6 +38,22 @@ export default function Recommendations({
           <ProductCard key={shoe.id} shoe={shoe} />
         ))}
       </motion.div>
+
+      <div className="mt-16">
+        <h3 className="text-2xl font-black uppercase sm:text-3xl">
+          Shop Your <span className="neon-text">Style</span>
+        </h3>
+        <p className="mt-1 text-sm opacity-70">
+          Handpicked essentials, curated to match how you move.
+        </p>
+        <Link
+          href="/shop"
+          className="btn-glow mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple px-5 py-2.5 text-sm font-semibold text-white"
+        >
+          See all
+          <span aria-hidden="true">→</span>
+        </Link>
+      </div>
     </section>
   );
 }
