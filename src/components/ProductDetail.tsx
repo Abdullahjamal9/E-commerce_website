@@ -166,9 +166,11 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
         />
       )}
 
-      {/* Sticky buy panel */}
+      {/* Sticky buy panel — pinned in the viewport and scrolls its own
+          content (like Nike's PDP) until it's exhausted, then the page
+          takes over and scrolls past it. */}
       <div className="lg:sticky lg:top-28 lg:self-start">
-        <div className="glass rounded-3xl p-6 sm:p-8">
+        <div className="no-scrollbar glass rounded-3xl p-6 sm:p-8 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs uppercase tracking-widest opacity-60">
@@ -189,12 +191,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
             </button>
           </div>
 
-          <div
-            style={{ maxHeight: mainImageHeight }}
-            className="no-scrollbar mt-4 overflow-y-auto"
-          >
-            <p className="whitespace-pre-line opacity-70">{shoe.description}</p>
-          </div>
+          <p className="mt-4 whitespace-pre-line opacity-70">{shoe.description}</p>
           <p className="mt-6 text-3xl font-black neon-text">{formatPrice(shoe.price)}</p>
           <p className={`mt-1 text-sm ${outOfStock ? 'text-red-400' : 'opacity-60'}`}>
             {outOfStock ? 'Currently out of stock' : `${shoe.stock} in stock`}
