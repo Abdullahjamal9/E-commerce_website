@@ -189,7 +189,12 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
             </button>
           </div>
 
-          <p className="mt-4 whitespace-pre-line opacity-70">{shoe.description}</p>
+          <div
+            style={{ maxHeight: mainImageHeight }}
+            className="no-scrollbar mt-4 overflow-y-auto"
+          >
+            <p className="whitespace-pre-line opacity-70">{shoe.description}</p>
+          </div>
           <p className="mt-6 text-3xl font-black neon-text">{formatPrice(shoe.price)}</p>
           <p className={`mt-1 text-sm ${outOfStock ? 'text-red-400' : 'opacity-60'}`}>
             {outOfStock ? 'Currently out of stock' : `${shoe.stock} in stock`}
