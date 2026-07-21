@@ -166,14 +166,10 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
         />
       )}
 
-      {/* Sticky buy panel — height matches the main image so it never grows
-          past it; only the description scrolls, everything else stays put. */}
+      {/* Sticky buy panel */}
       <div className="lg:sticky lg:top-28 lg:self-start">
-        <div
-          style={{ '--panel-h': mainImageHeight ? `${mainImageHeight}px` : 'auto' } as React.CSSProperties}
-          className="glass flex flex-col rounded-3xl p-6 sm:p-8 lg:h-[var(--panel-h)]"
-        >
-          <div className="flex shrink-0 items-start justify-between">
+        <div className="glass rounded-3xl p-6 sm:p-8">
+          <div className="flex items-start justify-between">
             <div>
               <p className="text-xs uppercase tracking-widest opacity-60">
                 {[shoe.category, ...shoe.tags].join(' · ')}
@@ -193,18 +189,18 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
             </button>
           </div>
 
-          <div className="no-scrollbar mt-4 min-h-0 flex-1 overflow-y-auto">
+          <div
+            style={{ maxHeight: mainImageHeight }}
+            className="no-scrollbar mt-4 overflow-y-auto"
+          >
             <p className="whitespace-pre-line opacity-70">{shoe.description}</p>
           </div>
+          <p className="mt-6 text-3xl font-black neon-text">{formatPrice(shoe.price)}</p>
+          <p className={`mt-1 text-sm ${outOfStock ? 'text-red-400' : 'opacity-60'}`}>
+            {outOfStock ? 'Currently out of stock' : `${shoe.stock} in stock`}
+          </p>
 
-          <div className="shrink-0">
-            <p className="mt-6 text-3xl font-black neon-text">{formatPrice(shoe.price)}</p>
-            <p className={`mt-1 text-sm ${outOfStock ? 'text-red-400' : 'opacity-60'}`}>
-              {outOfStock ? 'Currently out of stock' : `${shoe.stock} in stock`}
-            </p>
-          </div>
-
-          <div className="mt-6 shrink-0">
+          <div className="mt-6">
             <p className="mb-2 text-sm font-semibold">Color · {color.name}</p>
             <div className="flex gap-3">
               {shoe.colors.map((c) => (
@@ -219,7 +215,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
             </div>
           </div>
 
-          <div className="mt-6 shrink-0">
+          <div className="mt-6">
             <p className="mb-2 text-sm font-semibold">Size</p>
             <div className="flex flex-wrap gap-2">
               {shoe.sizes.map((s) => (
@@ -237,7 +233,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
           <button
             onClick={addToCart}
             disabled={outOfStock}
-            className="btn-glow mt-8 w-full shrink-0 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple py-4 text-lg font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn-glow mt-8 w-full rounded-full bg-gradient-to-r from-neon-blue to-neon-purple py-4 text-lg font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             {outOfStock ? 'Out of Stock' : 'Add to Cart · Buy Now'}
           </button>
