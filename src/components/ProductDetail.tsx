@@ -21,6 +21,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
   const [zoomOpen, setZoomOpen] = useState(false);
   const outOfStock = shoe.stock <= 0;
   const mainImageRef = useRef<HTMLDivElement>(null);
+  const buyPanelRef = useRef<HTMLDivElement>(null);
   const [mainImageHeight, setMainImageHeight] = useState<number>();
 
   useEffect(() => {
@@ -31,6 +32,33 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
     });
     observer.observe(el);
     return () => observer.disconnect();
+  }, []);
+
+  // Redirect wheel scrolling into the pinned buy panel — regardless of
+  // where the cursor is — while it's stuck in the viewport and still has
+  // room to scroll; once exhausted, hand scrolling back to the page.
+  useEffect(() => {
+    const STICKY_TOP = 112; // px, matches lg:top-28
+
+    const onWheel = (e: WheelEvent) => {
+      const panel = buyPanelRef.current;
+      if (!panel || window.innerWidth < 1024) return;
+
+      const rect = panel.getBoundingClientRect();
+      const isStuck = Math.abs(rect.top - STICKY_TOP) < 2;
+      if (!isStuck) return;
+
+      const canScrollDown = panel.scrollTop + panel.clientHeight < panel.scrollHeight - 1;
+      const canScrollUp = panel.scrollTop > 0;
+
+      if ((e.deltaY > 0 && canScrollDown) || (e.deltaY < 0 && canScrollUp)) {
+        e.preventDefault();
+        panel.scrollTop += e.deltaY;
+      }
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    return () => window.removeEventListener('wheel', onWheel);
   }, []);
 
   const add = useCart((s) => s.add);
@@ -170,7 +198,10 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
           content (like Nike's PDP) until it's exhausted, then the page
           takes over and scrolls past it. */}
       <div className="lg:sticky lg:top-28 lg:self-start">
-        <div className="no-scrollbar glass rounded-3xl p-6 sm:p-8 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+        <div
+          ref={buyPanelRef}
+          className="no-scrollbar glass rounded-3xl border-none p-6 sm:p-8 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
+        >
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs uppercase tracking-widest opacity-60">

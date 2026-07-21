@@ -118,7 +118,7 @@ export default function ProductReviews({
   };
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6">
+    <section className="mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6">
       <div className="glass rounded-3xl p-6 sm:p-8">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-black sm:text-3xl">
