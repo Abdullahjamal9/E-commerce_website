@@ -46,7 +46,7 @@ export default function ProductReviews({
   const notify = useToast((s) => s.show);
   const fileInput = useRef<HTMLInputElement>(null);
   const [customerName, setCustomerName] = useState('');
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -89,6 +89,10 @@ export default function ProductReviews({
       setError('Please add your name and a comment');
       return;
     }
+    if (rating === 0) {
+      setError('Please select a rating');
+      return;
+    }
 
     setSubmitting(true);
     const res = await fetch(`/api/products/${productId}/reviews`, {
@@ -111,7 +115,7 @@ export default function ProductReviews({
 
     setCustomerName('');
     setComment('');
-    setRating(5);
+    setRating(0);
     setImages([]);
     notify('Thanks for your review!');
     router.refresh();
@@ -199,7 +203,7 @@ export default function ProductReviews({
         <div className="space-y-5">
           {reviews.length === 0 && (
             <p className="text-center text-sm opacity-60">
-              No reviews yet — be the first to share your thoughts.
+              No reviews yet. Be the first to share your thoughts.
             </p>
           )}
           {reviews.map((r) => (
