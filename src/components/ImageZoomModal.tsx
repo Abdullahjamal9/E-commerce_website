@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { XIcon } from './icons';
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -89,9 +90,9 @@ export default function ImageZoomModal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="glass h-10 w-10 rounded-full text-lg"
+            className="glass flex h-10 w-10 items-center justify-center rounded-full"
           >
-            ✕
+            <XIcon size={18} />
           </button>
         </div>
 

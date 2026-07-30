@@ -9,6 +9,7 @@ import { useCart, selectCount } from '@/store/useCart';
 import { useWishlist } from '@/store/useWishlist';
 import SearchBox from './SearchBox';
 import ThemeToggle from './ThemeToggle';
+import { XIcon } from './icons';
 import logo from '@/assets/logo.png';
 
 function HeartIcon({ filled }: { filled: boolean }) {
@@ -104,7 +105,7 @@ function ShopMenu({ categories }: { categories: string[] }) {
             className="absolute left-1/2 top-full max-w-[90vw] -translate-x-1/2 pt-3"
             style={{ width: Math.min(panelWidth, 0.9 * (typeof window !== 'undefined' ? window.innerWidth : panelWidth)) }}
           >
-            <div className="glass overflow-hidden rounded-2xl p-2 shadow-glow">
+            <div className="panel-solid overflow-hidden rounded-2xl p-2 text-[var(--fg)] shadow-glow">
               <Link
                 href="/shop"
                 className="block rounded-xl px-3 py-2 text-sm font-semibold transition hover:bg-white/10"
@@ -303,7 +304,7 @@ export default function Navbar({
                 aria-label="Close menu"
                 className="rounded-lg p-1.5 hover:bg-white/10"
               >
-                ✕
+                <XIcon size={16} />
               </button>
             </div>
 

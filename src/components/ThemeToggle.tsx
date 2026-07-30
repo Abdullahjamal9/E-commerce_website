@@ -17,13 +17,12 @@ export default function ThemeToggle() {
       type="button"
       aria-label="Toggle theme"
       onClick={toggle}
-      className="glass relative h-7 w-12 flex-shrink-0 rounded-full transition hover:opacity-90"
+      className="glass relative h-7 w-12 flex-shrink-0 overflow-hidden rounded-full border-none outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white/40"
     >
       <motion.span
-        layout
+        animate={{ left: isDark ? 25 : 3 }}
         transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-        className="absolute top-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-neon-blue to-neon-purple text-white shadow-md"
-        style={{ left: isDark ? 'calc(100% - 1.625rem)' : '0.125rem' }}
+        className="absolute top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-neon-blue to-neon-purple text-white shadow-md"
       >
         {isDark ? (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">

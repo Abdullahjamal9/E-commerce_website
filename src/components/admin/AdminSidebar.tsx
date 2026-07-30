@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import logo from '@/assets/logo.png';
+import { XIcon } from '../icons';
 
 const LINKS = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -120,7 +121,7 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
                   aria-label="Close menu"
                   className="rounded-lg p-1.5 hover:bg-white/10"
                 >
-                  ✕
+                  <XIcon size={16} />
                 </button>
               </div>
 

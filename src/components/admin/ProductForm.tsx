@@ -6,6 +6,7 @@ import { uploadToCloudinary } from '@/lib/uploadToCloudinary';
 import { useToast } from '@/store/useToast';
 import MultiSelectDropdown from './MultiSelectDropdown';
 import SingleSelectDropdown from './SingleSelectDropdown';
+import { XIcon } from '../icons';
 import type { Category, Shoe, Tag } from '@/lib/types';
 
 interface Props {
@@ -322,9 +323,9 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
               <button
                 type="button"
                 onClick={() => removeColor(i)}
-                className="px-2 text-sm text-red-400 hover:text-red-300"
+                className="px-2 text-red-400 hover:text-red-300"
               >
-                ✕
+                <XIcon size={14} />
               </button>
             </div>
           ))}
@@ -372,9 +373,9 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
                 <button
                   type="button"
                   onClick={() => removeImage(url)}
-                  className="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 text-xs text-white opacity-0 transition group-hover:opacity-100"
+                  className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100"
                 >
-                  ✕
+                  <XIcon size={12} />
                 </button>
                 <div className="absolute inset-x-0 bottom-1 flex justify-center gap-1 opacity-0 transition group-hover:opacity-100">
                   <button
@@ -428,9 +429,9 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
                 <button
                   type="button"
                   onClick={() => removeSpinImage(url)}
-                  className="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 text-xs text-white opacity-0 transition group-hover:opacity-100"
+                  className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition group-hover:opacity-100"
                 >
-                  ✕
+                  <XIcon size={12} />
                 </button>
                 <div className="absolute inset-x-0 bottom-1 flex justify-center gap-1 opacity-0 transition group-hover:opacity-100">
                   <button

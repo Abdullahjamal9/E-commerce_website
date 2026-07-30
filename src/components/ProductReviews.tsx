@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { uploadToCloudinary } from '@/lib/uploadToCloudinary';
 import { useToast } from '@/store/useToast';
+import { XIcon } from './icons';
 
 interface Review {
   id: string;
@@ -170,9 +171,9 @@ export default function ProductReviews({
                     <button
                       type="button"
                       onClick={() => removeImage(url)}
-                      className="absolute right-0.5 top-0.5 rounded-full bg-black/60 px-1 text-xs text-white opacity-0 transition group-hover:opacity-100"
+                      className="absolute right-0.5 top-0.5 rounded-full bg-black/60 p-0.5 text-white opacity-0 transition group-hover:opacity-100"
                     >
-                      ✕
+                      <XIcon size={12} />
                     </button>
                   </div>
                 ))}

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart, selectTotal, lineKey } from '@/store/useCart';
 import { formatPrice } from '@/lib/currency';
+import { TrashIcon, XIcon } from './icons';
 
 export default function CartDrawer() {
   const { items, isOpen, close, remove, setQty } = useCart();
@@ -30,8 +31,8 @@ export default function CartDrawer() {
           >
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold tracking-wide">Your Cart</h2>
-              <button onClick={close} aria-label="Close cart" className="p-2 text-xl">
-                ✕
+              <button onClick={close} aria-label="Close cart" className="p-2">
+                <XIcon size={18} />
               </button>
             </div>
 
@@ -52,8 +53,12 @@ export default function CartDrawer() {
                     <div className="flex-1">
                       <div className="flex justify-between">
                         <p className="font-semibold">{i.name}</p>
-                        <button onClick={() => remove(key)} aria-label="Remove">
-                          🗑️
+                        <button
+                          onClick={() => remove(key)}
+                          aria-label="Remove"
+                          className="text-red-400 transition hover:text-red-300"
+                        >
+                          <TrashIcon size={16} />
                         </button>
                       </div>
                       <p className="text-xs opacity-60">

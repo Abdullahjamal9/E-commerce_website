@@ -8,6 +8,7 @@ import { useCart, selectTotal, lineKey } from '@/store/useCart';
 import { useToast } from '@/store/useToast';
 import { formatPrice } from '@/lib/currency';
 import type { PublicSettings } from '@/lib/settings';
+import { XIcon } from './icons';
 
 type PaymentMethod = 'COD' | 'BANK_TRANSFER';
 
@@ -241,9 +242,9 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
                         <button
                           type="button"
                           onClick={() => removeProof(url)}
-                          className="absolute right-0.5 top-0.5 rounded-full bg-black/60 px-1 text-xs text-white opacity-0 transition group-hover:opacity-100"
+                          className="absolute right-0.5 top-0.5 rounded-full bg-black/60 p-0.5 text-white opacity-0 transition group-hover:opacity-100"
                         >
-                          ✕
+                          <XIcon size={12} />
                         </button>
                       </div>
                     ))}
