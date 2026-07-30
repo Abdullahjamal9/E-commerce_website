@@ -136,7 +136,12 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
                   className={`aspect-square w-full flex-shrink-0 overflow-hidden rounded-xl ring-2 transition ${view === 'photo' && i === photoIndex ? 'ring-white' : 'ring-white/15'}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img} alt="" className="h-full w-full bg-white/5 object-contain p-1" />
+                  <img
+                    src={img}
+                    alt=""
+                    loading="eager"
+                    className="h-full w-full bg-white/5 object-contain p-1"
+                  />
                 </button>
               ))}
             </div>
@@ -162,6 +167,8 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
                   exit={{ opacity: 0 }}
                   src={shoe.images[photoIndex] ?? shoe.image}
                   alt={shoe.name}
+                  loading="eager"
+                  fetchPriority="high"
                   onClick={() => setZoomOpen(true)}
                   className="h-full w-full cursor-zoom-in object-contain p-6"
                 />

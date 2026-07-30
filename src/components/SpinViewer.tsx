@@ -65,6 +65,8 @@ export default function SpinViewer({ images, autoRotate = true, className = '' }
         src={images[frame]}
         alt=""
         draggable={false}
+        loading="eager"
+        fetchPriority="high"
         className="h-full w-full object-contain"
       />
     </div>
