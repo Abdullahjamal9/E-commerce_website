@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/store/useToast';
 import type { PublicSettings } from '@/lib/settings';
 
+/** Formats a Date for an <input type="datetime-local"> in the browser's local time. */
+function toDatetimeLocal(date: Date | null) {
+  if (!date) return '';
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export default function SettingsForm({ settings }: { settings: PublicSettings }) {
   const router = useRouter();
   const notify = useToast((s) => s.show);
@@ -20,7 +27,8 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
     whatsappNumber: settings.whatsappNumber,
     contactEmail: settings.contactEmail,
     address: settings.address,
-    saleEnabled: settings.saleEnabled
+    saleEnabled: settings.saleEnabled,
+    saleEndsAt: toDatetimeLocal(settings.saleEndsAt)
   });
   const [saving, setSaving] = useState(false);
 
@@ -41,7 +49,10 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
     const res = await fetch('/api/settings', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: JSON.stringify({
+        ...form,
+        saleEndsAt: form.saleEndsAt ? new Date(form.saleEndsAt).toISOString() : null
+      })
     });
     setSaving(false);
     if (!res.ok) {
@@ -91,6 +102,17 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
           />
           Independence Day banner enabled on the homepage
         </label>
+        <div className="mt-3">
+          <label className="mb-1 block text-sm font-medium opacity-80">
+            Sale ends at (shows a countdown on discounted products)
+          </label>
+          <input
+            type="datetime-local"
+            value={form.saleEndsAt}
+            onChange={(e) => setForm({ ...form, saleEndsAt: e.target.value })}
+            className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+          />
+        </div>
         <p className="mt-2 text-xs opacity-50">
           Discounts are set per product — open a product under Products and set its Discount %.
         </p>

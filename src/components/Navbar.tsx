@@ -132,7 +132,7 @@ export default function Navbar({
   // The Independence Day banner has a light background and sits directly
   // under the nav on the homepage — force dark text there so it stays
   // readable in dark mode, until scrolling past it onto normal content.
-  const overLightBanner = saleEnabled && pathname === '/' && !scrolled;
+  const overLightBanner = saleEnabled && (pathname === '/' || pathname === '/shop') && !scrolled;
 
   return (
     <>

@@ -43,6 +43,7 @@ export default async function ShopPage({
       category={category}
       initialTag={initialTag}
       storeName={settings.storeName}
+      saleEnabled={settings.saleEnabled}
     />
   );
 }

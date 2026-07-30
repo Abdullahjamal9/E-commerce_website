@@ -10,6 +10,7 @@ import { useWishlist } from '@/store/useWishlist';
 import { useToast } from '@/store/useToast';
 import SpinViewer from './SpinViewer';
 import ImageZoomModal from './ImageZoomModal';
+import SaleCountdownBar from './SaleCountdownBar';
 
 export default function ProductDetail({ shoe }: { shoe: Shoe }) {
   const hasSpin = shoe.spinImages.length >= 2;
@@ -163,7 +164,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
             ) : (
               onSale && (
                 <span className="absolute left-4 top-4 z-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-md">
-                  -{shoe.discountPercent}% OFF
+                  {shoe.discountPercent}% OFF
                 </span>
               )
             )}
@@ -238,6 +239,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
               <p className="text-lg opacity-50 line-through">{formatPrice(shoe.price)}</p>
             )}
           </div>
+          {onSale && <SaleCountdownBar percent={shoe.discountPercent} />}
           <p className={`mt-1 text-sm ${outOfStock ? 'text-red-400' : 'opacity-60'}`}>
             {outOfStock ? 'Currently out of stock' : `${shoe.stock} in stock`}
           </p>

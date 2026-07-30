@@ -89,7 +89,7 @@ export default function AdminReviewsTable({ reviews }: { reviews: AdminReview[] 
                   )}
                 </td>
                 <td className="py-3 pr-4 whitespace-nowrap opacity-50">
-                  {new Date(r.createdAt).toLocaleDateString()}
+                  {new Date(r.createdAt).toLocaleDateString('en-GB')}
                 </td>
                 <td className="py-3 pr-4 text-right">
                   <button

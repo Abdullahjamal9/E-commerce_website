@@ -212,7 +212,7 @@ export default function ProductReviews({
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{r.customerName}</p>
                   <span className="text-xs opacity-50">
-                    {new Date(r.createdAt).toLocaleDateString()}
+                    {new Date(r.createdAt).toLocaleDateString('en-GB')}
                   </span>
                 </div>
                 <Stars value={r.rating} />

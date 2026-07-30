@@ -95,7 +95,7 @@ export default function TrackOrderForm() {
         <div className="glass mt-6 rounded-3xl p-6 text-left sm:p-8">
           <div className="flex items-center justify-between">
             <p className="text-lg font-bold">{order.orderNumber}</p>
-            <p className="text-xs opacity-60">{new Date(order.createdAt).toLocaleDateString()}</p>
+            <p className="text-xs opacity-60">{new Date(order.createdAt).toLocaleDateString('en-GB')}</p>
           </div>
 
           {cancelled ? (

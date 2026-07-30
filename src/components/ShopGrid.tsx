@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from './ProductCard';
 import ScrollableChipRow from './ScrollableChipRow';
 import type { Category, Shoe, Tag } from '@/lib/types';
+import desktopShopBanner from '@/assets/shop_banner.png';
+import mobileShopBanner from '@/assets/mobile_shop_banner.png';
 
 type Sort = 'newest' | 'price-asc' | 'price-desc';
 
@@ -310,7 +313,8 @@ export default function ShopGrid({
   categories,
   category,
   initialTag,
-  storeName
+  storeName,
+  saleEnabled
 }: {
   products: Shoe[];
   tags: Tag[];
@@ -318,9 +322,22 @@ export default function ShopGrid({
   category?: Category;
   initialTag?: Tag;
   storeName: string;
+  saleEnabled: boolean;
 }) {
   const [activeCategory, setActiveCategory] = useState<Category | 'All'>(category ?? 'All');
   const [activeTag, setActiveTag] = useState<Tag | 'All'>(initialTag ?? 'All');
+
+  // useState's initial value only applies on mount — navigating here again with a
+  // different ?category=/?tag= (e.g. via the Navbar's Shop dropdown) re-renders
+  // this same component with new props instead of remounting it, so the active
+  // filters need to be re-synced explicitly or they'd keep showing the old ones.
+  useEffect(() => {
+    setActiveCategory(category ?? 'All');
+  }, [category]);
+
+  useEffect(() => {
+    setActiveTag(initialTag ?? 'All');
+  }, [initialTag]);
   const [activeSize, setActiveSize] = useState<string | 'All'>('All');
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<Sort>('newest');
@@ -384,23 +401,42 @@ export default function ShopGrid({
   const shown = visible.slice(0, visibleCount);
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-20 pt-28 sm:px-6">
-      <div className="mb-10 text-center">
-        <h1 className="text-3xl font-black sm:text-4xl">
-          {activeCategory === 'All' ? (
-            <>
-              Full <span className="neon-text">Shop</span>
-            </>
-          ) : (
-            <>
-              Shop <span className="neon-text">{activeCategory}</span>
-            </>
-          )}
-        </h1>
-        <p className="mt-2 opacity-60">Browse the entire {storeName} catalogue.</p>
-      </div>
+    <>
+      {saleEnabled && (
+        <div className="relative block w-full">
+          <Image
+            src={mobileShopBanner}
+            alt="Azadi Sale is live — up to 50% off sitewide"
+            priority
+            className="block h-auto w-full md:hidden"
+          />
+          <Image
+            src={desktopShopBanner}
+            alt="Azadi Sale is live — up to 50% off sitewide"
+            priority
+            className="hidden h-auto w-full md:block"
+          />
+        </div>
+      )}
+      <section className={`mx-auto max-w-7xl px-4 pb-20 sm:px-6 ${saleEnabled ? 'pt-8' : 'pt-28'}`}>
+        {!saleEnabled && (
+          <div className="mb-10 text-center">
+            <h1 className="text-3xl font-black sm:text-4xl">
+              {activeCategory === 'All' ? (
+                <>
+                  Full <span className="neon-text">Shop</span>
+                </>
+              ) : (
+                <>
+                  Shop <span className="neon-text">{activeCategory}</span>
+                </>
+              )}
+            </h1>
+            <p className="mt-2 opacity-60">Browse the entire {storeName} catalogue.</p>
+          </div>
+        )}
 
-      <ScrollableChipRow className="mb-6 justify-center !gap-8 pb-2">
+        <ScrollableChipRow className="mb-6 justify-center !gap-8 pb-2">
         {categoryFilters.map((c) => (
           <button
             key={c}
@@ -491,6 +527,7 @@ export default function ShopGrid({
           )}
         </>
       )}
-    </section>
+      </section>
+    </>
   );
 }

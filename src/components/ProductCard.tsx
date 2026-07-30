@@ -81,7 +81,7 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
           ) : (
             onSale && (
               <span className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-md">
-                -{shoe.discountPercent}%
+                {shoe.discountPercent}% OFF
               </span>
             )
           )}
