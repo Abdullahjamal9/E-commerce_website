@@ -26,7 +26,18 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
   const salePrice = onSale ? getSalePrice(shoe.price, shoe.discountPercent) : shoe.price;
   const mainImageRef = useRef<HTMLDivElement>(null);
   const buyPanelRef = useRef<HTMLDivElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
   const [mainImageHeight, setMainImageHeight] = useState<number>();
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [descTruncated, setDescTruncated] = useState(false);
+
+  // Measured once while the 7-line clamp is active — tells us whether the
+  // description actually overflows, so "Read more" only shows when it's needed.
+  useEffect(() => {
+    const el = descRef.current;
+    if (!el) return;
+    setDescTruncated(el.scrollHeight > el.clientHeight + 1);
+  }, [shoe.description]);
 
   useEffect(() => {
     const el = mainImageRef.current;
@@ -232,7 +243,23 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
             </button>
           </div>
 
-          <p className="mt-4 whitespace-pre-line opacity-70">{shoe.description}</p>
+          <div className="mt-4">
+            <p
+              ref={descRef}
+              className={`whitespace-pre-line opacity-70 ${descExpanded ? '' : 'line-clamp-[7]'}`}
+            >
+              {shoe.description}
+            </p>
+            {descTruncated && (
+              <button
+                type="button"
+                onClick={() => setDescExpanded((v) => !v)}
+                className="mt-1 text-sm font-semibold text-neon-blue hover:underline"
+              >
+                {descExpanded ? 'Read less' : 'Read more'}
+              </button>
+            )}
+          </div>
           <div className="mt-6 flex items-baseline gap-3">
             <p className="text-3xl font-black neon-text">{formatPrice(salePrice)}</p>
             {onSale && (

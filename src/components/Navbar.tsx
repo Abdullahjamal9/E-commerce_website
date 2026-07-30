@@ -7,9 +7,45 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart, selectCount } from '@/store/useCart';
 import { useWishlist } from '@/store/useWishlist';
-import { useTheme } from '@/store/useTheme';
 import SearchBox from './SearchBox';
+import ThemeToggle from './ThemeToggle';
 import logo from '@/assets/logo.png';
+
+function HeartIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" />
+    </svg>
+  );
+}
+
+function BagIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+      <path d="M3 6h18" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  );
+}
 
 const LINKS = [
   { href: '/', label: 'Home' },
@@ -118,8 +154,6 @@ export default function Navbar({
   const count = useCart(selectCount);
   const openCart = useCart((s) => s.open);
   const wishCount = useWishlist((s) => s.ids.length);
-  const mode = useTheme((s) => s.mode);
-  const toggleTheme = useTheme((s) => s.toggle);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -185,20 +219,14 @@ export default function Navbar({
             <SearchBox />
           </div>
 
-          <button
-            aria-label="Toggle theme"
-            onClick={toggleTheme}
-            className="rounded-full p-2 transition hover:bg-white/10"
-          >
-            {mode === 'dark' ? '☀️' : '🌙'}
-          </button>
+          <ThemeToggle />
 
           <Link
             href="/wishlist"
             aria-label="Open wishlist"
             className="relative rounded-full p-2 transition hover:bg-white/10"
           >
-            🤍
+            <HeartIcon filled={false} />
             <AnimatePresence>
               {wishCount > 0 && (
                 <motion.span
@@ -220,7 +248,7 @@ export default function Navbar({
             onClick={openCart}
             className="relative hidden rounded-full p-2 transition hover:bg-white/10 lg:block"
           >
-            🛍️
+            <BagIcon />
             <AnimatePresence>
               {count > 0 && (
                 <motion.span
@@ -372,7 +400,9 @@ export default function Navbar({
                 }}
                 className="relative mt-auto flex w-full items-center justify-between rounded-xl bg-white/5 px-3 py-3 text-sm font-semibold opacity-90 transition hover:bg-white/10"
               >
-                <span className="flex items-center gap-2">🛍️ Cart</span>
+                <span className="flex items-center gap-2">
+                  <BagIcon /> Cart
+                </span>
                 {count > 0 && (
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-neon-blue to-neon-purple text-[10px] font-bold text-white">
                     {count}
