@@ -11,6 +11,10 @@ export function cloudinaryResize(url: string, width?: number): string {
   const i = url.indexOf(marker);
   if (i === -1) return url;
 
-  const transform = width ? `f_auto,q_auto,w_${width}` : 'f_auto,q_auto';
+  // c_limit means "shrink to fit, never enlarge" — without it, w_N upscales
+  // any image narrower than N, which was making already-small hero images
+  // (already downsized by client-side upload compression) come out *larger*
+  // than the original after Cloudinary's own re-encode.
+  const transform = width ? `f_auto,q_auto,c_limit,w_${width}` : 'f_auto,q_auto';
   return `${url.slice(0, i + marker.length)}${transform}/${url.slice(i + marker.length)}`;
 }
