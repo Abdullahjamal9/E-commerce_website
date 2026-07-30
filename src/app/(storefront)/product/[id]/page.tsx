@@ -6,6 +6,7 @@ import Recommendations from '@/components/Recommendations';
 import { getAllSlugs, getProductBySlug, getRelated } from '@/lib/products';
 import { getSettings } from '@/lib/settings';
 import { getReviews } from '@/lib/reviews';
+import { cloudinaryResize } from '@/lib/cloudinaryUrl';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,6 +48,10 @@ export default async function ProductPage({ params }: { params: { id: string } }
 
   return (
     <>
+      {/* Starts the hero image download in parallel with HTML parsing,
+          before React even hydrates — the eager/fetchPriority attributes on
+          the <img> itself only help once the DOM has that element. */}
+      <link rel="preload" as="image" href={cloudinaryResize(shoe.image, 1200)} fetchPriority="high" />
       <ProductDetail shoe={shoe} />
       <ProductReviews productId={shoe.id} reviews={reviews} />
       <Recommendations picks={picks} storeName={settings.storeName} />

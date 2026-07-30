@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import type { Shoe } from '@/lib/types';
 import { formatPrice } from '@/lib/currency';
 import { getSalePrice } from '@/lib/sale';
+import { cloudinaryResize } from '@/lib/cloudinaryUrl';
 import { useCart } from '@/store/useCart';
 import { useWishlist } from '@/store/useWishlist';
 import { useToast } from '@/store/useToast';
@@ -89,7 +90,7 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
           <div className="relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/0 p-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={shoe.image}
+              src={cloudinaryResize(shoe.image, 600)}
               alt={shoe.name}
               loading="lazy"
               decoding="async"

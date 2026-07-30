@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Shoe } from '@/lib/types';
 import { formatPrice } from '@/lib/currency';
 import { getSalePrice } from '@/lib/sale';
+import { cloudinaryResize } from '@/lib/cloudinaryUrl';
 import { useCart } from '@/store/useCart';
 import { useWishlist } from '@/store/useWishlist';
 import { useToast } from '@/store/useToast';
@@ -137,7 +138,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={img}
+                    src={cloudinaryResize(img, 200)}
                     alt=""
                     loading="eager"
                     className="h-full w-full bg-white/5 object-contain p-1"
@@ -165,7 +166,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
                   initial={{ opacity: 0, scale: 1.05 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
-                  src={shoe.images[photoIndex] ?? shoe.image}
+                  src={cloudinaryResize(shoe.images[photoIndex] ?? shoe.image, 1200)}
                   alt={shoe.name}
                   loading="eager"
                   fetchPriority="high"

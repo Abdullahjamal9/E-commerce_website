@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPrice } from '@/lib/currency';
+import { cloudinaryResize } from '@/lib/cloudinaryUrl';
 import type { Shoe } from '@/lib/types';
 
 export default function SearchBox({
@@ -103,7 +104,7 @@ export default function SearchBox({
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={shoe.image}
+                      src={cloudinaryResize(shoe.image, 100)}
                       alt={shoe.name}
                       className="h-10 w-10 flex-shrink-0 rounded-lg bg-white/5 object-contain p-1"
                     />
@@ -184,7 +185,7 @@ export default function SearchBox({
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={shoe.image}
+                    src={cloudinaryResize(shoe.image, 100)}
                     alt={shoe.name}
                     className="h-10 w-10 flex-shrink-0 rounded-lg bg-white/5 object-contain p-1"
                   />
