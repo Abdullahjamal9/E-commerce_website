@@ -9,7 +9,7 @@ import { useCart, selectCount } from '@/store/useCart';
 import { useWishlist } from '@/store/useWishlist';
 import SearchBox from './SearchBox';
 import ThemeToggle from './ThemeToggle';
-import { XIcon } from './icons';
+import { BagIcon, XIcon } from './icons';
 import logo from '@/assets/logo.png';
 
 function HeartIcon({ filled }: { filled: boolean }) {
@@ -25,25 +25,6 @@ function HeartIcon({ filled }: { filled: boolean }) {
       strokeLinejoin="round"
     >
       <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" />
-    </svg>
-  );
-}
-
-function BagIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-      <path d="M3 6h18" />
-      <path d="M16 10a4 4 0 0 1-8 0" />
     </svg>
   );
 }

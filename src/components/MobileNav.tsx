@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart, selectCount } from '@/store/useCart';
+import { BagIcon } from './icons';
 
 const ITEMS = [
   { href: '/', label: 'Home', icon: '🏠' },
@@ -35,7 +36,7 @@ export default function MobileNav() {
         onClick={openCart}
         className="relative flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] opacity-70"
       >
-        <span className="text-lg">🛍️</span>
+        <BagIcon size={18} />
         Cart
         {count > 0 && (
           <span className="absolute right-1 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-neon-purple text-[9px] font-bold text-white">
