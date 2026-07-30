@@ -8,6 +8,7 @@ type ProductRow = {
   tagline: string;
   description: string;
   price: number;
+  discountPercent: number;
   stock: number;
   category: string;
   tags: unknown;
@@ -29,6 +30,7 @@ function mapProduct(p: ProductRow): Shoe {
     tagline: p.tagline,
     description: p.description,
     price: p.price,
+    discountPercent: p.discountPercent,
     stock: p.stock,
     category: p.category,
     tags: (p.tags as Tag[]) ?? [],

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Shoe } from '@/lib/types';
 import { formatPrice } from '@/lib/currency';
+import { getSalePrice } from '@/lib/sale';
 import { useCart } from '@/store/useCart';
 import { useWishlist } from '@/store/useWishlist';
 import { useToast } from '@/store/useToast';
@@ -20,6 +21,8 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
   const [flyTarget, setFlyTarget] = useState({ x: 0, y: 0 });
   const [zoomOpen, setZoomOpen] = useState(false);
   const outOfStock = shoe.stock <= 0;
+  const onSale = shoe.discountPercent > 0;
+  const salePrice = onSale ? getSalePrice(shoe.price, shoe.discountPercent) : shoe.price;
   const mainImageRef = useRef<HTMLDivElement>(null);
   const buyPanelRef = useRef<HTMLDivElement>(null);
   const [mainImageHeight, setMainImageHeight] = useState<number>();
@@ -76,7 +79,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
     add({
       shoeId: shoe.id,
       name: shoe.name,
-      price: shoe.price,
+      price: salePrice,
       colorHex: color.hex,
       size,
       qty: 1,
@@ -153,10 +156,16 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
               )}
             </AnimatePresence>
 
-            {outOfStock && (
+            {outOfStock ? (
               <span className="absolute left-4 top-4 z-10 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80 backdrop-blur">
                 Out of stock
               </span>
+            ) : (
+              onSale && (
+                <span className="absolute left-4 top-4 z-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-md">
+                  -{shoe.discountPercent}% OFF
+                </span>
+              )
             )}
 
             {hasSpin && (
@@ -223,7 +232,12 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
           </div>
 
           <p className="mt-4 whitespace-pre-line opacity-70">{shoe.description}</p>
-          <p className="mt-6 text-3xl font-black neon-text">{formatPrice(shoe.price)}</p>
+          <div className="mt-6 flex items-baseline gap-3">
+            <p className="text-3xl font-black neon-text">{formatPrice(salePrice)}</p>
+            {onSale && (
+              <p className="text-lg opacity-50 line-through">{formatPrice(shoe.price)}</p>
+            )}
+          </div>
           <p className={`mt-1 text-sm ${outOfStock ? 'text-red-400' : 'opacity-60'}`}>
             {outOfStock ? 'Currently out of stock' : `${shoe.stock} in stock`}
           </p>

@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Shoe } from '@/lib/types';
 import { formatPrice } from '@/lib/currency';
+import { getSalePrice } from '@/lib/sale';
 import { useCart } from '@/store/useCart';
 import { useWishlist } from '@/store/useWishlist';
 import { useToast } from '@/store/useToast';
@@ -18,6 +19,8 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
   const wished = useWishlist((s) => s.ids.includes(shoe.id));
   const notify = useToast((s) => s.show);
   const outOfStock = shoe.stock <= 0;
+  const onSale = shoe.discountPercent > 0;
+  const salePrice = onSale ? getSalePrice(shoe.price, shoe.discountPercent) : shoe.price;
 
   const onMove = (e: React.MouseEvent) => {
     const el = ref.current;
@@ -36,7 +39,7 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
     add({
       shoeId: shoe.id,
       name: shoe.name,
-      price: shoe.price,
+      price: salePrice,
       colorHex: shoe.colors[0].hex,
       size: shoe.sizes[0],
       qty: 1,
@@ -71,10 +74,16 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
             {wished ? '❤️' : '🤍'}
           </button>
 
-          {outOfStock && (
+          {outOfStock ? (
             <span className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/80 backdrop-blur">
               Out of stock
             </span>
+          ) : (
+            onSale && (
+              <span className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-md">
+                -{shoe.discountPercent}%
+              </span>
+            )
           )}
 
           <div className="relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/0 p-4">
@@ -95,7 +104,12 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
                 <p className="line-clamp-2 min-h-[2.5em] font-semibold leading-tight">{shoe.name}</p>
                 <p className="mt-1 line-clamp-1 text-xs opacity-60">{shoe.tagline}</p>
               </div>
-              <p className="shrink-0 whitespace-nowrap font-bold neon-text">{formatPrice(shoe.price)}</p>
+              <div className="shrink-0 whitespace-nowrap text-right">
+                {onSale && (
+                  <p className="text-xs opacity-50 line-through">{formatPrice(shoe.price)}</p>
+                )}
+                <p className="font-bold neon-text">{formatPrice(salePrice)}</p>
+              </div>
             </div>
 
             <div className="mt-2 flex gap-1.5">

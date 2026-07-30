@@ -13,7 +13,7 @@ export default async function StorefrontLayout({ children }: { children: React.R
 
   return (
     <>
-      <Navbar storeName={settings.storeName} categories={categories} />
+      <Navbar storeName={settings.storeName} categories={categories} saleEnabled={settings.saleEnabled} />
       <main className="pb-24 md:pb-0">
         <PageTransition>{children}</PageTransition>
       </main>

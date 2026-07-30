@@ -239,7 +239,14 @@ function Row({
       </td>
       <td className="py-3 pr-4 opacity-70">{p.category}</td>
       <td className="py-3 pr-4 opacity-70">{p.tags.join(', ')}</td>
-      <td className="py-3 pr-4 font-medium">{formatPrice(p.price)}</td>
+      <td className="py-3 pr-4 font-medium">
+        {formatPrice(p.price)}
+        {p.discountPercent > 0 && (
+          <span className="ml-2 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-400">
+            -{p.discountPercent}%
+          </span>
+        )}
+      </td>
       <td className="py-3 pr-4">
         <span className={p.stock <= 0 ? 'text-red-400' : 'opacity-70'}>{p.stock}</span>
         {p.stock <= 0 && (

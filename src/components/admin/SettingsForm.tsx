@@ -19,7 +19,8 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
     contactPhone: settings.contactPhone,
     whatsappNumber: settings.whatsappNumber,
     contactEmail: settings.contactEmail,
-    address: settings.address
+    address: settings.address,
+    saleEnabled: settings.saleEnabled
   });
   const [saving, setSaving] = useState(false);
 
@@ -79,6 +80,21 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
         These are demo values from initial setup — enter your real bank account and Easypaisa
         number below so customer payments reach the right place.
       </p>
+
+      <div>
+        <p className="mb-3 font-semibold">Sale</p>
+        <label className="glass flex items-center gap-3 rounded-xl p-3">
+          <input
+            type="checkbox"
+            checked={form.saleEnabled}
+            onChange={(e) => setForm({ ...form, saleEnabled: e.target.checked })}
+          />
+          Independence Day banner enabled on the homepage
+        </label>
+        <p className="mt-2 text-xs opacity-50">
+          Discounts are set per product — open a product under Products and set its Discount %.
+        </p>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         {field('storeName', 'Store Name')}

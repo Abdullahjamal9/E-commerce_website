@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Settings" ADD COLUMN "saleEnabled" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Settings" ADD COLUMN "salePercent" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "Settings" ADD COLUMN "saleLabel" TEXT NOT NULL DEFAULT '';

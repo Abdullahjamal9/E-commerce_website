@@ -15,6 +15,8 @@ export interface Shoe {
   name: string;
   tagline: string;
   price: number;
+  /** Per-product sale discount as a percentage (0-90); 0 means no discount. */
+  discountPercent: number;
   stock: number;
   /** Product type, e.g. Shoes, Clothes, Watches — one per product. */
   category: Category;

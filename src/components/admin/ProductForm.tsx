@@ -24,6 +24,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
   const [tagline, setTagline] = useState(initial?.tagline ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
   const [price, setPrice] = useState(initial?.price?.toString() ?? '');
+  const [discountPercent, setDiscountPercent] = useState(initial?.discountPercent?.toString() ?? '0');
   const [stock, setStock] = useState(initial?.stock?.toString() ?? '');
   const [category, setCategory] = useState(initial?.category ?? categoryOptions[0] ?? '');
   const [tags, setTags] = useState<Tag[]>(initial?.tags ?? []);
@@ -144,6 +145,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
       tagline,
       description,
       price: Number(price),
+      discountPercent: Number(discountPercent) || 0,
       stock: Number(stock),
       category,
       tags,
@@ -208,7 +210,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <label className="mb-1 block text-sm font-medium opacity-80">Price (Rs.)</label>
           <input
@@ -219,6 +221,22 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
             onChange={(e) => setPrice(e.target.value)}
             className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
           />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium opacity-80">Discount %</label>
+          <input
+            type="number"
+            min={0}
+            max={90}
+            value={discountPercent}
+            onChange={(e) => setDiscountPercent(e.target.value)}
+            className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+          />
+          {Number(discountPercent) > 0 && (
+            <p className="mt-1 text-xs opacity-50">
+              Sells at Rs. {Math.round(Number(price || 0) * (1 - Number(discountPercent) / 100))}
+            </p>
+          )}
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium opacity-80">Stock</label>

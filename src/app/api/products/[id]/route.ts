@@ -11,6 +11,7 @@ const productSchema = z.object({
   tagline: z.string().min(2),
   description: z.string().min(10),
   price: z.number().int().positive(),
+  discountPercent: z.number().int().min(0).max(90).default(0),
   stock: z.number().int().min(0),
   category: z.string().min(1),
   tags: z.array(z.string()).default([]),

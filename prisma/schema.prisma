@@ -31,6 +31,8 @@ model Product {
   tagline     String
   description String
   price       Int
+  /** Per-product sale discount, 0-90 — 0 means no discount. */
+  discountPercent Int @default(0)
   stock       Int      @default(0)
   category    String
   tags        Json     @default("[]")
@@ -136,4 +138,6 @@ model Settings {
   whatsappNumber      String  @default("")
   contactEmail        String  @default("")
   address             String  @default("")
+  /** Toggles the Independence Day promo banner on the homepage — per-product discounts are set individually and don't depend on this. */
+  saleEnabled         Boolean @default(false)
 }

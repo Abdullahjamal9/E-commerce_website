@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart, selectCount } from '@/store/useCart';
@@ -102,7 +103,15 @@ function ShopMenu({ categories }: { categories: string[] }) {
   );
 }
 
-export default function Navbar({ storeName, categories }: { storeName: string; categories: string[] }) {
+export default function Navbar({
+  storeName,
+  categories,
+  saleEnabled
+}: {
+  storeName: string;
+  categories: string[];
+  saleEnabled: boolean;
+}) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
@@ -111,6 +120,7 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
   const wishCount = useWishlist((s) => s.ids.length);
   const mode = useTheme((s) => s.mode);
   const toggleTheme = useTheme((s) => s.toggle);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -118,6 +128,11 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // The Independence Day banner has a light background and sits directly
+  // under the nav on the homepage — force dark text there so it stays
+  // readable in dark mode, until scrolling past it onto normal content.
+  const overLightBanner = saleEnabled && pathname === '/' && !scrolled;
 
   return (
     <>
@@ -131,7 +146,7 @@ export default function Navbar({ storeName, categories }: { storeName: string; c
         borderRadius: scrolled ? 0 : 28
       }}
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-      className="glass fixed z-50 shadow-glow"
+      className={`glass fixed z-50 shadow-glow transition-colors duration-300 ${overLightBanner ? 'text-[#0a0c14]' : ''}`}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2 text-xl font-black uppercase tracking-[0.3em] neon-text">

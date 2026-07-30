@@ -2,6 +2,7 @@ import ScrollVideo from '@/components/ScrollVideo';
 import MobileHero from '@/components/MobileHero';
 import ProductGrid from '@/components/ProductGrid';
 import Recommendations from '@/components/Recommendations';
+import SaleBanner from '@/components/SaleBanner';
 import { getFeaturedProducts, getRecommendedProducts } from '@/lib/products';
 import { getSettings } from '@/lib/settings';
 import { getTags } from '@/lib/tags';
@@ -15,6 +16,7 @@ export default async function HomePage() {
 
   return (
     <>
+      {settings.saleEnabled && <SaleBanner />}
       <MobileHero />
       <ScrollVideo />
       <ProductGrid products={featured} tags={tags} />

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { getAdminSession } from '@/lib/session';
 import { sendOrderEmails } from '@/lib/email';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { getSalePrice } from '@/lib/sale';
 
 const orderSchema = z.object({
   customerName: z.string().min(2),
@@ -77,12 +78,13 @@ export async function POST(request: Request) {
           const colors = (product.colors as { name: string; hex: string }[]) ?? [];
           const color = colors.find((c) => c.hex === item.colorHex);
           const images = (product.images as string[]) ?? [];
+          const price = getSalePrice(product.price, product.discountPercent);
 
-          total += product.price * item.qty;
+          total += price * item.qty;
           itemsToCreate.push({
             productId: product.id,
             productName: product.name,
-            price: product.price,
+            price,
             colorName: color?.name ?? item.colorHex,
             colorHex: item.colorHex,
             size: item.size,

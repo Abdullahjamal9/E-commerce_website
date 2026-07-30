@@ -15,7 +15,8 @@ const settingsSchema = z.object({
   contactPhone: z.string(),
   whatsappNumber: z.string(),
   contactEmail: z.string(),
-  address: z.string()
+  address: z.string(),
+  saleEnabled: z.boolean()
 });
 
 export async function PATCH(request: Request) {
