@@ -28,17 +28,65 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
   const mainImageRef = useRef<HTMLDivElement>(null);
   const buyPanelRef = useRef<HTMLDivElement>(null);
   const descRef = useRef<HTMLParagraphElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const restRef = useRef<HTMLDivElement>(null);
   const [mainImageHeight, setMainImageHeight] = useState<number>();
   const [descExpanded, setDescExpanded] = useState(false);
   const [descTruncated, setDescTruncated] = useState(false);
+  const [descLines, setDescLines] = useState(5);
 
-  // Measured once while the 7-line clamp is active — tells us whether the
-  // description actually overflows, so "Read more" only shows when it's needed.
+  // Works out how many description lines actually fit above the buy panel's
+  // scroll threshold — title, price, and the Add to Cart button stay put,
+  // and the description clamp shrinks or grows with them instead of a fixed
+  // line count, so a shorter laptop screen doesn't force extra scrolling
+  // just to see the button.
+  useEffect(() => {
+    const recompute = () => {
+      if (window.innerWidth < 1024) {
+        // Below lg the panel isn't height-constrained (no sticky max-height),
+        // so there's no scroll pressure to shrink the description for.
+        setDescLines(8);
+        return;
+      }
+
+      const panel = buyPanelRef.current;
+      const header = headerRef.current;
+      const rest = restRef.current;
+      const descEl = descRef.current;
+      if (!panel || !header || !rest || !descEl) return;
+
+      const panelStyles = getComputedStyle(panel);
+      const paddingY = parseFloat(panelStyles.paddingTop) + parseFloat(panelStyles.paddingBottom);
+      const budget = window.innerHeight - 128; // matches lg:max-h-[calc(100vh-8rem)]
+      const DESC_MARGIN_TOP = 16; // mt-4
+      const READ_MORE_RESERVE = 28; // space for the Read more link when shown
+
+      const available =
+        budget - paddingY - header.offsetHeight - rest.offsetHeight - DESC_MARGIN_TOP - READ_MORE_RESERVE;
+      const lineHeight = parseFloat(getComputedStyle(descEl).lineHeight) || 24;
+      setDescLines(Math.max(2, Math.min(Math.floor(available / lineHeight), 10)));
+    };
+
+    recompute();
+    window.addEventListener('resize', recompute);
+
+    const ro = new ResizeObserver(recompute);
+    if (headerRef.current) ro.observe(headerRef.current);
+    if (restRef.current) ro.observe(restRef.current);
+
+    return () => {
+      window.removeEventListener('resize', recompute);
+      ro.disconnect();
+    };
+  }, [shoe.description]);
+
+  // Tells us whether the description actually overflows the current clamp,
+  // so "Read more" only shows when it's needed.
   useEffect(() => {
     const el = descRef.current;
-    if (!el) return;
+    if (!el || descExpanded) return;
     setDescTruncated(el.scrollHeight > el.clientHeight + 1);
-  }, [shoe.description]);
+  }, [shoe.description, descLines, descExpanded]);
 
   useEffect(() => {
     const el = mainImageRef.current;
@@ -231,7 +279,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
           ref={buyPanelRef}
           className="no-scrollbar glass rounded-3xl border-none p-6 sm:p-8 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
         >
-          <div className="flex items-start justify-between">
+          <div ref={headerRef} className="flex items-start justify-between">
             <div>
               <p className="text-xs uppercase tracking-widest opacity-60">
                 {[shoe.category, ...shoe.tags].join(' · ')}
@@ -254,7 +302,17 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
           <div className="mt-4">
             <p
               ref={descRef}
-              className={`whitespace-pre-line opacity-70 ${descExpanded ? '' : 'line-clamp-[5]'}`}
+              className="whitespace-pre-line opacity-70"
+              style={
+                descExpanded
+                  ? undefined
+                  : {
+                      display: '-webkit-box',
+                      WebkitBoxOrient: 'vertical',
+                      WebkitLineClamp: descLines,
+                      overflow: 'hidden'
+                    }
+              }
             >
               {shoe.description}
             </p>
@@ -268,54 +326,57 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
               </button>
             )}
           </div>
-          <div className="mt-6 flex items-baseline gap-3">
-            <p className="text-3xl font-black neon-text">{formatPrice(salePrice)}</p>
-            {onSale && (
-              <p className="text-lg opacity-50 line-through">{formatPrice(shoe.price)}</p>
-            )}
-          </div>
-          {onSale && <SaleCountdownBar percent={shoe.discountPercent} />}
-          <p className={`mt-1 text-sm ${outOfStock ? 'text-red-400' : 'opacity-60'}`}>
-            {outOfStock ? 'Currently out of stock' : `${shoe.stock} in stock`}
-          </p>
 
-          <div className="mt-6">
-            <p className="mb-2 text-sm font-semibold">Color · {color.name}</p>
-            <div className="flex gap-3">
-              {shoe.colors.map((c) => (
-                <button
-                  key={c.hex}
-                  onClick={() => setColor(c)}
-                  aria-label={c.name}
-                  className={`h-9 w-9 rounded-full ring-2 transition ${color.hex === c.hex ? 'ring-white scale-110' : 'ring-white/20'}`}
-                  style={{ background: c.hex }}
-                />
-              ))}
+          <div ref={restRef}>
+            <div className="mt-6 flex items-baseline gap-3">
+              <p className="text-3xl font-black neon-text">{formatPrice(salePrice)}</p>
+              {onSale && (
+                <p className="text-lg opacity-50 line-through">{formatPrice(shoe.price)}</p>
+              )}
             </div>
-          </div>
+            {onSale && <SaleCountdownBar percent={shoe.discountPercent} />}
+            <p className={`mt-1 text-sm ${outOfStock ? 'text-red-400' : 'opacity-60'}`}>
+              {outOfStock ? 'Currently out of stock' : `${shoe.stock} in stock`}
+            </p>
 
-          <div className="mt-6">
-            <p className="mb-2 text-sm font-semibold">Size</p>
-            <div className="flex flex-wrap gap-2">
-              {shoe.sizes.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSize(s)}
-                  className={`h-11 min-w-11 rounded-xl px-3 text-sm font-medium transition ${size === s ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white' : 'glass hover:bg-white/10'}`}
-                >
-                  {s}
-                </button>
-              ))}
+            <div className="mt-6">
+              <p className="mb-2 text-sm font-semibold">Color · {color.name}</p>
+              <div className="flex gap-3">
+                {shoe.colors.map((c) => (
+                  <button
+                    key={c.hex}
+                    onClick={() => setColor(c)}
+                    aria-label={c.name}
+                    className={`h-9 w-9 rounded-full ring-2 transition ${color.hex === c.hex ? 'ring-white scale-110' : 'ring-white/20'}`}
+                    style={{ background: c.hex }}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
 
-          <button
-            onClick={addToCart}
-            disabled={outOfStock}
-            className="btn-glow mt-8 w-full rounded-full bg-gradient-to-r from-neon-blue to-neon-purple py-4 text-lg font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {outOfStock ? 'Out of Stock' : 'Add to Cart · Buy Now'}
-          </button>
+            <div className="mt-6">
+              <p className="mb-2 text-sm font-semibold">Size</p>
+              <div className="flex flex-wrap gap-2">
+                {shoe.sizes.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSize(s)}
+                    className={`h-11 min-w-11 rounded-xl px-3 text-sm font-medium transition ${size === s ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white' : 'glass hover:bg-white/10'}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={addToCart}
+              disabled={outOfStock}
+              className="btn-glow mt-8 w-full rounded-full bg-gradient-to-r from-neon-blue to-neon-purple py-4 text-lg font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {outOfStock ? 'Out of Stock' : 'Add to Cart · Buy Now'}
+            </button>
+          </div>
         </div>
       </div>
 
