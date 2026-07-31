@@ -57,7 +57,9 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
 
       const panelStyles = getComputedStyle(panel);
       const paddingY = parseFloat(panelStyles.paddingTop) + parseFloat(panelStyles.paddingBottom);
-      const budget = window.innerHeight - 128; // matches lg:max-h-[calc(100vh-8rem)]
+      // The panel's target height is the main image's height (see mainImageHeight
+      // below) — fall back to the viewport before that's measured.
+      const budget = mainImageHeight ?? window.innerHeight - 128;
       const DESC_MARGIN_TOP = 16; // mt-4
       const READ_MORE_RESERVE = 28; // space for the Read more link when shown
 
@@ -78,7 +80,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
       window.removeEventListener('resize', recompute);
       ro.disconnect();
     };
-  }, [shoe.description]);
+  }, [shoe.description, mainImageHeight]);
 
   // Tells us whether the description actually overflows the current clamp,
   // so "Read more" only shows when it's needed.
@@ -277,7 +279,14 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
       <div className="lg:sticky lg:top-28 lg:self-start">
         <div
           ref={buyPanelRef}
-          className="no-scrollbar glass rounded-3xl border-none p-6 sm:p-8 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
+          style={
+            {
+              '--panel-h': mainImageHeight ? `${mainImageHeight}px` : 'auto',
+              background: 'transparent',
+              border: 'none'
+            } as React.CSSProperties
+          }
+          className="no-scrollbar p-6 sm:p-8 lg:h-[var(--panel-h)] lg:overflow-y-auto"
         >
           <div ref={headerRef} className="flex items-start justify-between">
             <div>
