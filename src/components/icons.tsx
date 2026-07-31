@@ -106,6 +106,32 @@ export function InfoIcon({ size = 20, className }: { size?: number; className?: 
   );
 }
 
+export function StarIcon({
+  filled = true,
+  size = 20,
+  className
+}: {
+  filled?: boolean;
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="m12 2.5 2.9 6.06 6.6.87-4.83 4.63 1.2 6.6L12 17.6l-5.87 3.06 1.2-6.6L2.5 9.43l6.6-.87Z" />
+    </svg>
+  );
+}
+
 export function BagIcon({ size = 20, className }: { size?: number; className?: string }) {
   return (
     <svg

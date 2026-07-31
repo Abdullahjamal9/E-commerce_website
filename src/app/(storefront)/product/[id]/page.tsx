@@ -45,6 +45,9 @@ export default async function ProductPage({ params }: { params: { id: string } }
     getSettings(),
     getReviews(shoe.id)
   ]);
+  const averageRating = reviews.length
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : 0;
 
   return (
     <>
@@ -52,7 +55,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
           before React even hydrates — the eager/fetchPriority attributes on
           the <img> itself only help once the DOM has that element. */}
       <link rel="preload" as="image" href={cloudinaryResize(shoe.image, 1200)} fetchPriority="high" />
-      <ProductDetail shoe={shoe} />
+      <ProductDetail shoe={shoe} averageRating={averageRating} reviewCount={reviews.length} />
       <ProductReviews productId={shoe.id} reviews={reviews} />
       <Recommendations picks={picks} storeName={settings.storeName} />
     </>

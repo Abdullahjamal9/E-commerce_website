@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { uploadToCloudinary } from '@/lib/uploadToCloudinary';
 import { useToast } from '@/store/useToast';
-import { XIcon } from './icons';
+import { StarIcon, XIcon } from './icons';
 
 interface Review {
   id: string;
@@ -15,25 +15,41 @@ interface Review {
   createdAt: string | Date;
 }
 
-function Stars({ value, onChange }: { value: number; onChange?: (v: number) => void }) {
+function Stars({
+  value,
+  onChange,
+  size = 18
+}: {
+  value: number;
+  onChange?: (v: number) => void;
+  size?: number;
+}) {
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
           type="button"
           disabled={!onChange}
           onClick={() => onChange?.(n)}
-          className={`text-lg leading-none ${onChange ? 'cursor-pointer' : 'cursor-default'} ${
-            n <= value ? 'text-amber-400' : 'text-white/20'
-          }`}
+          className={onChange ? 'cursor-pointer' : 'cursor-default'}
           aria-label={`${n} star${n > 1 ? 's' : ''}`}
         >
-          ★
+          <StarIcon
+            filled={n <= value}
+            size={size}
+            className={n <= value ? 'text-amber-400' : 'text-white/20'}
+          />
         </button>
       ))}
     </div>
   );
+}
+
+/** First letters of up to the first two words of a name, for the review avatar. */
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?';
 }
 
 export default function ProductReviews({
@@ -123,18 +139,41 @@ export default function ProductReviews({
   };
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6">
+    <section id="reviews" className="mx-auto max-w-7xl scroll-mt-24 px-4 pb-20 pt-16 sm:px-6">
       <div className="glass rounded-3xl p-6 sm:p-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-black sm:text-3xl">
-            Reviews <span className="neon-text">& Comments</span>
-          </h2>
-          {reviews.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Stars value={Math.round(average)} />
-              <span className="text-sm opacity-70">
-                {average.toFixed(1)} ({reviews.length} review{reviews.length === 1 ? '' : 's'})
-              </span>
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-black sm:text-3xl">
+              Reviews <span className="neon-text">& Comments</span>
+            </h2>
+            {reviews.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Stars value={Math.round(average)} size={16} />
+                <span className="text-sm opacity-70">
+                  {average.toFixed(1)} ({reviews.length} review{reviews.length === 1 ? '' : 's'})
+                </span>
+              </div>
+            )}
+          </div>
+
+          {reviews.length > 1 && (
+            <div className="mt-4 max-w-xs space-y-1.5">
+              {[5, 4, 3, 2, 1].map((star) => {
+                const count = reviews.filter((r) => r.rating === star).length;
+                const pct = (count / reviews.length) * 100;
+                return (
+                  <div key={star} className="flex items-center gap-2 text-xs">
+                    <span className="w-8 shrink-0 opacity-60">{star} star</span>
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className="h-full rounded-full bg-amber-400"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="w-4 shrink-0 text-right opacity-50">{count}</span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -201,14 +240,17 @@ export default function ProductReviews({
           </button>
         </form>
 
-        <div className="space-y-5">
+        <div className="divide-y divide-white/10">
           {reviews.length === 0 && (
             <p className="text-center text-sm opacity-60">
               No reviews yet. Be the first to share your thoughts.
             </p>
           )}
           {reviews.map((r) => (
-            <div key={r.id} className="flex gap-3">
+            <div key={r.id} className="flex gap-3 py-5 first:pt-0 last:pb-0">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-blue to-neon-purple text-sm font-bold text-white">
+                {initials(r.customerName)}
+              </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{r.customerName}</p>
@@ -216,7 +258,7 @@ export default function ProductReviews({
                     {new Date(r.createdAt).toLocaleDateString('en-GB')}
                   </span>
                 </div>
-                <Stars value={r.rating} />
+                <Stars value={r.rating} size={14} />
                 <p className="mt-1 whitespace-pre-line text-sm opacity-80">{r.comment}</p>
                 {r.images.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">

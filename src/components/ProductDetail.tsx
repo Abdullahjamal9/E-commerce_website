@@ -12,8 +12,17 @@ import { useToast } from '@/store/useToast';
 import SpinViewer from './SpinViewer';
 import ImageZoomModal from './ImageZoomModal';
 import SaleCountdownBar from './SaleCountdownBar';
+import { StarIcon } from './icons';
 
-export default function ProductDetail({ shoe }: { shoe: Shoe }) {
+export default function ProductDetail({
+  shoe,
+  averageRating,
+  reviewCount
+}: {
+  shoe: Shoe;
+  averageRating: number;
+  reviewCount: number;
+}) {
   const hasSpin = shoe.spinImages.length >= 2;
   const [color, setColor] = useState(shoe.colors[0]);
   const [size, setSize] = useState<string | null>(null);
@@ -295,6 +304,17 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
               </p>
               <h1 className="mt-1 text-3xl font-black sm:text-4xl">{shoe.name}</h1>
               <p className="mt-1 text-sm opacity-60">{shoe.tagline}</p>
+              {reviewCount > 0 && (
+                <a
+                  href="#reviews"
+                  className="mt-2 inline-flex items-center gap-1.5 text-sm transition hover:opacity-80"
+                >
+                  <StarIcon size={15} className="text-amber-400" />
+                  <span className="font-semibold">{averageRating.toFixed(1)}</span>
+                  <span className="opacity-40">|</span>
+                  <span className="opacity-60">{reviewCount}</span>
+                </a>
+              )}
             </div>
             <button
               onClick={() => {
