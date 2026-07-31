@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart, selectCount } from '@/store/useCart';
-import { BagIcon } from './icons';
+import { BagIcon, HeartIcon, HomeIcon, InfoIcon, StoreIcon } from './icons';
 
 const ITEMS = [
-  { href: '/', label: 'Home', icon: '🏠' },
-  { href: '/shop', label: 'Shop', icon: '👟' },
-  { href: '/wishlist', label: 'Wishlist', icon: '❤️' },
-  { href: '/about', label: 'About', icon: '✨' }
+  { href: '/', label: 'Home', icon: <HomeIcon size={18} /> },
+  { href: '/shop', label: 'Shop', icon: <StoreIcon size={18} /> },
+  { href: '/wishlist', label: 'Wishlist', icon: <HeartIcon filled={false} size={18} /> },
+  { href: '/about', label: 'About', icon: <InfoIcon size={18} /> }
 ];
 
 export default function MobileNav() {
@@ -24,11 +24,11 @@ export default function MobileNav() {
           key={i.href}
           href={i.href}
           className={`flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] transition ${
-            pathname === i.href ? 'neon-text' : 'opacity-70'
+            pathname === i.href ? 'text-neon-blue' : 'opacity-70'
           }`}
         >
-          <span className="text-lg">{i.icon}</span>
-          {i.label}
+          {i.icon}
+          <span className={pathname === i.href ? 'neon-text' : ''}>{i.label}</span>
         </Link>
       ))}
       <button

@@ -254,7 +254,7 @@ export default function ProductDetail({ shoe }: { shoe: Shoe }) {
           <div className="mt-4">
             <p
               ref={descRef}
-              className={`whitespace-pre-line opacity-70 ${descExpanded ? '' : 'line-clamp-[7]'}`}
+              className={`whitespace-pre-line opacity-70 ${descExpanded ? '' : 'line-clamp-[5]'}`}
             >
               {shoe.description}
             </p>
