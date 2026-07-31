@@ -17,7 +17,8 @@ export default function ThemeToggle() {
       type="button"
       aria-label="Toggle theme"
       onClick={toggle}
-      className="glass relative h-7 w-12 flex-shrink-0 overflow-hidden rounded-full border-none outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white/40"
+      style={{ border: 'none' }}
+      className="glass relative h-7 w-12 flex-shrink-0 overflow-hidden rounded-full outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white/40"
     >
       <motion.span
         animate={{ left: isDark ? 25 : 3 }}
@@ -25,7 +26,13 @@ export default function ThemeToggle() {
         className="absolute top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-neon-blue to-neon-purple text-white shadow-md"
       >
         {isDark ? (
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            style={{ transform: 'translateX(1px)' }}
+          >
             <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
           </svg>
         ) : (
