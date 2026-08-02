@@ -22,10 +22,6 @@ export default async function EditProductPage({ params }: { params: { id: string
   return (
     <div>
       <h1 className="mb-6 text-2xl font-black sm:text-3xl">Edit Product</h1>
-      {/* TEMP diagnostic — remove once the stale-render cause is confirmed. */}
-      <p data-debug-render className="hidden">
-        rendered:{new Date().toISOString()} firstImage:{product.images[0] ?? 'none'}
-      </p>
       <ProductForm
         productId={product.id}
         initial={product}
