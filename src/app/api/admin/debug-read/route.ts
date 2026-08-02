@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { getProductById } from '@/lib/products';
 import { getAdminSession } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +33,11 @@ export async function GET(request: Request) {
     }
   };
 
+  const viaHelper = await getProductById(id);
+
   return NextResponse.json({
+    renderedAt: new Date().toISOString(),
+    getProductById: viaHelper?.images?.[0] ?? null,
     findUnique: firstUrl(unique?.images),
     findFirst: firstUrl(first?.images),
     findMany: firstUrl(many[0]?.images),
