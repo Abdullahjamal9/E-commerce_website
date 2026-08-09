@@ -8,114 +8,66 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart, selectCount } from '@/store/useCart';
 import { useWishlist } from '@/store/useWishlist';
 import SearchBox from './SearchBox';
-import ThemeToggle from './ThemeToggle';
+import MegaMenu from './MegaMenu';
+import MobileMenu from './MobileMenu';
 import { BagIcon, HeartIcon, XIcon } from './icons';
+import type { NavItem } from '@/lib/nav';
 import logo from '@/assets/logo.png';
 
-const LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/collections', label: 'Collections' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' }
-];
+// Height of the announcement strip (h-9) the fixed header has to clear at
+// rest; once scrolled the strip has moved away and the header sits at 0.
+const ANNOUNCEMENT_H = 36;
+// Matches the nav's h-16 — the menu panel starts right below it.
+const HEADER_H = 64;
 
-// Matches the max-h-72 box below at this row size (px-3 py-2, text-sm) — used to
-// work out how many 176px-wide columns the category list needs.
-const CATEGORY_COLUMN_WIDTH = 176;
-const CATEGORY_ROWS_PER_COLUMN = 8;
-
-function ShopMenu({ categories }: { categories: string[] }) {
-  const [open, setOpen] = useState(false);
-  // CSS columns only get extra columns if the container is actually wide enough
-  // to hold them — a shrink-to-fit ancestor would otherwise lock it to one
-  // column and clip the rest. So the width is computed explicitly from the
-  // category count instead of left to "w-max".
-  const columnCount = Math.max(1, Math.ceil(categories.length / CATEGORY_ROWS_PER_COLUMN));
-  const panelWidth = columnCount * CATEGORY_COLUMN_WIDTH + (columnCount - 1) * 8;
-
+function SearchIcon({ size = 20 }: { size?: number }) {
   return (
-    <li className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      <Link
-        href="/shop"
-        className="group relative flex items-center gap-1 text-sm font-medium opacity-80 transition hover:opacity-100"
-      >
-        Shop
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={`transition-transform ${open ? 'rotate-180' : ''}`}
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-        <span className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-neon-blue to-neon-purple transition-all duration-300 group-hover:w-full" />
-      </Link>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+  );
+}
 
-      {/* pt-3 (not mt-3) keeps this region directly adjacent to the trigger —
-          a margin gap here would create a dead zone where the mouse leaves
-          the hoverable area before reaching the panel, closing it early. */}
-      <AnimatePresence>
-        {open && categories.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.15 }}
-            className="absolute left-1/2 top-full max-w-[90vw] -translate-x-1/2 pt-3"
-            style={{ width: Math.min(panelWidth, 0.9 * (typeof window !== 'undefined' ? window.innerWidth : panelWidth)) }}
-          >
-            <div className="panel-solid overflow-hidden rounded-2xl p-2 text-[var(--fg)] shadow-glow">
-              <Link
-                href="/shop"
-                className="block rounded-xl px-3 py-2 text-sm font-semibold transition hover:bg-white/10"
-              >
-                All Products
-              </Link>
-              <div className="my-1 border-t border-white/10" />
-              {/* Fixed max-height + CSS columns: once the category list is taller than
-                  this box, it flows into additional side-by-side columns instead of
-                  scrolling, so every category stays reachable in one glance. The
-                  container width above is computed to actually fit `columnCount`
-                  columns — otherwise a shrink-wrapped ancestor caps it at one. */}
-              <div
-                className="max-h-72 [column-fill:auto]"
-                style={{ columnCount, columnGap: '8px' }}
-              >
-                {categories.map((c) => (
-                  <Link
-                    key={c}
-                    href={`/shop?category=${encodeURIComponent(c)}`}
-                    className="block break-inside-avoid rounded-xl px-3 py-2 text-sm opacity-80 transition hover:bg-white/10 hover:opacity-100"
-                  >
-                    {c}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </li>
+function MenuIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
+      <line x1="3" y1="7" x2="21" y2="7" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="17" x2="21" y2="17" />
+    </svg>
   );
 }
 
 export default function Navbar({
   storeName,
-  categories,
+  navItems,
   saleEnabled
 }: {
   storeName: string;
-  categories: string[];
+  navItems: NavItem[];
   saleEnabled: boolean;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [shopOpen, setShopOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const count = useCart(selectCount);
   const openCart = useCart((s) => s.open);
   const wishCount = useWishlist((s) => s.ids.length);
@@ -128,257 +80,139 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // The Independence Day banner has a light background and sits directly
-  // under the nav on the homepage — force dark text there so it stays
-  // readable in dark mode, until scrolling past it onto normal content.
+  // Close both overlays whenever navigation happens.
+  useEffect(() => {
+    setMenuOpen(false);
+    setMobileSearchOpen(false);
+  }, [pathname]);
+
+  // The sale banner has a light background and sits directly under the nav on
+  // these pages — force dark text there until scrolled onto normal content.
   const overLightBanner = saleEnabled && (pathname === '/' || pathname === '/shop') && !scrolled;
+  // Menu open pins the header to the top edge, full width, so the panel
+  // beneath it lines up with the header's bottom instead of a floating bar.
+  const docked = scrolled || menuOpen;
 
   return (
     <>
-    <motion.header
-      initial={{ opacity: 0, top: 16, left: '3%', right: '3%', borderRadius: 28 }}
-      animate={{
-        opacity: 1,
-        top: scrolled ? 0 : 16,
-        left: scrolled ? 0 : '3%',
-        right: scrolled ? 0 : '3%',
-        borderRadius: scrolled ? 0 : 28
-      }}
-      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-      className={`glass fixed z-50 shadow-glow transition-colors duration-300 ${overLightBanner ? 'text-[#0a0c14]' : ''}`}
-    >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 text-xl font-black uppercase tracking-[0.3em] neon-text">
-          <Image src={logo} alt={storeName} width={28} height={28} priority />
-          {storeName}
-        </Link>
+      <motion.header
+        initial={{ opacity: 0, top: ANNOUNCEMENT_H + 16, left: '3%', right: '3%', borderRadius: 28 }}
+        animate={{
+          opacity: 1,
+          top: docked ? 0 : ANNOUNCEMENT_H + 16,
+          left: docked ? 0 : '3%',
+          right: docked ? 0 : '3%',
+          borderRadius: docked ? 0 : 28
+        }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+        className={`glass fixed z-[60] shadow-glow transition-colors duration-300 ${overLightBanner ? 'text-[#151515]' : ''}`}
+      >
+        <nav className="relative mx-auto flex h-16 max-w-site items-center justify-between gap-3 px-4 sm:px-6">
+          {/* Left — hamburger on mobile, wordmark on desktop */}
+          <div className="flex flex-1 items-center lg:flex-none">
+            <button
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((o) => !o)}
+              className="-ml-2 rounded-full p-2 transition hover:bg-[var(--surface-alt)] lg:hidden"
+            >
+              {menuOpen ? <XIcon size={22} /> : <MenuIcon />}
+            </button>
 
-        <ul className="hidden items-center gap-8 lg:flex">
-          {LINKS.slice(0, 1).map((l) => (
-            <li key={l.href}>
-              <Link
-                href={l.href}
-                className="group relative text-sm font-medium opacity-80 transition hover:opacity-100"
-              >
-                {l.label}
-                <span className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-neon-blue to-neon-purple transition-all duration-300 group-hover:w-full" />
-              </Link>
-            </li>
-          ))}
-          <ShopMenu categories={categories} />
-          {LINKS.slice(1).map((l) => (
-            <li key={l.href}>
-              <Link
-                href={l.href}
-                className="group relative text-sm font-medium opacity-80 transition hover:opacity-100"
-              >
-                {l.label}
-                <span className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-neon-blue to-neon-purple transition-all duration-300 group-hover:w-full" />
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className="flex items-center gap-3">
-          <div className="hidden lg:block">
-            <SearchBox />
+            <Link
+              href="/"
+              className="hidden flex-shrink-0 items-center gap-2 text-lg font-black uppercase tracking-[0.25em] neon-text lg:flex"
+            >
+              <Image src={logo} alt={storeName} width={26} height={26} priority />
+              {storeName}
+            </Link>
           </div>
 
-          <ThemeToggle />
-
+          {/* Centre — wordmark, mobile only */}
           <Link
-            href="/wishlist"
-            aria-label="Open wishlist"
-            className="relative rounded-full p-2 transition hover:bg-white/10"
+            href="/"
+            className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-2.5 text-[15px] font-black uppercase tracking-[0.2em] neon-text lg:hidden"
           >
-            <HeartIcon filled={false} />
-            <AnimatePresence>
-              {wishCount > 0 && (
-                <motion.span
-                  key={wishCount}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-neon-blue to-neon-purple text-[10px] font-bold text-white"
-                >
-                  {wishCount}
-                </motion.span>
-              )}
-            </AnimatePresence>
+            {storeName}
           </Link>
 
-          <button
-            data-cart-target
-            aria-label="Open cart"
-            onClick={openCart}
-            className="relative hidden rounded-full p-2 transition hover:bg-white/10 lg:block"
-          >
-            <BagIcon />
-            <AnimatePresence>
-              {count > 0 && (
-                <motion.span
-                  key={count}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-neon-blue to-neon-purple text-[10px] font-bold text-white"
-                >
-                  {count}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
+          <ul className="hidden items-center gap-6 lg:flex">
+            {navItems.map((item) => (
+              <MegaMenu key={item.label} item={item} />
+            ))}
+          </ul>
 
-          <button
-            aria-label="Open menu"
-            onClick={() => setMenuOpen(true)}
-            className="rounded-full p-2 text-xl transition hover:bg-white/10 lg:hidden"
-          >
-            ☰
-          </button>
-        </div>
-      </nav>
-    </motion.header>
-
-    {/* Mobile nav drawer — the header only shows icons on mobile, so this is
-        the one place to reach Collections/About/Contact and the full
-        category list; the bottom tab bar covers quick actions separately. */}
-    <AnimatePresence>
-      {menuOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setMenuOpen(false)}
-            className="fixed inset-0 z-[100] bg-black/60 lg:hidden"
-          />
-          <motion.aside
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
-            className="panel-solid fixed inset-y-0 right-0 z-[101] flex w-72 max-w-[85vw] flex-col overflow-y-auto p-5 lg:hidden"
-            style={{ willChange: 'transform' }}
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-lg font-black uppercase tracking-[0.3em] neon-text">{storeName}</span>
-              <button
-                onClick={() => setMenuOpen(false)}
-                aria-label="Close menu"
-                className="rounded-lg p-1.5 hover:bg-white/10"
-              >
-                <XIcon size={16} />
-              </button>
+          {/* Right — search + cart on mobile; full icon set on desktop */}
+          <div className="flex flex-1 items-center justify-end gap-0.5 sm:gap-2 lg:flex-none">
+            <div className="hidden lg:block">
+              <SearchBox />
             </div>
 
-            <div className="mb-4">
-              <SearchBox variant="inline" onNavigate={() => setMenuOpen(false)} />
-            </div>
+            <button
+              aria-label="Search"
+              onClick={() => {
+                setMenuOpen(false);
+                setMobileSearchOpen((s) => !s);
+              }}
+              className="rounded-full p-2 transition hover:bg-[var(--surface-alt)] lg:hidden"
+            >
+              <SearchIcon />
+            </button>
 
-            <nav className="flex flex-1 flex-col space-y-1">
-              <Link
-                href="/"
-                onClick={() => setMenuOpen(false)}
-                className="block rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
-              >
-                Home
-              </Link>
-
-              <div>
-                <button
-                  onClick={() => setShopOpen((s) => !s)}
-                  className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
-                >
-                  Shop
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`transition-transform ${shopOpen ? 'rotate-180' : ''}`}
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </button>
-                <AnimatePresence initial={false}>
-                  {shopOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden pl-3"
-                    >
-                      <Link
-                        href="/shop"
-                        onClick={() => setMenuOpen(false)}
-                        className="block rounded-xl px-3 py-2 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
-                      >
-                        All Products
-                      </Link>
-                      {categories.map((c) => (
-                        <Link
-                          key={c}
-                          href={`/shop?category=${encodeURIComponent(c)}`}
-                          onClick={() => setMenuOpen(false)}
-                          className="block rounded-xl px-3 py-2 text-sm opacity-60 transition hover:bg-white/10 hover:opacity-100"
-                        >
-                          {c}
-                        </Link>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <Link
-                href="/collections"
-                onClick={() => setMenuOpen(false)}
-                className="block rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
-              >
-                Collections
-              </Link>
-              <Link
-                href="/about"
-                onClick={() => setMenuOpen(false)}
-                className="block rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
-              >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                onClick={() => setMenuOpen(false)}
-                className="block rounded-xl px-3 py-2.5 text-sm font-medium opacity-80 transition hover:bg-white/10 hover:opacity-100"
-              >
-                Contact
-              </Link>
-
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  openCart();
-                }}
-                className="relative mt-auto flex w-full items-center justify-between rounded-xl bg-white/5 px-3 py-3 text-sm font-semibold opacity-90 transition hover:bg-white/10"
-              >
-                <span className="flex items-center gap-2">
-                  <BagIcon /> Cart
+            <Link
+              href="/wishlist"
+              aria-label="Open wishlist"
+              className="relative hidden rounded-full p-2 transition hover:bg-[var(--surface-alt)] lg:block"
+            >
+              <HeartIcon filled={false} />
+              {wishCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent)] text-[9px] font-bold text-[var(--accent-fg)]">
+                  {wishCount}
                 </span>
-                {count > 0 && (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-neon-blue to-neon-purple text-[10px] font-bold text-white">
-                    {count}
-                  </span>
-                )}
-              </button>
-            </nav>
-          </motion.aside>
-        </>
-      )}
-    </AnimatePresence>
+              )}
+            </Link>
+
+            <button
+              data-cart-target
+              aria-label="Open cart"
+              onClick={openCart}
+              className="relative -mr-2 rounded-full p-2 transition hover:bg-[var(--surface-alt)] sm:mr-0"
+            >
+              <BagIcon />
+              {count > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent)] text-[9px] font-bold text-[var(--accent-fg)]">
+                  {count}
+                </span>
+              )}
+            </button>
+          </div>
+        </nav>
+
+        {/* Mobile search drops out of the bar rather than squeezing into it. */}
+        <AnimatePresence initial={false}>
+          {mobileSearchOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="overflow-hidden border-t border-[var(--border)] lg:hidden"
+            >
+              <div className="px-4 py-3">
+                <SearchBox variant="inline" onNavigate={() => setMobileSearchOpen(false)} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.header>
+
+      <MobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        navItems={navItems}
+        wishCount={wishCount}
+        topOffset={HEADER_H}
+      />
     </>
   );
 }

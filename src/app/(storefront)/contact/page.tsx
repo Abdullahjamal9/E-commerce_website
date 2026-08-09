@@ -7,7 +7,7 @@ export default async function ContactPage() {
   const settings = await getSettings();
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-20 pt-28 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 pb-20 pt-36 sm:px-6">
       <div className="mb-12 text-center">
         <h1 className="text-3xl font-black sm:text-4xl">
           Get in <span className="neon-text">Touch</span>

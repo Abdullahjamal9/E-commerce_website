@@ -1,8 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 import type { Shoe } from '@/lib/types';
 import { formatPrice } from '@/lib/currency';
 import { getSalePrice } from '@/lib/sale';
@@ -10,10 +8,9 @@ import { cloudinaryResize } from '@/lib/cloudinaryUrl';
 import { useCart } from '@/store/useCart';
 import { useWishlist } from '@/store/useWishlist';
 import { useToast } from '@/store/useToast';
+import { HeartIcon } from './icons';
 
 export default function ProductCard({ shoe }: { shoe: Shoe }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
   const add = useCart((s) => s.add);
   const openCart = useCart((s) => s.open);
   const toggleWish = useWishlist((s) => s.toggle);
@@ -22,17 +19,6 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
   const outOfStock = shoe.stock <= 0;
   const onSale = shoe.discountPercent > 0;
   const salePrice = onSale ? getSalePrice(shoe.price, shoe.discountPercent) : shoe.price;
-
-  const onMove = (e: React.MouseEvent) => {
-    const el = ref.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    setTilt({ rx: -py * 12, ry: px * 12 });
-  };
-
-  const reset = () => setTilt({ rx: 0, ry: 0 });
 
   const quickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -50,19 +36,21 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
   };
 
   return (
-    <motion.div
-      ref={ref}
-      onMouseMove={onMove}
-      onMouseLeave={reset}
-      style={{ transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)` }}
-      className="group relative h-full"
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.5 }}
-    >
-      <Link href={`/product/${shoe.slug}`} className="block h-full">
-        <div className="glass relative flex h-full flex-col overflow-hidden rounded-3xl p-4 transition-shadow duration-300 group-hover:shadow-glow-purple">
+    <div className="group relative h-full">
+      <Link href={`/product/${shoe.slug}`} className="flex h-full flex-col">
+        <div className="relative overflow-hidden border border-[var(--border)] bg-[var(--surface-alt)]">
+          {outOfStock ? (
+            <span className="absolute left-0 top-3 z-10 bg-[#939393] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+              Sold out
+            </span>
+          ) : (
+            onSale && (
+              <span className="absolute left-0 top-3 z-10 bg-[var(--accent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--accent-fg)]">
+                Save {shoe.discountPercent}%
+              </span>
+            )
+          )}
+
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -70,71 +58,56 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
               notify(wished ? `Removed ${shoe.name} from wishlist` : `Added ${shoe.name} to wishlist`);
             }}
             aria-label="Toggle wishlist"
-            className="absolute right-3 top-3 z-10 rounded-full bg-black/30 p-2 text-sm backdrop-blur"
+            className="absolute right-2 top-2 z-10 p-1.5 text-[var(--fg)] transition hover:opacity-70"
           >
-            {wished ? '❤️' : '🤍'}
+            <HeartIcon filled={wished} size={18} />
           </button>
 
-          {outOfStock ? (
-            <span className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/80 backdrop-blur">
-              Out of stock
-            </span>
-          ) : (
-            onSale && (
-              <span className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-md">
-                {shoe.discountPercent}% OFF
-              </span>
-            )
-          )}
-
-          <div className="relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/0 p-4">
+          <div className="aspect-square p-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={cloudinaryResize(shoe.image, 600)}
               alt={shoe.name}
               loading="lazy"
               decoding="async"
-              className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-110 ${outOfStock ? 'grayscale' : ''}`}
+              className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-105 ${outOfStock ? 'opacity-60 grayscale' : ''}`}
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition group-hover:opacity-100" />
-          </div>
-
-          <div className="mt-4 flex flex-1 flex-col">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="line-clamp-2 min-h-[2.5em] font-semibold leading-tight">{shoe.name}</p>
-                <p className="mt-1 line-clamp-1 text-xs opacity-60">{shoe.tagline}</p>
-              </div>
-              <div className="shrink-0 whitespace-nowrap text-right">
-                {onSale && (
-                  <p className="text-xs opacity-50 line-through">{formatPrice(shoe.price)}</p>
-                )}
-                <p className="font-bold neon-text">{formatPrice(salePrice)}</p>
-              </div>
-            </div>
-
-            <div className="mt-2 flex gap-1.5">
-              {shoe.colors.map((c) => (
-                <span
-                  key={c.hex}
-                  className="h-3 w-3 rounded-full ring-1 ring-white/20"
-                  style={{ background: c.hex }}
-                />
-              ))}
-            </div>
-
-            <motion.button
-              onClick={quickAdd}
-              disabled={outOfStock}
-              initial={{ opacity: 0, y: 10 }}
-              whileHover={outOfStock ? {} : { scale: 1.02 }}
-              className="btn-glow mt-4 w-full rounded-full bg-gradient-to-r from-neon-blue to-neon-purple py-2 text-sm font-semibold text-white opacity-0 transition group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-0 disabled:group-hover:opacity-60"
-            >
-              {outOfStock ? 'Out of Stock' : 'Add to Cart'}
-            </motion.button>
           </div>
         </div>
+
+        <div className="flex flex-1 flex-col pt-3">
+          <p className="line-clamp-2 min-h-[2.6em] text-sm font-medium leading-snug">{shoe.name}</p>
+          <p className="mt-1 text-xs text-[var(--muted)]">{shoe.category}</p>
+
+          <div className="mt-2 flex items-baseline gap-2">
+            {onSale && (
+              <span className="text-xs text-[var(--muted)] line-through">{formatPrice(shoe.price)}</span>
+            )}
+            <span className="text-sm font-bold">{formatPrice(salePrice)}</span>
+          </div>
+
+          {shoe.sizes.length > 0 && (
+            <div className="mt-2.5 flex flex-wrap gap-1">
+              {shoe.sizes.slice(0, 6).map((s) => (
+                <span
+                  key={s}
+                  className="min-w-[26px] border border-[var(--border)] px-1.5 py-0.5 text-center text-[10px] text-[var(--muted)]"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <button
+            onClick={quickAdd}
+            disabled={outOfStock}
+            className="btn-glow mt-3 w-full bg-[var(--accent)] py-2.5 text-xs font-semibold uppercase tracking-wide text-[var(--accent-fg)] disabled:cursor-not-allowed disabled:bg-[#939393]"
+          >
+            {outOfStock ? 'Sold out' : 'Add to cart'}
+          </button>
+        </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }

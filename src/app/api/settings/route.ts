@@ -16,6 +16,8 @@ const settingsSchema = z.object({
   whatsappNumber: z.string(),
   contactEmail: z.string(),
   address: z.string(),
+  facebookUrl: z.string(),
+  instagramUrl: z.string(),
   saleEnabled: z.boolean(),
   saleEndsAt: z
     .string()

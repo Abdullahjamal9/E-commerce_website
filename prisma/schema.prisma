@@ -138,6 +138,9 @@ model Settings {
   whatsappNumber      String  @default("")
   contactEmail        String  @default("")
   address             String  @default("")
+  /** Social profile URLs shown in the footer; blank hides the icon. */
+  facebookUrl         String  @default("")
+  instagramUrl        String  @default("")
   /** Toggles the Independence Day promo banner on the homepage — per-product discounts are set individually and don't depend on this. */
   saleEnabled         Boolean @default(false)
   /** When set, discounted products show a countdown bar to this moment. */

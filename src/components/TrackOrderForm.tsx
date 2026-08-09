@@ -67,7 +67,7 @@ export default function TrackOrderForm() {
               value={orderNumber}
               onChange={(e) => setOrderNumber(e.target.value)}
               placeholder="e.g. ORD-1001"
-              className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
             />
           </div>
           <div>
@@ -77,7 +77,7 @@ export default function TrackOrderForm() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Phone used at checkout"
-              className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
             />
           </div>
         </div>
@@ -109,7 +109,7 @@ export default function TrackOrderForm() {
                   <div className="flex flex-col items-center">
                     <div
                       className={`h-3 w-3 rounded-full ${
-                        i <= stepIndex ? 'bg-gradient-to-r from-neon-blue to-neon-purple' : 'bg-white/15'
+                        i <= stepIndex ? 'bg-gradient-to-r from-neon-blue to-neon-purple' : 'bg-[var(--surface-alt)]'
                       }`}
                     />
                     <p className={`mt-2 text-[10px] uppercase tracking-wide ${i <= stepIndex ? 'opacity-90' : 'opacity-40'}`}>
@@ -117,7 +117,7 @@ export default function TrackOrderForm() {
                     </p>
                   </div>
                   {i < ORDER_STEPS.length - 1 && (
-                    <div className={`mx-1 h-px flex-1 ${i < stepIndex ? 'bg-neon-blue' : 'bg-white/15'}`} />
+                    <div className={`mx-1 h-px flex-1 ${i < stepIndex ? 'bg-neon-blue' : 'bg-[var(--surface-alt)]'}`} />
                   )}
                 </div>
               ))}
@@ -132,7 +132,7 @@ export default function TrackOrderForm() {
             </span>
           </p>
 
-          <div className="mt-4 space-y-2 border-t border-white/10 pt-4">
+          <div className="mt-4 space-y-2 border-t border-[var(--border)] pt-4">
             {order.items.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
                 <span>
@@ -141,7 +141,7 @@ export default function TrackOrderForm() {
                 <span className="font-semibold">{formatPrice(item.price * item.qty)}</span>
               </div>
             ))}
-            <div className="flex justify-between border-t border-white/10 pt-3 text-lg font-bold">
+            <div className="flex justify-between border-t border-[var(--border)] pt-3 text-lg font-bold">
               <span>Total</span>
               <span className="neon-text">{formatPrice(order.total)}</span>
             </div>

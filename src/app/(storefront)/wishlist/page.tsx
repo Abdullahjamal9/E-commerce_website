@@ -25,7 +25,7 @@ export default function WishlistPage() {
   }, [ids]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-20 pt-28 sm:px-6">
+    <div className="mx-auto max-w-site px-4 pb-20 pt-36 sm:px-6">
       <div className="mb-10 text-center">
         <h1 className="text-3xl font-black sm:text-4xl">
           Your <span className="neon-text">Wishlist</span>
@@ -44,7 +44,7 @@ export default function WishlistPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((shoe) => (
             <ProductCard key={shoe.id} shoe={shoe} />
           ))}

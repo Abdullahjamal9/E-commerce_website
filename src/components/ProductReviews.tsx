@@ -38,7 +38,7 @@ function Stars({
           <StarIcon
             filled={n <= value}
             size={size}
-            className={n <= value ? 'text-amber-400' : 'text-white/20'}
+            className={n <= value ? 'text-amber-400' : 'text-[var(--border)]'}
           />
         </button>
       ))}
@@ -139,7 +139,7 @@ export default function ProductReviews({
   };
 
   return (
-    <section id="reviews" className="mx-auto max-w-7xl scroll-mt-24 px-4 pb-20 pt-16 sm:px-6">
+    <section id="reviews" className="mx-auto max-w-site scroll-mt-24 px-4 pb-20 pt-16 sm:px-6">
       <div className="glass rounded-3xl p-6 sm:p-8">
         <div className="mb-6">
           <div className="flex items-center justify-between">
@@ -164,7 +164,7 @@ export default function ProductReviews({
                 return (
                   <div key={star} className="flex items-center gap-2 text-xs">
                     <span className="w-8 shrink-0 opacity-60">{star} star</span>
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--surface-alt)]">
                       <div
                         className="h-full rounded-full bg-amber-400"
                         style={{ width: `${pct}%` }}
@@ -178,16 +178,16 @@ export default function ProductReviews({
           )}
         </div>
 
-        <form onSubmit={onSubmit} className="mb-8 space-y-3 border-b border-white/10 pb-8">
+        <form onSubmit={onSubmit} className="mb-8 space-y-3 border-b border-[var(--border)] pb-8">
           {error && <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-400">{error}</p>}
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Your name"
-              className="flex-1 rounded-xl bg-white/5 px-4 py-2.5 text-sm outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="flex-1 rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
             />
-            <div className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 ring-1 ring-white/10">
+            <div className="flex items-center gap-2 rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 ring-1 ring-[var(--border)]">
               <span className="text-sm opacity-60">Your rating</span>
               <Stars value={rating} onChange={setRating} />
             </div>
@@ -197,7 +197,7 @@ export default function ProductReviews({
             onChange={(e) => setComment(e.target.value)}
             placeholder="Share your thoughts about this product…"
             rows={3}
-            className="w-full rounded-xl bg-white/5 px-4 py-2.5 text-sm outline-none ring-1 ring-white/10 focus:ring-white/30"
+            className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
           />
 
           <div>
@@ -240,7 +240,7 @@ export default function ProductReviews({
           </button>
         </form>
 
-        <div className="divide-y divide-white/10">
+        <div className="divide-y divide-[var(--border)]">
           {reviews.length === 0 && (
             <p className="text-center text-sm opacity-60">
               No reviews yet. Be the first to share your thoughts.

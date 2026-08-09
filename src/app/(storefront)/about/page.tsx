@@ -6,7 +6,7 @@ export default async function AboutPage() {
   const settings = await getSettings();
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pb-20 pt-28 sm:px-6">
+    <div className="mx-auto max-w-4xl px-4 pb-20 pt-36 sm:px-6">
       <div className="mb-12 text-center">
         <h1 className="text-3xl font-black sm:text-4xl">
           About <span className="neon-text">{settings.storeName}</span>

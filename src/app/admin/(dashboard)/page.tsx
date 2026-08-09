@@ -28,7 +28,7 @@ export default async function AdminDashboardPage() {
 
       <div className="mb-10 grid gap-4 sm:grid-cols-3">
         {stats.map((s) => (
-          <Link key={s.label} href={s.href} className="glass rounded-2xl p-6 transition hover:bg-white/5">
+          <Link key={s.label} href={s.href} className="glass rounded-2xl p-6 transition hover:bg-[var(--surface-alt)]">
             <p className="text-sm opacity-60">{s.label}</p>
             <p className="mt-2 text-3xl font-black neon-text">{s.value}</p>
           </Link>
@@ -50,7 +50,7 @@ export default async function AdminDashboardPage() {
               <Link
                 key={o.id}
                 href={`/admin/orders/${o.id}`}
-                className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition hover:bg-white/5"
+                className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition hover:bg-[var(--surface-alt)]"
               >
                 <span className="font-medium">{o.orderNumber}</span>
                 <span className="opacity-60">{o.customerName}</span>

@@ -45,7 +45,7 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
           prefetch={false}
           onClick={onNavigate}
           className={`relative block h-11 rounded-xl text-sm font-medium transition ${
-            isActive(l.href) ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white' : 'opacity-70 hover:bg-white/10 hover:opacity-100'
+            isActive(l.href) ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white' : 'opacity-70 hover:bg-[var(--surface-alt)] hover:opacity-100'
           }`}
         >
           <span
@@ -82,7 +82,7 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
         <button
           onClick={() => setMobileOpen(true)}
           aria-label="Open menu"
-          className="rounded-lg p-2 text-xl hover:bg-white/10"
+          className="rounded-lg p-2 text-xl hover:bg-[var(--surface-alt)]"
         >
           ☰
         </button>
@@ -119,7 +119,7 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
                 <button
                   onClick={() => setMobileOpen(false)}
                   aria-label="Close menu"
-                  className="rounded-lg p-1.5 hover:bg-white/10"
+                  className="rounded-lg p-1.5 hover:bg-[var(--surface-alt)]"
                 >
                   <XIcon size={16} />
                 </button>
@@ -136,7 +136,7 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
               </Link>
               <button
                 onClick={logout}
-                className="rounded-xl px-3 py-2 text-left text-sm opacity-60 transition hover:bg-white/10 hover:opacity-100"
+                className="rounded-xl px-3 py-2 text-left text-sm opacity-60 transition hover:bg-[var(--surface-alt)] hover:opacity-100"
               >
                 🚪 Logout
               </button>
@@ -174,7 +174,7 @@ export default function AdminSidebar({ storeName }: { storeName: string }) {
         </Link>
         <button
           onClick={logout}
-          className="relative block h-9 w-full rounded-xl text-left text-sm opacity-60 transition hover:bg-white/10 hover:opacity-100"
+          className="relative block h-9 w-full rounded-xl text-left text-sm opacity-60 transition hover:bg-[var(--surface-alt)] hover:opacity-100"
         >
           <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-base transition-all duration-200 group-hover:left-3 group-hover:translate-x-0">
             🚪

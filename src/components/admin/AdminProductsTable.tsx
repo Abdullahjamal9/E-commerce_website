@@ -122,7 +122,7 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
   }
 
   const columns = (
-    <tr className="border-b border-white/10 text-xs uppercase tracking-wide opacity-50">
+    <tr className="border-b border-[var(--border)] text-xs uppercase tracking-wide opacity-50">
       <th className="w-8 py-3" />
       <th className="py-3 pr-4">S.No</th>
       <th className="py-3 pr-4">Product</th>
@@ -263,7 +263,7 @@ function Row({
           className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide disabled:opacity-50 ${
             p.isActive
               ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
-              : 'bg-white/10 text-white/50 hover:bg-white/20'
+              : 'bg-[var(--surface-alt)] text-[var(--muted)] hover:bg-[var(--surface-alt)]'
           }`}
         >
           {p.isActive ? 'Active' : 'Inactive'}
@@ -304,7 +304,7 @@ function Row({
       dragListener={false}
       dragControls={controls}
       onDragEnd={onDragEnd}
-      className="panel-solid border-b border-white/5"
+      className="panel-solid border-b border-[var(--border)]"
       whileDrag={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}
     >
       {cells}

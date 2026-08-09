@@ -100,13 +100,13 @@ export default function SearchBox({
                     key={shoe.id}
                     href={`/product/${shoe.slug}`}
                     onClick={navigate}
-                    className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/10"
+                    className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-[var(--surface-alt)]"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={cloudinaryResize(shoe.image, 100)}
                       alt={shoe.name}
-                      className="h-10 w-10 flex-shrink-0 rounded-lg bg-white/5 object-contain p-1"
+                      className="h-10 w-10 flex-shrink-0 rounded-lg bg-[var(--surface-alt)] object-contain p-1"
                     />
                     <span className="flex-1 overflow-hidden">
                       <span className="block truncate text-sm font-medium">{shoe.name}</span>
@@ -144,7 +144,7 @@ export default function SearchBox({
       <button
         aria-label="Search"
         onClick={() => setOpen((s) => !s)}
-        className="rounded-full p-2 transition hover:bg-white/10"
+        className="rounded-full p-2 transition hover:bg-[var(--surface-alt)]"
       >
         <svg
           width="20"
@@ -181,13 +181,13 @@ export default function SearchBox({
                   key={shoe.id}
                   href={`/product/${shoe.slug}`}
                   onClick={close}
-                  className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/10"
+                  className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-[var(--surface-alt)]"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={cloudinaryResize(shoe.image, 100)}
                     alt={shoe.name}
-                    className="h-10 w-10 flex-shrink-0 rounded-lg bg-white/5 object-contain p-1"
+                    className="h-10 w-10 flex-shrink-0 rounded-lg bg-[var(--surface-alt)] object-contain p-1"
                   />
                   <span className="flex-1 overflow-hidden">
                     <span className="block truncate text-sm font-medium">{shoe.name}</span>

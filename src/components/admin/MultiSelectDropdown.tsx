@@ -37,7 +37,7 @@ export default function MultiSelectDropdown({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between rounded-xl bg-white/5 px-4 py-2.5 text-left outline-none ring-1 ring-white/10 focus:ring-white/30"
+        className="flex w-full items-center justify-between rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 text-left outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
       >
         <span className={selected.length === 0 ? 'opacity-50' : ''}>
           {selected.length === 0 ? placeholder : selected.join(', ')}
@@ -72,7 +72,7 @@ export default function MultiSelectDropdown({
               options.map((name) => (
                 <label
                   key={name}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm transition hover:bg-white/10"
+                  className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm transition hover:bg-[var(--surface-alt)]"
                 >
                   <input
                     type="checkbox"

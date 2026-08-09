@@ -6,7 +6,7 @@ export default async function PrivacyPolicyPage() {
   const settings = await getSettings();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pb-20 pt-28 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 pb-20 pt-36 sm:px-6">
       <h1 className="text-3xl font-black sm:text-4xl">
         Privacy <span className="neon-text">Policy</span>
       </h1>
@@ -56,7 +56,7 @@ export default async function PrivacyPolicyPage() {
           <p>
             For any privacy-related questions, contact us at{' '}
             {settings.contactEmail ? (
-              <a href={`mailto:${settings.contactEmail}`} className="text-neon-blue hover:underline">
+              <a href={`mailto:${settings.contactEmail}`} className="inline-block py-1 font-medium underline underline-offset-4 transition hover:opacity-70">
                 {settings.contactEmail}
               </a>
             ) : (

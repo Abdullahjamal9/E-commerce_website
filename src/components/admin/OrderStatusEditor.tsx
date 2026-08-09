@@ -82,7 +82,7 @@ export default function OrderStatusEditor({
           defaultValue={paymentStatus}
           disabled={saving}
           onChange={(e) => update('paymentStatus', e.target.value)}
-          className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+          className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
         >
           {PAYMENT_STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -97,7 +97,7 @@ export default function OrderStatusEditor({
           defaultValue={orderStatus}
           disabled={saving}
           onChange={(e) => update('orderStatus', e.target.value)}
-          className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+          className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
         >
           {ORDER_STATUSES.map((s) => (
             <option key={s} value={s}>

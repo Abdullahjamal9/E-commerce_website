@@ -120,8 +120,13 @@ export default function ProductDetail({
       if (!panel || window.innerWidth < 1024) return;
 
       const rect = panel.getBoundingClientRect();
-      const isStuck = Math.abs(rect.top - STICKY_TOP) < 2;
-      if (!isStuck) return;
+      // Testing for the exact sticky offset was too strict: at non-100% zoom
+      // getBoundingClientRect returns fractional pixels that rarely land on
+      // it, so the redirect never fired and the panel would only scroll while
+      // the pointer happened to be over it. Treat "pinned at or above the
+      // sticky line, still on screen" as the trigger instead.
+      const pinned = rect.top <= STICKY_TOP + 4 && rect.bottom > 0;
+      if (!pinned) return;
 
       const canScrollDown = panel.scrollTop + panel.clientHeight < panel.scrollHeight - 1;
       const canScrollUp = panel.scrollTop > 0;
@@ -177,10 +182,12 @@ export default function ProductDetail({
   };
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-10 px-4 pt-28 sm:px-6 lg:grid-cols-2">
-      {/* Viewer */}
-      <div>
-        <div className="flex items-start gap-3">
+    <div className="mx-auto grid max-w-site gap-10 px-4 pt-36 sm:px-6 lg:grid-cols-2">
+      {/* Viewer — min-w-0 because a grid item defaults to min-width:auto, which
+          let the thumbnail rail plus image push this column wider than its
+          track and gave the page a couple of pixels of sideways scroll. */}
+      <div className="min-w-0">
+        <div className="flex min-w-0 items-start gap-3">
           {shoe.images.length > 1 && (
             <div
               style={{ height: mainImageHeight }}
@@ -193,21 +200,27 @@ export default function ProductDetail({
                     setPhotoIndex(i);
                     setView('photo');
                   }}
-                  className={`aspect-square w-full flex-shrink-0 overflow-hidden rounded-xl ring-2 transition ${view === 'photo' && i === photoIndex ? 'ring-white' : 'ring-white/15'}`}
+                  className={`aspect-square w-full flex-shrink-0 overflow-hidden rounded-xl ring-2 transition ${view === 'photo' && i === photoIndex ? 'ring-white' : 'ring-[var(--border)]'}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={cloudinaryResize(img, 200)}
                     alt=""
                     loading="eager"
-                    className="h-full w-full bg-white/5 object-contain p-1"
+                    className="h-full w-full bg-[var(--surface-alt)] object-contain p-1"
                   />
                 </button>
               ))}
             </div>
           )}
 
-          <div ref={mainImageRef} className="glass relative aspect-square flex-1 overflow-hidden rounded-3xl">
+          {/* min-w-0: as a flex item this defaults to min-width:auto, so it
+              refused to shrink below the image's intrinsic width and pushed
+              the row past the viewport on narrow screens. */}
+          <div
+            ref={mainImageRef}
+            className="glass relative aspect-square min-w-0 flex-1 overflow-hidden rounded-3xl"
+          >
             <AnimatePresence mode="wait">
               {view === '360' && hasSpin ? (
                 <motion.div
@@ -285,7 +298,7 @@ export default function ProductDetail({
       {/* Sticky buy panel — pinned in the viewport and scrolls its own
           content (like Nike's PDP) until it's exhausted, then the page
           takes over and scrolls past it. */}
-      <div className="lg:sticky lg:top-28 lg:self-start">
+      <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
         <div
           ref={buyPanelRef}
           style={
@@ -349,7 +362,7 @@ export default function ProductDetail({
               <button
                 type="button"
                 onClick={() => setDescExpanded((v) => !v)}
-                className="mt-1 text-sm font-semibold text-neon-blue hover:underline"
+                className="mt-1 py-1 text-sm font-semibold underline underline-offset-4 transition hover:opacity-70"
               >
                 {descExpanded ? 'Read less' : 'Read more'}
               </button>
@@ -376,7 +389,7 @@ export default function ProductDetail({
                     key={c.hex}
                     onClick={() => setColor(c)}
                     aria-label={c.name}
-                    className={`h-9 w-9 rounded-full ring-2 transition ${color.hex === c.hex ? 'ring-white scale-110' : 'ring-white/20'}`}
+                    className={`h-9 w-9 rounded-full ring-2 transition ${color.hex === c.hex ? 'ring-white scale-110' : 'ring-[var(--border)]'}`}
                     style={{ background: c.hex }}
                   />
                 ))}
@@ -390,7 +403,7 @@ export default function ProductDetail({
                   <button
                     key={s}
                     onClick={() => setSize(s)}
-                    className={`h-11 min-w-11 rounded-xl px-3 text-sm font-medium transition ${size === s ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white' : 'glass hover:bg-white/10'}`}
+                    className={`h-11 min-w-11 rounded-xl px-3 text-sm font-medium transition ${size === s ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white' : 'glass hover:bg-[var(--surface-alt)]'}`}
                   >
                     {s}
                   </button>

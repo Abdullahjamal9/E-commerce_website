@@ -92,7 +92,7 @@ export default function AdminOrdersTable({ orders }: { orders: OrderRow[] }) {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-xs uppercase tracking-wide opacity-50">
+              <tr className="border-b border-[var(--border)] text-xs uppercase tracking-wide opacity-50">
                 <th className="py-3 pr-4">Order</th>
                 <th className="py-3 pr-4">Customer</th>
                 <th className="py-3 pr-4">Payment</th>
@@ -103,7 +103,7 @@ export default function AdminOrdersTable({ orders }: { orders: OrderRow[] }) {
             </thead>
             <tbody>
               {visible.map((o) => (
-                <tr key={o.id} className="border-b border-white/5">
+                <tr key={o.id} className="border-b border-[var(--border)]">
                   <td className="py-3 pr-4">
                     <Link href={`/admin/orders/${o.id}`} className="font-medium hover:underline">
                       {o.orderNumber}

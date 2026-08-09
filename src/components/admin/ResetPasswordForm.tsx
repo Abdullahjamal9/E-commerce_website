@@ -65,7 +65,7 @@ export default function ResetPasswordForm({
         </div>
 
         {done ? (
-          <p className="rounded-xl bg-white/5 px-4 py-3 text-sm opacity-80">
+          <p className="rounded-xl bg-[var(--surface-alt)] px-4 py-3 text-sm opacity-80">
             Password updated. Redirecting to sign in…
           </p>
         ) : (

@@ -1,33 +1,50 @@
 import Navbar from '@/components/Navbar';
+import AnnouncementBar from '@/components/AnnouncementBar';
 import CartDrawer from '@/components/CartDrawer';
-import MobileNav from '@/components/MobileNav';
 import Footer from '@/components/Footer';
 import PageTransition from '@/components/PageTransition';
 import SaleCountdownSync from '@/components/SaleCountdownSync';
 import { getSettings } from '@/lib/settings';
 import { getCategories } from '@/lib/categories';
+import { getTags } from '@/lib/tags';
+import { buildNav } from '@/lib/nav';
 
 export const dynamic = 'force-dynamic';
 
 export default async function StorefrontLayout({ children }: { children: React.ReactNode }) {
-  const [settings, categories] = await Promise.all([getSettings(), getCategories()]);
+  const [settings, categories, tags] = await Promise.all([getSettings(), getCategories(), getTags()]);
+  const navItems = buildNav(categories, tags, settings.saleEnabled);
+
+  const announcements = [
+    settings.saleEnabled ? 'Mid-season sale — up to 50% off' : null,
+    'Free delivery on orders over Rs. 3,000',
+    'Cash on Delivery available nationwide'
+  ].filter((m): m is string => Boolean(m));
 
   return (
     <>
       <SaleCountdownSync
         saleEndsAt={settings.saleEnabled && settings.saleEndsAt ? settings.saleEndsAt.toISOString() : null}
       />
-      <Navbar storeName={settings.storeName} categories={categories} saleEnabled={settings.saleEnabled} />
-      <main className="pb-24 md:pb-0">
+      <AnnouncementBar messages={announcements} />
+      <Navbar storeName={settings.storeName} navItems={navItems} saleEnabled={settings.saleEnabled} />
+      <main>
         <PageTransition>{children}</PageTransition>
       </main>
       <Footer
         storeName={settings.storeName}
         contactEmail={settings.contactEmail}
         contactPhone={settings.contactPhone}
+        whatsappNumber={settings.whatsappNumber}
+        address={settings.address}
+        codEnabled={settings.codEnabled}
+        bankTransferEnabled={settings.bankTransferEnabled}
+        easypaisaNumber={settings.easypaisaNumber}
+        facebookUrl={settings.facebookUrl}
+        instagramUrl={settings.instagramUrl}
+        categories={categories}
       />
       <CartDrawer />
-      <MobileNav />
     </>
   );
 }

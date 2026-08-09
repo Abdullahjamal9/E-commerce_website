@@ -9,12 +9,14 @@ import type { Category, Tag } from '@/lib/types';
 export async function generateMetadata({
   searchParams
 }: {
-  searchParams: { category?: string; tag?: string };
+  searchParams: { category?: string; tag?: string; audience?: string };
 }): Promise<Metadata> {
   const settings = await getSettings();
-  const scope = searchParams.category ?? searchParams.tag;
+  const scope = [searchParams.audience, searchParams.tag ?? searchParams.category]
+    .filter(Boolean)
+    .join(' ');
   return {
-    title: scope ? `Shop ${scope} — ${settings.storeName}` : `Shop — ${settings.storeName}`,
+    title: scope ? `${scope} — ${settings.storeName}` : `Shop — ${settings.storeName}`,
     description: `Browse the full ${settings.storeName} catalogue.`
   };
 }
@@ -22,7 +24,7 @@ export async function generateMetadata({
 export default async function ShopPage({
   searchParams
 }: {
-  searchParams: { category?: string; tag?: string };
+  searchParams: { category?: string; tag?: string; audience?: string };
 }) {
   const [products, settings, categories, tags] = await Promise.all([
     getProducts({ activeOnly: true }),
@@ -34,6 +36,11 @@ export default async function ShopPage({
     ? (searchParams.category as Category)
     : undefined;
   const initialTag = tags.includes(searchParams.tag as Tag) ? (searchParams.tag as Tag) : undefined;
+  // Audience (Men/Women) stays applied while the style tabs change, so
+  // "Men > Sneakers" really means men's sneakers rather than all sneakers.
+  const audience = tags.includes(searchParams.audience as Tag)
+    ? (searchParams.audience as Tag)
+    : undefined;
 
   return (
     <ShopGrid
@@ -42,8 +49,8 @@ export default async function ShopPage({
       categories={categories}
       category={category}
       initialTag={initialTag}
+      audience={audience}
       storeName={settings.storeName}
-      saleEnabled={settings.saleEnabled}
     />
   );
 }

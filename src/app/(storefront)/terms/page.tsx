@@ -6,7 +6,7 @@ export default async function TermsPage() {
   const settings = await getSettings();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pb-20 pt-28 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 pb-20 pt-36 sm:px-6">
       <h1 className="text-3xl font-black sm:text-4xl">
         Terms <span className="neon-text">& Conditions</span>
       </h1>
@@ -58,7 +58,7 @@ export default async function TermsPage() {
           <p>
             Questions about these terms can be sent to{' '}
             {settings.contactEmail ? (
-              <a href={`mailto:${settings.contactEmail}`} className="text-neon-blue hover:underline">
+              <a href={`mailto:${settings.contactEmail}`} className="inline-block py-1 font-medium underline underline-offset-4 transition hover:opacity-70">
                 {settings.contactEmail}
               </a>
             ) : (

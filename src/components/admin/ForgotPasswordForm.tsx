@@ -37,7 +37,7 @@ export default function ForgotPasswordForm({ storeName }: { storeName: string })
         </div>
 
         {sent ? (
-          <p className="rounded-xl bg-white/5 px-4 py-3 text-sm opacity-80">
+          <p className="rounded-xl bg-[var(--surface-alt)] px-4 py-3 text-sm opacity-80">
             If an account exists for that email, a reset link has been sent. Check your inbox.
           </p>
         ) : (
@@ -49,7 +49,7 @@ export default function ForgotPasswordForm({ storeName }: { storeName: string })
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+                className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
               />
             </div>
             <button

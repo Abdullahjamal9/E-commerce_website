@@ -33,14 +33,14 @@ export default async function FAQPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pb-20 pt-28 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 pb-20 pt-36 sm:px-6">
       <h1 className="text-3xl font-black sm:text-4xl">
         Frequently Asked <span className="neon-text">Questions</span>
       </h1>
 
       <div className="glass mt-8 space-y-6 rounded-3xl p-6 sm:p-8">
         {faqs.map((item) => (
-          <div key={item.q} className="border-b border-white/10 pb-5 last:border-0 last:pb-0">
+          <div key={item.q} className="border-b border-[var(--border)] pb-5 last:border-0 last:pb-0">
             <p className="font-semibold">{item.q}</p>
             <p className="mt-1 text-sm opacity-70">{item.a}</p>
           </div>
@@ -50,7 +50,7 @@ export default async function FAQPage() {
       <p className="mt-6 text-center text-sm opacity-60">
         Still have questions?{' '}
         {settings.contactEmail ? (
-          <a href={`mailto:${settings.contactEmail}`} className="text-neon-blue hover:underline">
+          <a href={`mailto:${settings.contactEmail}`} className="inline-block py-1 font-medium underline underline-offset-4 transition hover:opacity-70">
             Email us
           </a>
         ) : (

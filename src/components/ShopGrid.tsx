@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from './ProductCard';
 import ScrollableChipRow from './ScrollableChipRow';
 import type { Category, Shoe, Tag } from '@/lib/types';
-import desktopShopBanner from '@/assets/shop_banner.png';
-import mobileShopBanner from '@/assets/mobile_shop_banner.png';
 
 type Sort = 'newest' | 'price-asc' | 'price-desc';
 
@@ -105,7 +103,7 @@ function PriceFilter({
                 value={min}
                 onChange={(e) => setMin(e.target.value)}
                 placeholder="Min"
-                className="w-full rounded-lg bg-white/5 px-3 py-2 text-sm outline-none ring-1 ring-white/10 focus:ring-white/30"
+                className="w-full rounded-lg bg-[var(--surface-alt)] px-3 py-2 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
               />
               <span className="opacity-50">–</span>
               <input
@@ -114,7 +112,7 @@ function PriceFilter({
                 value={max}
                 onChange={(e) => setMax(e.target.value)}
                 placeholder="Max"
-                className="w-full rounded-lg bg-white/5 px-3 py-2 text-sm outline-none ring-1 ring-white/10 focus:ring-white/30"
+                className="w-full rounded-lg bg-[var(--surface-alt)] px-3 py-2 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
               />
             </div>
             <div className="mt-3 flex gap-2">
@@ -201,7 +199,7 @@ function SortFilter({ sort, onChange }: { sort: Sort; onChange: (sort: Sort) => 
                   className={`rounded-full px-3 py-1.5 text-left text-sm transition ${
                     sort === o.value
                       ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white'
-                      : 'bg-white/5 opacity-70 hover:opacity-100'
+                      : 'bg-[var(--surface-alt)] opacity-70 hover:opacity-100'
                   }`}
                 >
                   {o.label}
@@ -277,7 +275,7 @@ function SizeFilter({
                 className={`rounded-full px-3 py-1.5 text-sm transition ${
                   activeSize === 'All'
                     ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white'
-                    : 'bg-white/5 opacity-70 hover:opacity-100'
+                    : 'bg-[var(--surface-alt)] opacity-70 hover:opacity-100'
                 }`}
               >
                 All
@@ -293,7 +291,7 @@ function SizeFilter({
                   className={`rounded-full px-3 py-1.5 text-sm transition ${
                     activeSize === s
                       ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white'
-                      : 'bg-white/5 opacity-70 hover:opacity-100'
+                      : 'bg-[var(--surface-alt)] opacity-70 hover:opacity-100'
                   }`}
                 >
                   {s}
@@ -313,16 +311,17 @@ export default function ShopGrid({
   categories,
   category,
   initialTag,
-  storeName,
-  saleEnabled
+  audience,
+  storeName
 }: {
   products: Shoe[];
   tags: Tag[];
   categories: Category[];
   category?: Category;
   initialTag?: Tag;
+  /** Locked audience filter (Men/Women) that survives style tab changes. */
+  audience?: Tag;
   storeName: string;
-  saleEnabled: boolean;
 }) {
   const [activeCategory, setActiveCategory] = useState<Category | 'All'>(category ?? 'All');
   const [activeTag, setActiveTag] = useState<Tag | 'All'>(initialTag ?? 'All');
@@ -346,11 +345,20 @@ export default function ShopGrid({
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const categoryFilters: (Category | 'All')[] = ['All', ...categories];
-  const tagFilters: (Tag | 'All')[] = ['All', ...tags];
+  // Audience is fixed by the menu, so it isn't offered as a style tab.
+  const tagFilters: (Tag | 'All')[] = [
+    'All',
+    ...tags.filter((t) => t !== audience)
+  ];
+
+  const inAudience = useMemo(
+    () => (audience ? products.filter((p) => p.tags.includes(audience)) : products),
+    [products, audience]
+  );
 
   const inCategory = useMemo(
-    () => (activeCategory === 'All' ? products : products.filter((p) => p.category === activeCategory)),
-    [products, activeCategory]
+    () => (activeCategory === 'All' ? inAudience : inAudience.filter((p) => p.category === activeCategory)),
+    [inAudience, activeCategory]
   );
 
   // Sizes only make sense within a single product category (e.g. shoe sizes
@@ -400,134 +408,196 @@ export default function ShopGrid({
 
   const shown = visible.slice(0, visibleCount);
 
+  const scope = activeCategory === 'All' ? 'All Products' : activeCategory;
+  const heading = audience ? `${audience}'s ${scope === 'All Products' ? 'Collection' : scope}` : scope;
+
   return (
     <>
-      {saleEnabled && (
-        <div className="relative block w-full">
-          <Image
-            src={mobileShopBanner}
-            alt="Azadi Sale is live — up to 50% off sitewide"
-            priority
-            className="block h-auto w-full md:hidden"
-          />
-          <Image
-            src={desktopShopBanner}
-            alt="Azadi Sale is live — up to 50% off sitewide"
-            priority
-            className="hidden h-auto w-full md:block"
-          />
-        </div>
-      )}
-      <section className={`mx-auto max-w-7xl px-4 pb-20 sm:px-6 ${saleEnabled ? 'pt-8' : 'pt-28'}`}>
-        {!saleEnabled && (
-          <div className="mb-10 text-center">
-            <h1 className="text-3xl font-black sm:text-4xl">
-              {activeCategory === 'All' ? (
-                <>
-                  Full <span className="neon-text">Shop</span>
-                </>
-              ) : (
-                <>
-                  Shop <span className="neon-text">{activeCategory}</span>
-                </>
-              )}
-            </h1>
-            <p className="mt-2 opacity-60">Browse the entire {storeName} catalogue.</p>
+
+      <section className="mx-auto max-w-site px-4 pb-20 pt-36 sm:px-6">
+        <nav className="mb-3 text-xs text-[var(--muted)]">
+          <Link href="/" className="-my-2 inline-block py-2 transition hover:text-[var(--fg)]">
+            Home
+          </Link>
+          <span className="px-1.5">/</span>
+          <span className="text-[var(--fg)]">{heading}</span>
+        </nav>
+
+        <h1 className="text-2xl font-black uppercase tracking-wide sm:text-3xl">{heading}</h1>
+        <p className="mt-1 text-sm text-[var(--muted)]">Browse the {storeName} catalogue.</p>
+
+        {/* Style tab row — the reference storefront's rounded, separator-split
+            strip. Driven by tags, which are our equivalent of its style
+            filters; category has its own control in the rail. */}
+        <div className="mt-6 flex justify-center">
+          <div className="max-w-full rounded-2xl bg-[var(--surface-alt)] px-2 sm:px-4">
+            <ScrollableChipRow className="!gap-0">
+              {tagFilters.map((f, i) => (
+                <div key={f} className="flex items-center">
+                  {i > 0 && <span className="h-4 w-px bg-[var(--border)]" aria-hidden />}
+                  <button
+                    onClick={() => setActiveTag(f)}
+                    className={`relative mx-3 whitespace-nowrap py-3.5 text-sm transition-colors sm:mx-4 ${
+                      activeTag === f
+                        ? 'font-semibold text-[var(--fg)]'
+                        : 'text-[var(--muted)] hover:text-[var(--fg)]'
+                    }`}
+                  >
+                    {f}
+                    <span
+                      className={`absolute inset-x-0 bottom-1.5 h-0.5 origin-left bg-[var(--fg)] transition-transform duration-200 ${
+                        activeTag === f ? 'scale-x-100' : 'scale-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              ))}
+            </ScrollableChipRow>
           </div>
-        )}
-
-        <ScrollableChipRow className="mb-6 justify-center !gap-8 pb-2">
-        {categoryFilters.map((c) => (
-          <button
-            key={c}
-            onClick={() => setActiveCategory(c)}
-            className={`relative whitespace-nowrap pb-2 text-base font-bold uppercase tracking-wide transition-colors sm:text-lg ${
-              activeCategory === c ? 'text-[var(--fg)]' : 'opacity-45 hover:opacity-80'
-            }`}
-          >
-            {c}
-            {activeCategory === c && (
-              <motion.span
-                layoutId="category-tab-underline"
-                className="absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple shadow-glow"
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              />
-            )}
-          </button>
-        ))}
-      </ScrollableChipRow>
-
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <ScrollableChipRow className="pb-1">
-          {tagFilters.map((f) => (
-            <button
-              key={f}
-              onClick={() => setActiveTag(f)}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition ${
-                activeTag === f
-                  ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white shadow-glow'
-                  : 'glass opacity-70 hover:opacity-100'
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </ScrollableChipRow>
-
-        <div className="flex gap-2">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search shoes…"
-            className="glass w-full rounded-full px-4 py-2 text-sm outline-none sm:w-48"
-          />
-          <SortFilter sort={sort} onChange={setSort} />
-          <PriceFilter
-            minPrice={minPrice}
-            maxPrice={maxPrice}
-            onApply={(min, max) => {
-              setMinPrice(min);
-              setMaxPrice(max);
-            }}
-          />
-          {activeCategory !== 'All' && availableSizes.length > 0 && (
-            <SizeFilter sizes={availableSizes} activeSize={activeSize} onChange={setActiveSize} />
-          )}
         </div>
-      </div>
 
-      {visible.length === 0 ? (
-        <p className="py-20 text-center opacity-60">
-          {search.trim() || minPrice !== '' || maxPrice !== '' || activeSize !== 'All'
-            ? 'No products match your filters.'
-            : activeCategory !== 'All'
-              ? `No products available in "${activeCategory}" yet. Check back soon!`
-              : 'No products available yet.'}
-        </p>
-      ) : (
-        <>
-          <motion.div
-            layout
-            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          >
-            {shown.map((shoe) => (
-              <ProductCard key={shoe.id} shoe={shoe} />
-            ))}
-          </motion.div>
+        <div className="mt-8 flex gap-10">
+          {/* Desktop filter rail */}
+          <aside className="hidden w-56 flex-shrink-0 lg:block">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search products…"
+              className="mb-6 w-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--fg)]"
+            />
 
-          {visibleCount < visible.length && (
-            <div className="mt-10 flex justify-center">
-              <button
-                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                className="glass rounded-full px-6 py-2.5 text-sm font-semibold transition hover:bg-white/10"
-              >
-                Load More
-              </button>
+            {categoryFilters.length > 2 && (
+              <FilterGroup title="Category">
+                <div className="space-y-1.5">
+                  {categoryFilters.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setActiveCategory(c)}
+                      className={`block w-full text-left text-sm transition ${
+                        activeCategory === c
+                          ? 'font-semibold text-[var(--fg)]'
+                          : 'text-[var(--muted)] hover:text-[var(--fg)]'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </FilterGroup>
+            )}
+
+            {availableSizes.length > 0 && (
+              <FilterGroup title="Size">
+                <div className="flex flex-wrap gap-1.5">
+                  {['All', ...availableSizes].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setActiveSize(s)}
+                      className={`min-w-[34px] border px-2 py-1 text-xs transition ${
+                        activeSize === s
+                          ? 'border-[var(--fg)] bg-[var(--accent)] text-[var(--accent-fg)]'
+                          : 'border-[var(--border)] hover:border-[var(--fg)]'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </FilterGroup>
+            )}
+
+            <FilterGroup title="Price">
+              <div className="flex items-center gap-2">
+                <input
+                  inputMode="numeric"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="Min"
+                  className="w-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs outline-none focus:border-[var(--fg)]"
+                />
+                <span className="text-xs text-[var(--muted)]">–</span>
+                <input
+                  inputMode="numeric"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="Max"
+                  className="w-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs outline-none focus:border-[var(--fg)]"
+                />
+              </div>
+            </FilterGroup>
+          </aside>
+
+          <div className="min-w-0 flex-1">
+            {/* Compact controls for narrow screens, where the rail is hidden. */}
+            <div className="mb-5 flex flex-wrap items-center gap-2 lg:hidden">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search…"
+                className="min-w-[140px] flex-1 border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none"
+              />
+              <PriceFilter
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                onApply={(min, max) => {
+                  setMinPrice(min);
+                  setMaxPrice(max);
+                }}
+              />
+              {availableSizes.length > 0 && (
+                <SizeFilter sizes={availableSizes} activeSize={activeSize} onChange={setActiveSize} />
+              )}
             </div>
-          )}
-        </>
-      )}
+
+
+            <div className="mb-5 flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+              <p className="text-xs text-[var(--muted)]">
+                {visible.length} product{visible.length === 1 ? '' : 's'}
+              </p>
+              <SortFilter sort={sort} onChange={setSort} />
+            </div>
+
+            {visible.length === 0 ? (
+              <p className="py-20 text-center text-sm text-[var(--muted)]">
+                {search.trim() || minPrice !== '' || maxPrice !== '' || activeSize !== 'All'
+                  ? 'No products match your filters.'
+                  : activeCategory !== 'All'
+                    ? `No products available in "${activeCategory}" yet. Check back soon!`
+                    : 'No products available yet.'}
+              </p>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
+                  {shown.map((shoe) => (
+                    <ProductCard key={shoe.id} shoe={shoe} />
+                  ))}
+                </div>
+
+                {visibleCount < visible.length && (
+                  <div className="mt-12 flex justify-center">
+                    <button
+                      onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                      className="btn-glow border border-[var(--fg)] px-8 py-3 text-xs font-semibold uppercase tracking-wide transition hover:bg-[var(--accent)] hover:text-[var(--accent-fg)]"
+                    >
+                      Load More
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
       </section>
     </>
+  );
+}
+
+/** Titled block in the desktop filter rail. */
+function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-6 border-t border-[var(--border)] pt-4">
+      <p className="mb-3 text-[11px] font-bold uppercase tracking-widest">{title}</p>
+      {children}
+    </div>
   );
 }

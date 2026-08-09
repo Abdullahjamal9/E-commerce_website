@@ -39,7 +39,7 @@ export default function SingleSelectDropdown({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between rounded-xl bg-white/5 px-4 py-2.5 text-left outline-none ring-1 ring-white/10 focus:ring-white/30"
+        className="flex w-full items-center justify-between rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 text-left outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
       >
         <span className={!selected ? 'opacity-50' : ''}>{selected || placeholder}</span>
         <svg
@@ -72,7 +72,7 @@ export default function SingleSelectDropdown({
               options.map((name) => (
                 <label
                   key={name}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm transition hover:bg-white/10"
+                  className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm transition hover:bg-[var(--surface-alt)]"
                 >
                   <input
                     type="radio"

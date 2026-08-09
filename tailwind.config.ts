@@ -1,24 +1,37 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: 'class',
   content: ['./src/app/**/*.{ts,tsx}', './src/components/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        neon: { blue: '#3b82ff', purple: '#a855f7', gold: '#f5c518' },
-        ink: { 900: '#05060a', 800: '#0a0c14', 700: '#11141f' }
+        // The old neon trio is now one ink tone, so the many
+        // `from-neon-blue to-neon-purple` gradients across the app resolve
+        // to a flat near-black — the retail-standard button treatment —
+        // without touching every component that references them.
+        neon: { blue: '#151515', purple: '#151515', gold: '#151515' },
+        ink: { 900: '#151515', 800: '#1c1c1c', 700: '#232323' },
+        line: '#dad4d0'
       },
       fontFamily: { sans: ['var(--font-sans)', 'system-ui', 'sans-serif'] },
+      // Page gutter width. Tailwind's max-w-7xl (1280px) left noticeably dead
+      // margins on wide/zoomed-out viewports; 1440 matches the reference
+      // storefront and keeps four product columns comfortably filled.
+      maxWidth: { site: '1440px' },
       boxShadow: {
-        glow: '0 0 40px -10px rgba(59,130,255,0.6)',
-        'glow-purple': '0 0 40px -10px rgba(168,85,247,0.6)'
+        glow: '0 1px 2px rgba(21,21,21,0.06)',
+        'glow-purple': '0 4px 16px -4px rgba(21,21,21,0.12)'
       },
       keyframes: {
         floaty: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },
-        shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } }
+        shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+        fadeIn: { '0%': { opacity: '0', transform: 'translateY(4px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
       },
-      animation: { floaty: 'floaty 6s ease-in-out infinite', shimmer: 'shimmer 3s linear infinite' }
+      animation: {
+        floaty: 'floaty 6s ease-in-out infinite',
+        shimmer: 'shimmer 3s linear infinite',
+        fadeIn: 'fadeIn 0.4s ease'
+      }
     }
   },
   plugins: []

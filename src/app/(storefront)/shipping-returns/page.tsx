@@ -6,7 +6,7 @@ export default async function ShippingReturnsPage() {
   const settings = await getSettings();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pb-20 pt-28 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 pb-20 pt-36 sm:px-6">
       <h1 className="text-3xl font-black sm:text-4xl">
         Shipping <span className="neon-text">& Returns</span>
       </h1>
@@ -52,7 +52,7 @@ export default async function ShippingReturnsPage() {
           <p>
             Reach out to us at{' '}
             {settings.contactPhone ? (
-              <a href={`tel:${settings.contactPhone}`} className="text-neon-blue hover:underline">
+              <a href={`tel:${settings.contactPhone}`} className="inline-block py-1 font-medium underline underline-offset-4 transition hover:opacity-70">
                 {settings.contactPhone}
               </a>
             ) : (
@@ -65,7 +65,7 @@ export default async function ShippingReturnsPage() {
                   href={`https://wa.me/${settings.whatsappNumber}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neon-blue hover:underline"
+                  className="inline-block py-1 font-medium underline underline-offset-4 transition hover:opacity-70"
                 >
                   WhatsApp
                 </a>

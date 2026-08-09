@@ -23,7 +23,7 @@ export default function PasswordInput({
         autoFocus={autoFocus}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl bg-white/5 px-4 py-2.5 pr-11 outline-none ring-1 ring-white/10 focus:ring-white/30"
+        className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 pr-11 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
       />
       <button
         type="button"

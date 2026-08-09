@@ -10,7 +10,7 @@ function Stars({ value }: { value: number }) {
   return (
     <span className="text-amber-400">
       {'★'.repeat(value)}
-      <span className="text-white/20">{'★'.repeat(5 - value)}</span>
+      <span className="text-[var(--border)]">{'★'.repeat(5 - value)}</span>
     </span>
   );
 }
@@ -55,13 +55,13 @@ export default function AdminReviewsTable({ reviews }: { reviews: AdminReview[] 
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search by product, customer, or comment…"
-        className="mb-4 w-full max-w-sm rounded-xl bg-white/5 px-4 py-2 text-sm outline-none ring-1 ring-white/10 focus:ring-white/30"
+        className="mb-4 w-full max-w-sm rounded-xl bg-[var(--surface-alt)] px-4 py-2 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
       />
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-xs uppercase tracking-wide opacity-50">
+            <tr className="border-b border-[var(--border)] text-xs uppercase tracking-wide opacity-50">
               <th className="py-3 pr-4">Product</th>
               <th className="py-3 pr-4">Customer</th>
               <th className="py-3 pr-4">Rating</th>
@@ -72,7 +72,7 @@ export default function AdminReviewsTable({ reviews }: { reviews: AdminReview[] 
           </thead>
           <tbody>
             {filtered.map((r) => (
-              <tr key={r.id} className="border-b border-white/5 align-top">
+              <tr key={r.id} className="border-b border-[var(--border)] align-top">
                 <td className="py-3 pr-4">
                   <Link href={`/product/${r.productSlug}`} target="_blank" className="font-medium hover:underline">
                     {r.productName}

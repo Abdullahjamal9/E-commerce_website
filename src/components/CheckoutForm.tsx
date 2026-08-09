@@ -114,7 +114,7 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-20 pt-28 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 pb-20 pt-36 sm:px-6">
       <h1 className="mb-8 text-center text-3xl font-black sm:text-4xl">
         <span className="neon-text">Checkout</span>
       </h1>
@@ -127,7 +127,7 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
               required
               value={form.customerName}
               onChange={(e) => setForm({ ...form, customerName: e.target.value })}
-              className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
             />
           </div>
           <div>
@@ -138,7 +138,7 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="you@example.com"
-              className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
             />
           </div>
           <div>
@@ -148,7 +148,7 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
               placeholder="03XXXXXXXXX"
-              className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
             />
           </div>
           <div>
@@ -157,7 +157,7 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
               required
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
-              className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
             />
           </div>
           <div>
@@ -166,7 +166,7 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
               required
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
-              className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
             />
           </div>
 
@@ -175,7 +175,7 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
             <div className="space-y-2">
               {settings.codEnabled && (
                 <label
-                  className={`glass flex cursor-pointer items-center gap-3 rounded-xl p-3 ring-1 transition ${method === 'COD' ? 'ring-white/40' : 'ring-transparent'}`}
+                  className={`glass flex cursor-pointer items-center gap-3 rounded-xl p-3 ring-1 transition ${method === 'COD' ? 'ring-[var(--fg)]' : 'ring-transparent'}`}
                 >
                   <input
                     type="radio"
@@ -190,7 +190,7 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
               )}
               {settings.bankTransferEnabled && (
                 <label
-                  className={`glass flex cursor-pointer items-center gap-3 rounded-xl p-3 ring-1 transition ${method === 'BANK_TRANSFER' ? 'ring-white/40' : 'ring-transparent'}`}
+                  className={`glass flex cursor-pointer items-center gap-3 rounded-xl p-3 ring-1 transition ${method === 'BANK_TRANSFER' ? 'ring-[var(--fg)]' : 'ring-transparent'}`}
                 >
                   <input
                     type="radio"
@@ -228,7 +228,7 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
                 value={transactionRef}
                 onChange={(e) => setTransactionRef(e.target.value)}
                 placeholder="Transaction ID / reference (required)"
-                className="mt-2 w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+                className="mt-2 w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
               />
 
               <div className="pt-2">
@@ -291,7 +291,7 @@ export default function CheckoutForm({ settings }: { settings: PublicSettings })
               </div>
             ))}
           </div>
-          <div className="flex justify-between border-t border-white/10 pt-4 text-lg font-bold">
+          <div className="flex justify-between border-t border-[var(--border)] pt-4 text-lg font-bold">
             <span>Total</span>
             <span className="neon-text">{formatPrice(total)}</span>
           </div>

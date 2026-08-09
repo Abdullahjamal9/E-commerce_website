@@ -87,7 +87,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
             </div>
           ))}
         </div>
-        <div className="mt-4 flex justify-between border-t border-white/10 pt-4 text-lg font-bold">
+        <div className="mt-4 flex justify-between border-t border-[var(--border)] pt-4 text-lg font-bold">
           <span>Total</span>
           <span className="neon-text">{formatPrice(order.total)}</span>
         </div>

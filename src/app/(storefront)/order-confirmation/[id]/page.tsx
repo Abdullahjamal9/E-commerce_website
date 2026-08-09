@@ -34,7 +34,7 @@ export default async function OrderConfirmationPage({ params }: { params: { id: 
             <span className="font-semibold">{formatPrice(item.price * item.qty)}</span>
           </div>
         ))}
-        <div className="flex justify-between border-t border-white/10 pt-3 text-lg font-bold">
+        <div className="flex justify-between border-t border-[var(--border)] pt-3 text-lg font-bold">
           <span>Total</span>
           <span className="neon-text">{formatPrice(order.total)}</span>
         </div>
@@ -68,7 +68,7 @@ export default async function OrderConfirmationPage({ params }: { params: { id: 
             href={`https://wa.me/${settings.whatsappNumber}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="glass rounded-full px-8 py-3 font-semibold transition hover:bg-white/10"
+            className="glass rounded-full px-8 py-3 font-semibold transition hover:bg-[var(--surface-alt)]"
           >
             💬 Message us on WhatsApp
           </a>

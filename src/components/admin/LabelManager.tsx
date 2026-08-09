@@ -78,7 +78,7 @@ export default function LabelManager({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+          className="flex-1 rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
         />
         <button
           type="submit"

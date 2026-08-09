@@ -86,7 +86,7 @@ export default function CartDrawer() {
               })}
             </div>
 
-            <div className="mt-4 border-t border-white/10 pt-4">
+            <div className="mt-4 border-t border-[var(--border)] pt-4">
               <div className="mb-4 flex justify-between text-lg font-bold">
                 <span>Total</span>
                 <span className="neon-text">{formatPrice(total)}</span>

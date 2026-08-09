@@ -41,12 +41,12 @@ export default function AdminProductsFilters({ categoryOptions }: { categoryOpti
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search products…"
-        className="min-w-[180px] flex-1 rounded-xl bg-white/5 px-4 py-2 text-sm outline-none ring-1 ring-white/10 focus:ring-white/30"
+        className="min-w-[180px] flex-1 rounded-xl bg-[var(--surface-alt)] px-4 py-2 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
       />
       <select
         value={category}
         onChange={(e) => setParam('category', e.target.value)}
-        className="rounded-xl bg-white/5 px-3 py-2 text-sm outline-none ring-1 ring-white/10 focus:ring-white/30"
+        className="rounded-xl bg-[var(--surface-alt)] px-3 py-2 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
       >
         <option value="">All categories</option>
         {categoryOptions.map((c) => (
@@ -58,7 +58,7 @@ export default function AdminProductsFilters({ categoryOptions }: { categoryOpti
       <select
         value={status}
         onChange={(e) => setParam('status', e.target.value)}
-        className="rounded-xl bg-white/5 px-3 py-2 text-sm outline-none ring-1 ring-white/10 focus:ring-white/30"
+        className="rounded-xl bg-[var(--surface-alt)] px-3 py-2 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
       >
         <option value="">All statuses</option>
         <option value="active">Active</option>
@@ -67,7 +67,7 @@ export default function AdminProductsFilters({ categoryOptions }: { categoryOpti
       <select
         value={stock}
         onChange={(e) => setParam('stock', e.target.value)}
-        className="rounded-xl bg-white/5 px-3 py-2 text-sm outline-none ring-1 ring-white/10 focus:ring-white/30"
+        className="rounded-xl bg-[var(--surface-alt)] px-3 py-2 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
       >
         <option value="">All stock</option>
         <option value="in">In stock</option>

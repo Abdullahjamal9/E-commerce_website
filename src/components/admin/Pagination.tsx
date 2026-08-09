@@ -25,7 +25,7 @@ export default function Pagination({
   };
 
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
       <p className="text-xs opacity-60">
         Page {page} of {totalPages}
       </p>
@@ -52,7 +52,7 @@ export default function Pagination({
             value={goTo}
             onChange={(e) => setGoTo(e.target.value)}
             placeholder="Go to"
-            className="w-20 rounded-full bg-white/5 px-3 py-1.5 text-xs outline-none ring-1 ring-white/10 focus:ring-white/30"
+            className="w-20 rounded-full bg-[var(--surface-alt)] px-3 py-1.5 text-xs outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
           />
           <button
             type="submit"

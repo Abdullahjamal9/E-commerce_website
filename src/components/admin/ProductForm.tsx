@@ -186,7 +186,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+            className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
           />
         </div>
         <div>
@@ -195,7 +195,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
             required
             value={tagline}
             onChange={(e) => setTagline(e.target.value)}
-            className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+            className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
           />
         </div>
       </div>
@@ -207,7 +207,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+          className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
         />
       </div>
 
@@ -220,7 +220,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
             min={1}
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+            className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
           />
         </div>
         <div>
@@ -231,7 +231,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
             max={90}
             value={discountPercent}
             onChange={(e) => setDiscountPercent(e.target.value)}
-            className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+            className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
           />
           {Number(discountPercent) > 0 && (
             <p className="mt-1 text-xs opacity-50">
@@ -247,7 +247,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
             min={0}
             value={stock}
             onChange={(e) => setStock(e.target.value)}
-            className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+            className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
           />
           {Number(stock) <= 0 && stock !== '' && (
             <p className="mt-1 text-xs text-red-400">
@@ -258,7 +258,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
       </div>
 
       <div>
-        <label className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3 ring-1 ring-white/10">
+        <label className="flex items-center gap-3 rounded-xl bg-[var(--surface-alt)] px-4 py-3 ring-1 ring-[var(--border)]">
           <input
             type="checkbox"
             checked={isActive}
@@ -279,7 +279,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
         <div>
           <label className="mb-1 block text-sm font-medium opacity-80">Category</label>
           {categoryOptions.length === 0 ? (
-            <p className="rounded-xl bg-white/5 px-4 py-2.5 text-sm opacity-60">
+            <p className="rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 text-sm opacity-60">
               No categories yet — add one from the Categories page first.
             </p>
           ) : (
@@ -318,7 +318,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
                 placeholder="Color name"
                 value={c.name}
                 onChange={(e) => updateColor(i, 'name', e.target.value)}
-                className="flex-1 rounded-xl bg-white/5 px-4 py-2 text-sm outline-none ring-1 ring-white/10 focus:ring-white/30"
+                className="flex-1 rounded-xl bg-[var(--surface-alt)] px-4 py-2 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
               />
               <button
                 type="button"
@@ -333,7 +333,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
         <button
           type="button"
           onClick={addColor}
-          className="mt-2 text-sm font-medium text-neon-blue hover:underline"
+          className="mt-2 py-1 text-sm font-medium underline underline-offset-4 transition hover:opacity-70"
         >
           + Add color
         </button>
@@ -348,7 +348,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
           value={sizesText}
           onChange={(e) => setSizesText(e.target.value)}
           placeholder="e.g. 40, 41, 42 or S, M, L, XL"
-          className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+          className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
         />
       </div>
 

@@ -27,6 +27,8 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
     whatsappNumber: settings.whatsappNumber,
     contactEmail: settings.contactEmail,
     address: settings.address,
+    facebookUrl: settings.facebookUrl,
+    instagramUrl: settings.instagramUrl,
     saleEnabled: settings.saleEnabled,
     saleEndsAt: toDatetimeLocal(settings.saleEndsAt)
   });
@@ -38,7 +40,7 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
       <input
         value={form[key] as string}
         onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-        className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+        className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
       />
     </div>
   );
@@ -110,7 +112,7 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
             type="datetime-local"
             value={form.saleEndsAt}
             onChange={(e) => setForm({ ...form, saleEndsAt: e.target.value })}
-            className="w-full rounded-xl bg-white/5 px-4 py-2.5 outline-none ring-1 ring-white/10 focus:ring-white/30"
+            className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
           />
         </div>
         <p className="mt-2 text-xs opacity-50">
@@ -128,6 +130,8 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
         {field('whatsappNumber', 'WhatsApp Number (with country code, no +)')}
         {field('contactEmail', 'Contact Email')}
         {field('address', 'Address')}
+        {field('facebookUrl', 'Facebook Page URL')}
+        {field('instagramUrl', 'Instagram Profile URL')}
       </div>
 
       <button
