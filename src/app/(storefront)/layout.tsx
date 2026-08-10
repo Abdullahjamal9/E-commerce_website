@@ -15,10 +15,12 @@ export default async function StorefrontLayout({ children }: { children: React.R
   const [settings, categories, tags] = await Promise.all([getSettings(), getCategories(), getTags()]);
   const navItems = buildNav(categories, tags, settings.saleEnabled);
 
+  // One glyph per line, leading the text — enough to catch the eye in a
+  // ticker without turning the strip into decoration.
   const announcements = [
-    settings.saleEnabled ? 'Mid-season sale — up to 50% off' : null,
-    'Free delivery on orders over Rs. 3,000',
-    'Cash on Delivery available nationwide'
+    settings.saleEnabled ? '🏷️ Mid-season sale — up to 50% off' : null,
+    '🚚 Free delivery on orders over Rs. 3,000',
+    '💵 Cash on Delivery available nationwide'
   ].filter((m): m is string => Boolean(m));
 
   return (
@@ -27,7 +29,7 @@ export default async function StorefrontLayout({ children }: { children: React.R
         saleEndsAt={settings.saleEnabled && settings.saleEndsAt ? settings.saleEndsAt.toISOString() : null}
       />
       <AnnouncementBar messages={announcements} />
-      <Navbar storeName={settings.storeName} navItems={navItems} saleEnabled={settings.saleEnabled} />
+      <Navbar storeName={settings.storeName} navItems={navItems} />
       <main>
         <PageTransition>{children}</PageTransition>
       </main>

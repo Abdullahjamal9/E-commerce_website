@@ -82,6 +82,36 @@ select option {
   letter-spacing: -0.01em;
 }
 
+/* While the header is see-through it takes its colour from the artwork behind
+   it, so descendants that pin themselves to --fg have to defer to it. */
+.header-adaptive .neon-text {
+  color: inherit;
+}
+
+/* Announcement headline. The track carries two identical copies of the message
+   list, so travelling exactly half its width lands back where it started and
+   the loop has no visible seam. */
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.ticker-track {
+  animation: ticker-scroll 25s linear infinite;
+  will-change: transform;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+}
+
 .btn-glow {
   transition: opacity 0.2s ease, background-color 0.2s ease;
 }

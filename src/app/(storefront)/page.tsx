@@ -40,8 +40,13 @@ export default async function HomePage() {
 
   return (
     <>
-      {settings.saleEnabled && <SaleBanner />}
-      <HeroSlider slides={slides} />
+      {/* Below lg the header is a plain fixed bar sitting on the page, so the
+          first block clears its 64px height. From lg up it floats and the
+          artwork runs underneath it full-bleed. */}
+      <div className="pt-16 lg:pt-0">
+        {settings.saleEnabled && <SaleBanner />}
+        <HeroSlider slides={slides} />
+      </div>
       <CategoryTiles tiles={tiles} />
       <ProductRail title="Trending" accent="Now" href="/shop" products={featured.slice(0, 8)} />
       <ProductRail title="Recommended" accent="For You" href="/shop" products={picks} />
