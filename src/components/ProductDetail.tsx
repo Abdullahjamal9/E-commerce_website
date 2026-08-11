@@ -112,8 +112,18 @@ export default function ProductDetail({
   // Redirect wheel scrolling into the pinned buy panel — regardless of
   // where the cursor is — while it's stuck in the viewport and still has
   // room to scroll; once exhausted, hand scrolling back to the page.
+  //
+  // A short description barely overflows the panel at all, so relying only
+  // on real content height made the hold last a single wheel tick — easy to
+  // miss entirely. MIN_LOCK_PX is a floor on how much wheel input the panel
+  // absorbs before releasing to the page, independent of how much the
+  // content actually needs to scroll, so the pause is felt on every product.
   useEffect(() => {
     const STICKY_TOP = 112; // px, matches lg:top-28
+    const MIN_LOCK_PX = 260;
+    let lockConsumed = 0;
+    // 0 = no direction committed yet, 1 = holding for a downward pass, -1 = upward.
+    let lockDir = 0;
 
     const onWheel = (e: WheelEvent) => {
       const panel = buyPanelRef.current;
@@ -126,14 +136,31 @@ export default function ProductDetail({
       // the pointer happened to be over it. Treat "pinned at or above the
       // sticky line, still on screen" as the trigger instead.
       const pinned = rect.top <= STICKY_TOP + 4 && rect.bottom > 0;
-      if (!pinned) return;
+      if (!pinned) {
+        lockDir = 0;
+        lockConsumed = 0;
+        return;
+      }
+
+      // A sticky panel typically stays pinned for its entire scroll pass, so
+      // "still pinned" alone isn't enough to know a hold is still active —
+      // reversing direction mid-pinned (scroll down, then immediately back
+      // up) should get its own fresh budget rather than inheriting whatever
+      // was left over (or already spent) from the other direction.
+      const dir = e.deltaY > 0 ? 1 : -1;
+      if (dir !== lockDir) {
+        lockDir = dir;
+        lockConsumed = 0;
+      }
 
       const canScrollDown = panel.scrollTop + panel.clientHeight < panel.scrollHeight - 1;
       const canScrollUp = panel.scrollTop > 0;
+      const holding = lockConsumed < MIN_LOCK_PX;
 
-      if ((e.deltaY > 0 && canScrollDown) || (e.deltaY < 0 && canScrollUp)) {
+      if ((e.deltaY > 0 && (canScrollDown || holding)) || (e.deltaY < 0 && (canScrollUp || holding))) {
         e.preventDefault();
         panel.scrollTop += e.deltaY;
+        lockConsumed += Math.abs(e.deltaY);
       }
     };
 
