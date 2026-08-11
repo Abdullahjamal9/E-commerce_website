@@ -61,15 +61,22 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
                 </Link>
               </div>
 
-              <div className="order-1 w-full max-w-md md:order-2 md:h-full md:w-1/2 md:pr-6 lg:pr-10 3xl:pr-20 4xl:pr-28">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={cloudinaryResize(slide.image, 900)}
-                  alt={slide.title}
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                  fetchPriority={i === 0 ? 'high' : undefined}
-                  className="mx-auto h-auto w-full max-w-[280px] object-contain md:h-full md:w-auto md:max-w-full"
-                />
+              <div className="order-1 flex w-full max-w-md items-center justify-center md:order-2 md:h-full md:w-1/2 md:pr-6 lg:pr-10 3xl:pr-20 4xl:pr-28">
+                {/* Fixed aspect-square box + object-cover, not object-contain
+                    — slide photos come from different products at different
+                    native aspect ratios, and contain let each one sit at its
+                    own scale (some filling the frame, some small and padded),
+                    which read as inconsistent slide sizes as you paged through. */}
+                <div className="aspect-square w-full max-w-[260px] overflow-hidden sm:max-w-[320px] md:max-h-full md:max-w-[480px]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={cloudinaryResize(slide.image, 900)}
+                    alt={slide.title}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={i === 0 ? 'high' : undefined}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
               </div>
             </div>
           </div>
