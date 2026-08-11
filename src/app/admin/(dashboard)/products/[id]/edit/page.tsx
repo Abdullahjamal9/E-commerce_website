@@ -22,11 +22,12 @@ export default async function EditProductPage({ params }: { params: { id: string
   return (
     <div>
       <h1 className="mb-6 text-2xl font-black sm:text-3xl">Edit Product</h1>
-      {/* TEMP diagnostic — remove after confirming live staleness cause. */}
-      <p className="mb-4 text-xs text-red-500">
-        DEBUG rendered at {new Date().toISOString()} — discountPercent={product.discountPercent}
-      </p>
       <ProductForm
+        // ProductForm seeds every field from `initial` via useState, which only
+        // runs on mount — without a key tied to this exact fetch, revisiting the
+        // same product's edit page reuses the old component instance and keeps
+        // showing whatever was previously typed/loaded instead of the fresh row.
+        key={`${product.id}-${Date.now()}`}
         productId={product.id}
         initial={product}
         categoryOptions={categoryOptions}
