@@ -63,14 +63,19 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
             <HeartIcon filled={wished} size={18} />
           </button>
 
-          <div className="aspect-square p-4">
+          <div className="aspect-square">
+            {/* object-cover, not object-contain — product photos come in a mix
+                of aspect ratios, and contain left each one at its own natural
+                scale inside the box (some filling it, some tiny and padded),
+                which read as inconsistent card sizes. Cover fills the same
+                fixed box edge-to-edge for every card, cropping as needed. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={cloudinaryResize(shoe.image, 600)}
               alt={shoe.name}
               loading="lazy"
               decoding="async"
-              className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-105 ${outOfStock ? 'opacity-60 grayscale' : ''}`}
+              className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${outOfStock ? 'opacity-60 grayscale' : ''}`}
             />
           </div>
         </div>
