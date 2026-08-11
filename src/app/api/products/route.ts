@@ -19,7 +19,11 @@ const productSchema = z.object({
   sizes: z.array(z.string().min(1)).min(1),
   images: z.array(z.string()).min(1),
   spinImages: z.array(z.string()).default([]),
-  isActive: z.boolean().default(true)
+  isActive: z.boolean().default(true),
+  tileTag: z.string().nullable().default(null)
+}).refine((v) => !v.tileTag || v.tags.includes(v.tileTag), {
+  message: 'Homepage tile tag must be one of this product\'s own tags',
+  path: ['tileTag']
 });
 
 async function uniqueSlug(name: string) {

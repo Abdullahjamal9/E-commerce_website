@@ -41,6 +41,10 @@ model Product {
   images      Json
   spinImages  Json     @default("[]")
   featuredAt  DateTime?
+  /** When set to one of this product's own tags, its photo is used for that
+   *  tag's homepage promo tile instead of whichever matching product the
+   *  auto-pick would otherwise land on. */
+  tileTag     String?
   isActive    Boolean  @default(true)
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())

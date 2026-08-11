@@ -32,7 +32,9 @@ export default async function HomePage() {
 
   const tiles: Tile[] = TILE_TAG_PRIORITY.filter((t) => tags.includes(t))
     .map((tag) => {
-      const match = all.find((p) => p.tags.includes(tag));
+      // An admin-picked product (tileTag) wins over whichever product happens
+      // to match the tag first.
+      const match = all.find((p) => p.tileTag === tag) ?? all.find((p) => p.tags.includes(tag));
       return match ? { label: tag, href: `/shop?tag=${encodeURIComponent(tag)}`, image: match.image } : null;
     })
     .filter((t): t is Tile => t !== null)

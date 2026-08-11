@@ -16,6 +16,8 @@ interface Props {
   tagOptions: Tag[];
 }
 
+const AUTO_TILE_LABEL = 'Auto (first matching product)';
+
 export default function ProductForm({ productId, initial, categoryOptions, tagOptions }: Props) {
   const router = useRouter();
   const notify = useToast((s) => s.show);
@@ -34,6 +36,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
   const [spinImages, setSpinImages] = useState<string[]>(initial?.spinImages ?? []);
   const [isActive, setIsActive] = useState(initial?.isActive ?? true);
+  const [tileTag, setTileTag] = useState(initial?.tileTag ?? '');
   const spinFileInput = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingSpin, setUploadingSpin] = useState(false);
@@ -154,7 +157,8 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
       sizes,
       images,
       spinImages,
-      isActive
+      isActive,
+      tileTag: tags.includes(tileTag) ? tileTag : null
     };
 
     const res = await fetch(productId ? `/api/products/${productId}` : '/api/products', {
@@ -301,6 +305,21 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
             emptyMessage="No tags yet — add one from the Tags page first."
           />
         </div>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium opacity-80">Homepage tile image</label>
+        <SingleSelectDropdown
+          options={[AUTO_TILE_LABEL, ...tags]}
+          selected={tileTag || AUTO_TILE_LABEL}
+          onChange={(v) => setTileTag(v === AUTO_TILE_LABEL ? '' : v)}
+          placeholder={AUTO_TILE_LABEL}
+          emptyMessage="Add a tag above first."
+        />
+        <p className="mt-1 text-xs opacity-50">
+          The homepage shows one promo tile per tag, using whichever matching product it finds first.
+          Pick a tag here to make this product&apos;s photo the one used for that tile instead.
+        </p>
       </div>
 
       <div>

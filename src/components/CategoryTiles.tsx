@@ -29,15 +29,18 @@ export default function CategoryTiles({ tiles }: { tiles: Tile[] }) {
             href={tile.href}
             className="group relative block overflow-hidden border border-[var(--border)] bg-[var(--surface-alt)]"
           >
-            {/* Square frame with tight padding — a 4:3 box with p-8 left the
-                photo tiny once these went two-up on phones. */}
-            <div className="aspect-square p-3 sm:p-6">
+            {/* object-cover, not object-contain — otherwise each tile's photo
+                sits at its own natural scale inside the fixed square box, and
+                tiles with different source aspect ratios read as inconsistent
+                sizes even though the boxes are identical (same fix as the
+                product grid cards). */}
+            <div className="aspect-square">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={cloudinaryResize(tile.image, 600)}
                 alt={tile.label}
                 loading="lazy"
-                className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </div>
             <div className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--surface)] px-5 py-4">

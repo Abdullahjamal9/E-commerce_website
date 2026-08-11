@@ -33,6 +33,9 @@ export interface Shoe {
   description: string;
   /** Set when an admin curates this product onto the homepage; null otherwise. */
   featuredAt: Date | null;
+  /** When set to one of this product's own tags, its photo is used for that
+   *  tag's homepage promo tile instead of the auto-picked match. */
+  tileTag: string | null;
   /** Admin can deactivate a product to hide it from the storefront without deleting it. */
   isActive: boolean;
 }

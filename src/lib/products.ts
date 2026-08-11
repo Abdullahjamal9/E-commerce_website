@@ -17,6 +17,7 @@ type ProductRow = {
   images: unknown;
   spinImages?: unknown;
   featuredAt?: Date | null;
+  tileTag?: string | null;
   isActive: boolean;
   sortOrder: number;
 };
@@ -40,6 +41,7 @@ function mapProduct(p: ProductRow): Shoe {
     image: images[0] ?? '',
     spinImages: (p.spinImages as string[]) ?? [],
     featuredAt: p.featuredAt ?? null,
+    tileTag: p.tileTag ?? null,
     isActive: p.isActive
   };
 }
