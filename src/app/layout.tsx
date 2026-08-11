@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Zen_Maru_Gothic } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import Toaster from '@/components/Toaster';
 import { getSettings } from '@/lib/settings';
@@ -8,9 +8,16 @@ import { getSettings } from '@/lib/settings';
 // defined it — an undefined var invalidates the whole font-family
 // declaration, so every page was falling back to the browser's default
 // serif. This both defines it and matches the reference storefront's face.
-const sans = Zen_Maru_Gothic({
-  subsets: ['latin'],
-  weight: ['400', '500', '700', '900'],
+// Self-hosted (latin subset, pulled from Google Fonts' own CDN files) instead
+// of next/font/google — that fetches at dev/build time over the network,
+// which hangs indefinitely behind a firewall/proxy that blocks Google Fonts.
+const sans = localFont({
+  src: [
+    { path: '../assets/fonts/zen-maru-gothic-400.woff2', weight: '400', style: 'normal' },
+    { path: '../assets/fonts/zen-maru-gothic-500.woff2', weight: '500', style: 'normal' },
+    { path: '../assets/fonts/zen-maru-gothic-700.woff2', weight: '700', style: 'normal' },
+    { path: '../assets/fonts/zen-maru-gothic-900.woff2', weight: '900', style: 'normal' }
+  ],
   variable: '--font-sans',
   display: 'swap'
 });

@@ -55,6 +55,33 @@ select option {
   border: 1px solid var(--border);
 }
 
+/* Dual-handle price slider: two overlapping <input type="range"> share one
+   track with pointer-events disabled on the input itself (so clicks pass
+   through to whichever handle is on top) but re-enabled on the thumb alone. */
+.range-thumb::-webkit-slider-thumb {
+  pointer-events: auto;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--fg);
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--border);
+  cursor: pointer;
+}
+
+.range-thumb::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--fg);
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--border);
+  cursor: pointer;
+}
+
 /* Continuous light sweep across a dark banner (sale countdown bar). The
    highlight band sits in the middle of a full-width gradient so sliding the
    whole thing from -100% to 100% carries it fully off-screen on each side

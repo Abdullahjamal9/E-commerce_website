@@ -12,6 +12,13 @@ type Sort = 'newest' | 'price-asc' | 'price-desc';
 const TEXT_SIZE_ORDER = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL', 'XXXL'];
 const PAGE_SIZE = 24;
 
+/** How many cards were showing for a given category/tag/audience combo —
+ * remembered across a visit to a product page and back, so "Load more"
+ * doesn't collapse back to one page every time the back button is used. */
+function visibleCountKey(category: string, tag: string, audience?: string) {
+  return `shop-visible:${audience ?? ''}|${category}|${tag}`;
+}
+
 /** Numeric sizes sort low-to-high; text sizes (S, M, L…) follow a known
  * size order; anything else falls back to alphabetical. */
 function compareSizes(a: string, b: string) {
@@ -29,113 +36,6 @@ function compareSizes(a: string, b: string) {
   if (idxA !== -1) return -1;
   if (idxB !== -1) return 1;
   return a.localeCompare(b);
-}
-
-function PriceFilter({
-  minPrice,
-  maxPrice,
-  onApply
-}: {
-  minPrice: string;
-  maxPrice: string;
-  onApply: (min: string, max: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [min, setMin] = useState(minPrice);
-  const [max, setMax] = useState(maxPrice);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const active = minPrice !== '' || maxPrice !== '';
-
-  useEffect(() => {
-    const onClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, []);
-
-  const apply = () => {
-    onApply(min, max);
-    setOpen(false);
-  };
-
-  const clear = () => {
-    setMin('');
-    setMax('');
-    onApply('', '');
-    setOpen(false);
-  };
-
-  return (
-    <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-label="Filter by price"
-        className={`glass relative flex h-full items-center gap-1.5 rounded-full px-3 py-2 text-sm transition ${
-          active ? 'ring-1 ring-neon-blue' : ''
-        }`}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="4" y1="6" x2="20" y2="6" />
-          <line x1="7" y1="12" x2="17" y2="12" />
-          <line x1="10" y1="18" x2="14" y2="18" />
-        </svg>
-        {active && <span className="h-1.5 w-1.5 rounded-full bg-neon-blue" />}
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.15 }}
-            className="glass absolute right-0 top-full z-20 mt-2 w-64 rounded-xl p-4 shadow-glow"
-          >
-            <p className="mb-3 text-sm font-medium opacity-80">Price range</p>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                min={0}
-                value={min}
-                onChange={(e) => setMin(e.target.value)}
-                placeholder="Min"
-                className="w-full rounded-lg bg-[var(--surface-alt)] px-3 py-2 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
-              />
-              <span className="opacity-50">–</span>
-              <input
-                type="number"
-                min={0}
-                value={max}
-                onChange={(e) => setMax(e.target.value)}
-                placeholder="Max"
-                className="w-full rounded-lg bg-[var(--surface-alt)] px-3 py-2 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
-              />
-            </div>
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                onClick={apply}
-                className="btn-glow flex-1 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple py-2 text-sm font-semibold text-white"
-              >
-                Apply
-              </button>
-              <button
-                type="button"
-                onClick={clear}
-                className="rounded-full px-4 py-2 text-sm opacity-60 transition hover:opacity-100"
-              >
-                Clear
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
 }
 
 const SORT_OPTIONS: { value: Sort; label: string }[] = [
@@ -169,6 +69,7 @@ function SortFilter({ sort, onChange }: { sort: Sort; onChange: (sort: Sort) => 
           active ? 'ring-1 ring-neon-blue' : ''
         }`}
       >
+        <span>Sort by</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="4" y1="6" x2="20" y2="6" />
           <line x1="4" y1="12" x2="14" y2="12" />
@@ -213,95 +114,405 @@ function SortFilter({ sort, onChange }: { sort: Sort; onChange: (sort: Sort) => 
   );
 }
 
-function SizeFilter({
-  sizes,
-  activeSize,
+/** Two-thumb slider sharing one track — plain overlapping range inputs, the
+ *  standard way to build a dual-handle slider without a component library. */
+function PriceRangeSlider({
+  bounds,
+  min,
+  max,
   onChange
 }: {
-  sizes: string[];
-  activeSize: string | 'All';
-  onChange: (size: string | 'All') => void;
+  bounds: [number, number];
+  min: number;
+  max: number;
+  onChange: (min: number, max: number) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const active = activeSize !== 'All';
+  const [lo, hi] = bounds;
+  const span = Math.max(hi - lo, 1);
+  const pctMin = ((min - lo) / span) * 100;
+  const pctMax = ((max - lo) / span) * 100;
+
+  // Free-typed text so a user can clear the box and type a fresh number
+  // without the value snapping back to a clamped one on every keystroke;
+  // it's only clamped into the slider range once they're done editing.
+  const [minText, setMinText] = useState(String(min));
+  const [maxText, setMaxText] = useState(String(max));
+
+  // Marks which box last drove a change, so the sync-back effects below
+  // don't immediately overwrite an emptied box with its reset numeric value
+  // (e.g. "0") — only a slider drag should push a value into the text box.
+  const lastEditRef = useRef<'min' | 'max' | null>(null);
 
   useEffect(() => {
-    const onClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, []);
+    if (lastEditRef.current === 'min') {
+      lastEditRef.current = null;
+      return;
+    }
+    setMinText(String(min));
+  }, [min]);
+
+  useEffect(() => {
+    if (lastEditRef.current === 'max') {
+      lastEditRef.current = null;
+      return;
+    }
+    setMaxText(String(max));
+  }, [max]);
+
+  // Only clamped to the overall bounds, not against the opposite handle —
+  // so the slider can reposition live on every keystroke instead of only
+  // once the box loses focus. An emptied box resets its handle back to the
+  // default end of the range rather than freezing at the last value.
+  const commitMin = (raw: string) => {
+    lastEditRef.current = 'min';
+    if (raw === '') {
+      onChange(lo, max);
+      return;
+    }
+    const n = Number(raw);
+    onChange(Math.min(Math.max(n, lo), hi), max);
+  };
+  const commitMax = (raw: string) => {
+    lastEditRef.current = 'max';
+    if (raw === '') {
+      onChange(min, hi);
+      return;
+    }
+    const n = Number(raw);
+    onChange(min, Math.max(Math.min(n, hi), lo));
+  };
 
   return (
-    <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-label="Filter by size"
-        className={`glass relative flex h-full items-center gap-1.5 rounded-full px-3 py-2 text-sm transition ${
-          active ? 'ring-1 ring-neon-blue' : ''
-        }`}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="8" width="18" height="8" rx="1" />
-          <line x1="7" y1="8" x2="7" y2="11" />
-          <line x1="11" y1="8" x2="11" y2="11" />
-          <line x1="15" y1="8" x2="15" y2="11" />
-        </svg>
-        {active && <span className="h-1.5 w-1.5 rounded-full bg-neon-blue" />}
-      </button>
+    <div>
+      <div className="mb-3 flex items-center justify-between text-sm font-medium">
+        <span>Rs. {min.toLocaleString()}</span>
+        <span>Rs. {max.toLocaleString()}</span>
+      </div>
+      <div className="relative h-6">
+        <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-[var(--surface-alt)]" />
+        <div
+          className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-[var(--fg)]"
+          style={{ left: `${pctMin}%`, right: `${100 - pctMax}%` }}
+        />
+        <input
+          type="range"
+          min={lo}
+          max={hi}
+          value={min}
+          onChange={(e) => onChange(Math.min(Number(e.target.value), max), max)}
+          className="range-thumb pointer-events-none absolute inset-x-0 top-1/2 h-1 w-full -translate-y-1/2 appearance-none bg-transparent"
+          style={{ zIndex: min > hi - span * 0.1 ? 5 : 3 }}
+        />
+        <input
+          type="range"
+          min={lo}
+          max={hi}
+          value={max}
+          onChange={(e) => onChange(min, Math.max(Number(e.target.value), min))}
+          className="range-thumb pointer-events-none absolute inset-x-0 top-1/2 h-1 w-full -translate-y-1/2 appearance-none bg-transparent"
+          style={{ zIndex: 4 }}
+        />
+      </div>
 
-      <AnimatePresence>
-        {open && (
+      <div className="mt-4 flex items-center gap-2">
+        <input
+          inputMode="numeric"
+          value={minText}
+          onChange={(e) => {
+            const digits = e.target.value.replace(/[^0-9]/g, '');
+            setMinText(digits);
+            commitMin(digits);
+          }}
+          onBlur={(e) => commitMin(e.target.value)}
+          placeholder="Min"
+          className="w-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs outline-none focus:border-[var(--fg)]"
+        />
+        <span className="text-xs text-[var(--muted)]">–</span>
+        <input
+          inputMode="numeric"
+          value={maxText}
+          onChange={(e) => {
+            const digits = e.target.value.replace(/[^0-9]/g, '');
+            setMaxText(digits);
+            commitMax(digits);
+          }}
+          onBlur={(e) => commitMax(e.target.value)}
+          placeholder="Max"
+          className="w-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs outline-none focus:border-[var(--fg)]"
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Titled block inside the filter panel. */
+function PanelSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="border-b border-[var(--border)] py-5 first:pt-0 last:border-b-0">
+      <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-[var(--muted)]">{title}</p>
+      {children}
+    </div>
+  );
+}
+
+function ChipButton({
+  active,
+  onClick,
+  children
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-3.5 py-1.5 text-sm transition ${
+        active
+          ? 'border-[var(--fg)] bg-[var(--fg)] text-[var(--bg)]'
+          : 'border-[var(--border)] text-[var(--fg)] hover:border-[var(--fg)]'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Square box for a single size value — distinct from the pill-shaped style
+ *  chips so sizes read as a grid of options rather than another tag. */
+function SizeBox({
+  active,
+  onClick,
+  children
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex h-10 min-w-[40px] items-center justify-center border px-2 text-sm transition ${
+        active
+          ? 'border-[var(--fg)] bg-[var(--fg)] text-[var(--bg)]'
+          : 'border-[var(--border)] text-[var(--fg)] hover:border-[var(--fg)]'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/**
+ * Full filter drawer — slides in from the left. Full screen on mobile/tablet,
+ * a 30%-width side panel on desktop. Edits are held in local draft state so
+ * Cancel discards them and Apply commits them all at once, matching a
+ * standard commerce filter tray.
+ */
+function FilterPanel({
+  open,
+  onClose,
+  categoryFilters,
+  tagFilters,
+  productsInScope,
+  priceBounds,
+  category,
+  tag,
+  size,
+  search,
+  minPrice,
+  maxPrice,
+  onApply
+}: {
+  open: boolean;
+  onClose: () => void;
+  categoryFilters: (Category | 'All')[];
+  tagFilters: (Tag | 'All')[];
+  /** Audience-filtered but otherwise unfiltered products, so sizes can be
+   *  recomputed live as the draft category/tag change inside the panel. */
+  productsInScope: Shoe[];
+  priceBounds: [number, number];
+  category: Category | 'All';
+  tag: Tag | 'All';
+  size: string | 'All';
+  search: string;
+  minPrice: string;
+  maxPrice: string;
+  onApply: (v: {
+    category: Category | 'All';
+    tag: Tag | 'All';
+    size: string | 'All';
+    search: string;
+    minPrice: string;
+    maxPrice: string;
+  }) => void;
+}) {
+  const [draftCategory, setDraftCategory] = useState(category);
+  const [draftTag, setDraftTag] = useState(tag);
+  const [draftSize, setDraftSize] = useState(size);
+  const [draftSearch, setDraftSearch] = useState(search);
+  const [draftMin, setDraftMin] = useState(priceBounds[0]);
+  const [draftMax, setDraftMax] = useState(priceBounds[1]);
+
+  // Smart size list: narrows to whatever category/style combination is
+  // currently picked, so sizes show up the moment that combination actually
+  // has sized products — a style tag alone (with category left on "All")
+  // is enough to surface them, not just an explicit category pick.
+  const sizes = useMemo(() => {
+    let list = productsInScope;
+    if (draftCategory !== 'All') list = list.filter((p) => p.category === draftCategory);
+    if (draftTag !== 'All') list = list.filter((p) => p.tags.includes(draftTag));
+    return Array.from(new Set(list.flatMap((p) => p.sizes))).sort(compareSizes);
+  }, [productsInScope, draftCategory, draftTag]);
+
+  // A size chosen under one category/style may not exist under another —
+  // clear it whenever the user actually changes either (not when the panel
+  // is merely re-seeding drafts on open).
+  const selectCategory = (c: Category | 'All') => {
+    setDraftCategory(c);
+    setDraftSize('All');
+  };
+  const selectTag = (t: Tag | 'All') => {
+    setDraftTag(t);
+    setDraftSize('All');
+  };
+
+  // Re-seed the draft from committed values every time the panel opens,
+  // so a Cancel on a previous open never bleeds into the next one.
+  useEffect(() => {
+    if (!open) return;
+    setDraftCategory(category);
+    setDraftTag(tag);
+    setDraftSize(size);
+    setDraftSearch(search);
+    setDraftMin(minPrice === '' ? priceBounds[0] : Number(minPrice));
+    setDraftMax(maxPrice === '' ? priceBounds[1] : Number(maxPrice));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const apply = () => {
+    onApply({
+      category: draftCategory,
+      tag: draftTag,
+      size: draftSize,
+      search: draftSearch,
+      minPrice: draftMin <= priceBounds[0] ? '' : String(draftMin),
+      maxPrice: draftMax >= priceBounds[1] ? '' : String(draftMax)
+    });
+    onClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.15 }}
-            className="glass absolute right-0 top-full z-20 mt-2 w-64 rounded-xl p-4 shadow-glow"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-[65] bg-black/50"
+          />
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
+            className="fixed inset-y-0 left-0 z-[70] flex h-full w-full flex-col bg-[var(--surface)] shadow-glow lg:w-[30%]"
           >
-            <p className="mb-3 text-sm font-medium opacity-80">Size</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4">
+              <h2 className="text-base font-bold uppercase tracking-wide">Filters</h2>
+              <button type="button" onClick={onClose} aria-label="Close filters" className="p-1 opacity-70 transition hover:opacity-100">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="5" y1="5" x2="19" y2="19" />
+                  <line x1="19" y1="5" x2="5" y2="19" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5">
+              <div className="border-b border-[var(--border)] py-5">
+                <input
+                  value={draftSearch}
+                  onChange={(e) => setDraftSearch(e.target.value)}
+                  placeholder="Search products…"
+                  className="w-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--fg)]"
+                />
+              </div>
+
+              {categoryFilters.length > 2 && (
+                <PanelSection title="Category">
+                  <div className="flex flex-wrap gap-2">
+                    {categoryFilters.map((c) => (
+                      <ChipButton key={c} active={draftCategory === c} onClick={() => selectCategory(c)}>
+                        {c}
+                      </ChipButton>
+                    ))}
+                  </div>
+                </PanelSection>
+              )}
+
+              <PanelSection title="Price">
+                <PriceRangeSlider
+                  bounds={priceBounds}
+                  min={draftMin}
+                  max={draftMax}
+                  onChange={(mn, mx) => {
+                    setDraftMin(mn);
+                    setDraftMax(mx);
+                  }}
+                />
+              </PanelSection>
+
+              <PanelSection title="Shop by Style">
+                <div className="flex flex-wrap gap-2">
+                  {tagFilters.map((f) => (
+                    <ChipButton key={f} active={draftTag === f} onClick={() => selectTag(f)}>
+                      {f}
+                    </ChipButton>
+                  ))}
+                </div>
+
+                {sizes.length > 0 && (
+                  <div className="mt-5">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Size</p>
+                    <div className="flex flex-wrap gap-2">
+                      <SizeBox active={draftSize === 'All'} onClick={() => setDraftSize('All')}>
+                        All
+                      </SizeBox>
+                      {sizes.map((s) => (
+                        <SizeBox key={s} active={draftSize === s} onClick={() => setDraftSize(s)}>
+                          {s}
+                        </SizeBox>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </PanelSection>
+            </div>
+
+            <div className="flex gap-3 border-t border-[var(--border)] px-5 py-4">
               <button
                 type="button"
-                onClick={() => {
-                  onChange('All');
-                  setOpen(false);
-                }}
-                className={`rounded-full px-3 py-1.5 text-sm transition ${
-                  activeSize === 'All'
-                    ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white'
-                    : 'bg-[var(--surface-alt)] opacity-70 hover:opacity-100'
-                }`}
+                onClick={onClose}
+                className="flex-1 rounded-full border border-[var(--border)] py-3 text-sm font-semibold uppercase tracking-wide transition hover:border-[var(--fg)]"
               >
-                All
+                Cancel
               </button>
-              {sizes.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => {
-                    onChange(s);
-                    setOpen(false);
-                  }}
-                  className={`rounded-full px-3 py-1.5 text-sm transition ${
-                    activeSize === s
-                      ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white'
-                      : 'bg-[var(--surface-alt)] opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+              <button
+                type="button"
+                onClick={apply}
+                className="flex-1 rounded-full bg-black py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:opacity-90"
+              >
+                Apply
+              </button>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -342,7 +553,46 @@ export default function ShopGrid({
   const [sort, setSort] = useState<Sort>('newest');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  // Slider bounds come from the full catalogue in scope, not the
+  // currently-filtered list — otherwise the range would shrink as filters
+  // are applied and the handles would jump around.
+  const priceBounds = useMemo<[number, number]>(() => {
+    if (products.length === 0) return [0, 0];
+    const prices = products.map((p) => p.price);
+    return [0, Math.max(...prices)];
+  }, [products]);
+
+  // Restored after mount, not in useState's initializer — sessionStorage
+  // isn't available during the server render, and reading it synchronously
+  // there would make the client's first pass disagree with the server's
+  // markup (a hydration mismatch) whenever a count had been saved before.
+  useEffect(() => {
+    const raw = window.sessionStorage.getItem(
+      visibleCountKey(category ?? 'All', initialTag ?? 'All', audience)
+    );
+    const n = raw ? Number(raw) : NaN;
+    if (Number.isFinite(n) && n > PAGE_SIZE) setVisibleCount(n);
+    // Only on mount — this seeds the initial count from the last visit,
+    // it isn't meant to re-run as category/tag state changes afterwards.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep the count that's actually visible for the current filter combo
+  // saved, so coming back from a product page restores it instead of
+  // collapsing to the first page. Skipping the default avoids a React
+  // Strict Mode dev quirk: its mount→cleanup→remount cycle runs this effect
+  // with the pre-restore PAGE_SIZE value in between, which would otherwise
+  // clobber a larger count the restore effect above hasn't applied yet.
+  useEffect(() => {
+    if (visibleCount <= PAGE_SIZE) return;
+    window.sessionStorage.setItem(
+      visibleCountKey(activeCategory, activeTag, audience),
+      String(visibleCount)
+    );
+  }, [visibleCount, activeCategory, activeTag, audience]);
 
   const categoryFilters: (Category | 'All')[] = ['All', ...categories];
   // Audience is fixed by the menu, so it isn't offered as a style tab.
@@ -361,21 +611,20 @@ export default function ShopGrid({
     [inAudience, activeCategory]
   );
 
-  // Sizes only make sense within a single product category (e.g. shoe sizes
-  // vs. clothing sizes), so this filter is hidden on the all-categories view.
-  const availableSizes = useMemo(
-    () =>
-      activeCategory === 'All'
-        ? []
-        : Array.from(new Set(inCategory.flatMap((p) => p.sizes))).sort(compareSizes),
-    [inCategory, activeCategory]
-  );
+  // Smart size list: narrows to whatever category/style tag is active, so
+  // sizes surface as soon as that combination actually has sized products —
+  // picking a style tag (e.g. a shoe-only tag) is enough on its own, without
+  // requiring the category filter to be set too.
+  const availableSizes = useMemo(() => {
+    const list = activeTag === 'All' ? inCategory : inCategory.filter((p) => p.tags.includes(activeTag));
+    return Array.from(new Set(list.flatMap((p) => p.sizes))).sort(compareSizes);
+  }, [inCategory, activeTag]);
 
-  // A size chosen under one category may not exist under another, so drop it
-  // whenever the category changes rather than leaving a filter that hides everything.
+  // A size chosen under one category/style may not exist under another, so
+  // drop it rather than leaving a filter that silently hides everything.
   useEffect(() => {
-    setActiveSize('All');
-  }, [activeCategory]);
+    if (activeSize !== 'All' && !availableSizes.includes(activeSize)) setActiveSize('All');
+  }, [availableSizes, activeSize]);
 
   const visible = useMemo(() => {
     let list = activeTag === 'All' ? inCategory : inCategory.filter((p) => p.tags.includes(activeTag));
@@ -400,13 +649,30 @@ export default function ShopGrid({
     return list;
   }, [inCategory, activeTag, activeSize, search, sort, minPrice, maxPrice]);
 
-  // Reset how many cards are rendered whenever the filtered set changes, so
-  // switching category/tag/search doesn't leave a stale "Load more" position.
+  // Reset how many cards are rendered whenever the filter criteria actually
+  // change, so switching category/tag/search doesn't leave a stale "Load
+  // more" position. Compares against the previous signature rather than a
+  // one-shot "did this already run" flag — a boolean flag breaks under
+  // React Strict Mode's dev-only double-invoke (the flag survives from the
+  // first pass, so the second pass sees it already set and fires a reset
+  // that stomps the count sessionStorage just restored on mount).
+  const filterSignatureRef = useRef<string | null>(null);
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [visible]);
+    const signature = JSON.stringify([activeCategory, activeTag, activeSize, search, sort, minPrice, maxPrice]);
+    if (filterSignatureRef.current !== null && filterSignatureRef.current !== signature) {
+      setVisibleCount(PAGE_SIZE);
+    }
+    filterSignatureRef.current = signature;
+  }, [activeCategory, activeTag, activeSize, search, sort, minPrice, maxPrice]);
 
   const shown = visible.slice(0, visibleCount);
+
+  const activeFiltersCount = [
+    activeCategory !== 'All',
+    activeSize !== 'All',
+    search.trim() !== '',
+    minPrice !== '' || maxPrice !== ''
+  ].filter(Boolean).length;
 
   const scope = activeCategory === 'All' ? 'All Products' : activeCategory;
   const heading = audience ? `${audience}'s ${scope === 'All Products' ? 'Collection' : scope}` : scope;
@@ -456,148 +722,86 @@ export default function ShopGrid({
           </div>
         </div>
 
-        <div className="mt-8 flex gap-10">
-          {/* Desktop filter rail */}
-          <aside className="hidden w-56 flex-shrink-0 lg:block">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search products…"
-              className="mb-6 w-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-[var(--fg)]"
-            />
-
-            {categoryFilters.length > 2 && (
-              <FilterGroup title="Category">
-                <div className="space-y-1.5">
-                  {categoryFilters.map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => setActiveCategory(c)}
-                      className={`block w-full text-left text-sm transition ${
-                        activeCategory === c
-                          ? 'font-semibold text-[var(--fg)]'
-                          : 'text-[var(--muted)] hover:text-[var(--fg)]'
-                      }`}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </FilterGroup>
-            )}
-
-            {availableSizes.length > 0 && (
-              <FilterGroup title="Size">
-                <div className="flex flex-wrap gap-1.5">
-                  {['All', ...availableSizes].map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setActiveSize(s)}
-                      className={`min-w-[34px] border px-2 py-1 text-xs transition ${
-                        activeSize === s
-                          ? 'border-[var(--fg)] bg-[var(--accent)] text-[var(--accent-fg)]'
-                          : 'border-[var(--border)] hover:border-[var(--fg)]'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </FilterGroup>
-            )}
-
-            <FilterGroup title="Price">
-              <div className="flex items-center gap-2">
-                <input
-                  inputMode="numeric"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value.replace(/[^0-9]/g, ''))}
-                  placeholder="Min"
-                  className="w-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs outline-none focus:border-[var(--fg)]"
-                />
-                <span className="text-xs text-[var(--muted)]">–</span>
-                <input
-                  inputMode="numeric"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value.replace(/[^0-9]/g, ''))}
-                  placeholder="Max"
-                  className="w-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs outline-none focus:border-[var(--fg)]"
-                />
-              </div>
-            </FilterGroup>
-          </aside>
-
-          <div className="min-w-0 flex-1">
-            {/* Compact controls for narrow screens, where the rail is hidden. */}
-            <div className="mb-5 flex flex-wrap items-center gap-2 lg:hidden">
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search…"
-                className="min-w-[140px] flex-1 border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm outline-none"
-              />
-              <PriceFilter
-                minPrice={minPrice}
-                maxPrice={maxPrice}
-                onApply={(min, max) => {
-                  setMinPrice(min);
-                  setMaxPrice(max);
-                }}
-              />
-              {availableSizes.length > 0 && (
-                <SizeFilter sizes={availableSizes} activeSize={activeSize} onChange={setActiveSize} />
-              )}
-            </div>
-
-
-            <div className="mb-5 flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+        <div className="mt-8">
+          <div className="mb-5 flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setFilterOpen(true)}
+                aria-label="Open filters"
+                className={`glass relative flex items-center gap-1.5 rounded-full px-3 py-2 text-sm transition ${
+                  activeFiltersCount > 0 ? 'ring-1 ring-neon-blue' : ''
+                }`}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="4" y1="7" x2="20" y2="7" />
+                  <circle cx="9" cy="7" r="2" fill="var(--surface)" />
+                  <line x1="4" y1="17" x2="20" y2="17" />
+                  <circle cx="15" cy="17" r="2" fill="var(--surface)" />
+                </svg>
+                <span>Filter</span>
+                {activeFiltersCount > 0 && <span className="h-1.5 w-1.5 rounded-full bg-neon-blue" />}
+              </button>
               <p className="text-xs text-[var(--muted)]">
                 {visible.length} product{visible.length === 1 ? '' : 's'}
               </p>
-              <SortFilter sort={sort} onChange={setSort} />
             </div>
-
-            {visible.length === 0 ? (
-              <p className="py-20 text-center text-sm text-[var(--muted)]">
-                {search.trim() || minPrice !== '' || maxPrice !== '' || activeSize !== 'All'
-                  ? 'No products match your filters.'
-                  : activeCategory !== 'All'
-                    ? `No products available in "${activeCategory}" yet. Check back soon!`
-                    : 'No products available yet.'}
-              </p>
-            ) : (
-              <>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
-                  {shown.map((shoe) => (
-                    <ProductCard key={shoe.id} shoe={shoe} />
-                  ))}
-                </div>
-
-                {visibleCount < visible.length && (
-                  <div className="mt-12 flex justify-center">
-                    <button
-                      onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                      className="btn-glow border border-[var(--fg)] px-8 py-3 text-xs font-semibold uppercase tracking-wide transition hover:bg-[var(--accent)] hover:text-[var(--accent-fg)]"
-                    >
-                      Load More
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
+            <SortFilter sort={sort} onChange={setSort} />
           </div>
+
+          <FilterPanel
+            open={filterOpen}
+            onClose={() => setFilterOpen(false)}
+            categoryFilters={categoryFilters}
+            tagFilters={tagFilters}
+            productsInScope={inAudience}
+            priceBounds={priceBounds}
+            category={activeCategory}
+            tag={activeTag}
+            size={activeSize}
+            search={search}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            onApply={(v) => {
+              setActiveCategory(v.category);
+              setActiveTag(v.tag);
+              setActiveSize(v.size);
+              setSearch(v.search);
+              setMinPrice(v.minPrice);
+              setMaxPrice(v.maxPrice);
+            }}
+          />
+
+          {visible.length === 0 ? (
+            <p className="py-20 text-center text-sm text-[var(--muted)]">
+              {search.trim() || minPrice !== '' || maxPrice !== '' || activeSize !== 'All'
+                ? 'No products match your filters.'
+                : activeCategory !== 'All'
+                  ? `No products available in "${activeCategory}" yet. Check back soon!`
+                  : 'No products available yet.'}
+            </p>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
+                {shown.map((shoe) => (
+                  <ProductCard key={shoe.id} shoe={shoe} />
+                ))}
+              </div>
+
+              {visibleCount < visible.length && (
+                <div className="mt-12 flex justify-center">
+                  <button
+                    onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                    className="btn-glow border border-[var(--fg)] px-8 py-3 text-xs font-semibold uppercase tracking-wide transition hover:bg-[var(--accent)] hover:text-[var(--accent-fg)]"
+                  >
+                    Load More
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
     </>
-  );
-}
-
-/** Titled block in the desktop filter rail. */
-function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-6 border-t border-[var(--border)] pt-4">
-      <p className="mb-3 text-[11px] font-bold uppercase tracking-widest">{title}</p>
-      {children}
-    </div>
   );
 }
