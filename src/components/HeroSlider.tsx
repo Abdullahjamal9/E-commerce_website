@@ -32,7 +32,12 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
 
   return (
     <section className="relative w-full overflow-hidden border-b border-[var(--border)] bg-[var(--surface-alt)]">
-      <div className="relative mx-auto h-[62vh] min-h-[380px] max-w-[1600px] sm:h-[70vh]">
+      {/* aspect-ratio, not a vh height — vh is tied to the physical viewport
+          and desyncs from width under real browser zoom (width scales with
+          effective CSS pixels as you zoom out, vh doesn't follow it), which
+          is what left white space on the sides at non-100% zoom. Width-driven
+          aspect-ratio scales together with the rest of the layout instead. */}
+      <div className="relative mx-auto aspect-[3/4] max-w-[1600px] sm:aspect-[16/9] lg:aspect-[21/9]">
         {slides.map((slide, i) => (
           <div
             key={slide.href + i}
@@ -52,14 +57,14 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
                 </Link>
               </div>
 
-              <div className="order-1 w-full max-w-md md:order-2 md:w-1/2">
+              <div className="order-1 w-full max-w-md md:order-2 md:h-full md:w-1/2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={cloudinaryResize(slide.image, 900)}
                   alt={slide.title}
                   loading={i === 0 ? 'eager' : 'lazy'}
                   fetchPriority={i === 0 ? 'high' : undefined}
-                  className="mx-auto h-[30vh] w-auto object-contain sm:h-[42vh]"
+                  className="mx-auto h-auto w-full max-w-[280px] object-contain md:h-full md:w-auto md:max-w-none"
                 />
               </div>
             </div>

@@ -9,12 +9,20 @@ export interface Tile {
 
 /** Three-up promo grid under the hero — the reference storefront's way of
  *  routing people into collections before any product list appears. */
+const BASE_COLS: Record<number, string> = { 1: 'grid-cols-1', 2: 'grid-cols-2', 3: 'grid-cols-2' };
+const LG_COLS: Record<number, string> = { 1: 'lg:grid-cols-1', 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3' };
+
 export default function CategoryTiles({ tiles }: { tiles: Tile[] }) {
   if (tiles.length === 0) return null;
 
+  // A hardcoded 3-column grid left an empty cell whenever there were fewer
+  // than 3 tiles (the common case) — size the grid to whatever's actually here.
+  const baseCols = BASE_COLS[tiles.length] ?? 'grid-cols-2';
+  const lgCols = LG_COLS[tiles.length] ?? 'lg:grid-cols-3';
+
   return (
     <section className="mx-auto max-w-site px-4 py-12 sm:px-6">
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+      <div className={`grid ${baseCols} gap-3 sm:gap-4 ${lgCols}`}>
         {tiles.map((tile) => (
           <Link
             key={tile.href + tile.label}
