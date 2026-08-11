@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Reorder, useDragControls } from 'framer-motion';
@@ -279,13 +278,15 @@ function Row({
         />
       </td>
       <td className="py-3 pr-4 text-right">
-        <Link
-          href={`/admin/products/${p.id}/edit`}
-          prefetch={false}
-          className="mr-3 text-sm opacity-70 hover:opacity-100"
-        >
+        {/* A plain anchor, not next/link — Next's client-side soft navigation
+            was still serving a cached RSC payload for this route even with
+            prefetch disabled and staleTimes.dynamic set to 0, so editing a
+            product and reopening it via a soft nav kept showing the old
+            values until a manual hard reload. A real browser navigation
+            always hits the server fresh, matching the working reload case. */}
+        <a href={`/admin/products/${p.id}/edit`} className="mr-3 text-sm opacity-70 hover:opacity-100">
           Edit
-        </Link>
+        </a>
         <button
           onClick={() => onDelete(p.id, p.name)}
           disabled={deletingId === p.id}
