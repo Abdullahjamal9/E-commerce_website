@@ -166,6 +166,13 @@ export default function Navbar({
   const [hovered, setHovered] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  // Tracks whether the collapsible search panel has finished opening, so its
+  // overflow can switch from hidden (needed mid-animation) to visible (so
+  // the results dropdown isn't clipped) — see the panel below.
+  const [mobileSearchOverflowVisible, setMobileSearchOverflowVisible] = useState(false);
+  useEffect(() => {
+    if (!mobileSearchOpen) setMobileSearchOverflowVisible(false);
+  }, [mobileSearchOpen]);
   const headerRef = useRef<HTMLElement>(null);
   const count = useCart(selectCount);
   const openCart = useCart((s) => s.open);
@@ -385,7 +392,12 @@ export default function Navbar({
           </div>
         </nav>
 
-        {/* Mobile search drops out of the bar rather than squeezing into it. */}
+        {/* Mobile search drops out of the bar rather than squeezing into it.
+            overflow stays hidden only while the height is animating — once
+            open, it switches to visible so the live-results dropdown (which
+            renders below the input via top-full) isn't clipped by this
+            container's own height, the way it would be with a permanent
+            overflow-hidden. */}
         <AnimatePresence initial={false}>
           {mobileSearchOpen && (
             <motion.div
@@ -393,7 +405,9 @@ export default function Navbar({
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="overflow-hidden border-t border-[var(--border)] lg:hidden"
+              onAnimationComplete={() => setMobileSearchOverflowVisible(true)}
+              style={{ overflow: mobileSearchOverflowVisible ? 'visible' : 'hidden' }}
+              className="border-t border-[var(--border)] lg:hidden"
             >
               <div className="px-4 py-3">
                 <SearchBox variant="inline" onNavigate={() => setMobileSearchOpen(false)} />
