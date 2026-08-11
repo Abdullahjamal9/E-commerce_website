@@ -22,6 +22,10 @@ export default async function EditProductPage({ params }: { params: { id: string
   return (
     <div>
       <h1 className="mb-6 text-2xl font-black sm:text-3xl">Edit Product</h1>
+      {/* TEMP diagnostic — remove after confirming live staleness cause. */}
+      <p className="mb-4 text-xs text-red-500">
+        DEBUG rendered at {new Date().toISOString()} — discountPercent={product.discountPercent}
+      </p>
       <ProductForm
         productId={product.id}
         initial={product}

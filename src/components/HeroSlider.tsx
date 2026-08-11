@@ -38,7 +38,7 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
             key={slide.href + i}
             className={`absolute inset-0 transition-opacity duration-700 ${i === index ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
           >
-            <div className="mx-auto flex h-full max-w-site flex-col items-center justify-center gap-6 px-6 py-10 md:flex-row md:justify-between md:gap-12">
+            <div className="mx-auto flex h-full max-w-site flex-col items-center justify-center gap-6 px-6 py-10 md:flex-row md:justify-between md:gap-12 md:px-16 lg:px-20">
               <div className="order-2 max-w-lg text-center md:order-1 md:text-left">
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-[var(--muted)]">
                   {slide.eyebrow}
