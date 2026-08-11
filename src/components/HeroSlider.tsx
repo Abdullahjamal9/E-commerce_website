@@ -37,7 +37,11 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
           effective CSS pixels as you zoom out, vh doesn't follow it), which
           is what left white space on the sides at non-100% zoom. Width-driven
           aspect-ratio scales together with the rest of the layout instead. */}
-      <div className="relative mx-auto aspect-[3/4] max-w-[1600px] sm:aspect-[16/9] lg:aspect-[21/9]">
+      {/* max-h caps how tall the 21/9 box gets once width reaches max-w-site's
+          2560px ceiling — aspect-ratio alone would keep growing the height in
+          lockstep with the width, leaving the slide's text/image floating in
+          a lot of empty vertical space on ultra-wide screens. */}
+      <div className="relative mx-auto aspect-[3/4] max-w-site sm:aspect-[16/9] lg:aspect-[21/9] lg:max-h-[720px]">
         {slides.map((slide, i) => (
           <div
             key={slide.href + i}
@@ -57,14 +61,14 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
                 </Link>
               </div>
 
-              <div className="order-1 w-full max-w-md md:order-2 md:h-full md:w-1/2">
+              <div className="order-1 w-full max-w-md md:order-2 md:h-full md:w-1/2 md:pr-6 lg:pr-10 3xl:pr-20 4xl:pr-28">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={cloudinaryResize(slide.image, 900)}
                   alt={slide.title}
                   loading={i === 0 ? 'eager' : 'lazy'}
                   fetchPriority={i === 0 ? 'high' : undefined}
-                  className="mx-auto h-auto w-full max-w-[280px] object-contain md:h-full md:w-auto md:max-w-none"
+                  className="mx-auto h-auto w-full max-w-[280px] object-contain md:h-full md:w-auto md:max-w-full"
                 />
               </div>
             </div>

@@ -866,7 +866,7 @@ export default function ShopGrid({
             </p>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6">
                 {shown.map((shoe) => (
                   <ProductCard key={shoe.id} shoe={shoe} />
                 ))}

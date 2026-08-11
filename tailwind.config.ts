@@ -4,10 +4,11 @@ const config: Config = {
   content: ['./src/app/**/*.{ts,tsx}', './src/components/**/*.{ts,tsx}'],
   theme: {
     extend: {
-      // One extra step above Tailwind's built-in 2xl (1536px) — lets product
-      // grids add a column on very wide monitors instead of just stretching
-      // the existing four cards across the wider max-width.
-      screens: { '3xl': '1920px' },
+      // Two extra steps above Tailwind's built-in 2xl (1536px) — lets product
+      // grids add columns as the viewport grows instead of just stretching
+      // the same four cards across the wider max-width. 4xl lines up with
+      // max-w-site itself, where there's room for one more column still.
+      screens: { '3xl': '1920px', '4xl': '2560px' },
       colors: {
         // The old neon trio is now one ink tone, so the many
         // `from-neon-blue to-neon-purple` gradients across the app resolve
