@@ -4,6 +4,10 @@ const config: Config = {
   content: ['./src/app/**/*.{ts,tsx}', './src/components/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      // One extra step above Tailwind's built-in 2xl (1536px) — lets product
+      // grids add a column on very wide monitors instead of just stretching
+      // the existing four cards across the wider max-width.
+      screens: { '3xl': '1920px' },
       colors: {
         // The old neon trio is now one ink tone, so the many
         // `from-neon-blue to-neon-purple` gradients across the app resolve
@@ -14,10 +18,11 @@ const config: Config = {
         line: '#dad4d0'
       },
       fontFamily: { sans: ['var(--font-sans)', 'system-ui', 'sans-serif'] },
-      // Page gutter width. Tailwind's max-w-7xl (1280px) left noticeably dead
-      // margins on wide/zoomed-out viewports; 1440 matches the reference
-      // storefront and keeps four product columns comfortably filled.
-      maxWidth: { site: '1440px' },
+      // Page gutter width. Widened from 1440px so ultra-wide monitors
+      // (2500px+) don't sit behind large empty side margins, while still
+      // stopping short of true edge-to-edge so content doesn't stretch too
+      // thin on the widest screens.
+      maxWidth: { site: '2560px' },
       boxShadow: {
         glow: '0 1px 2px rgba(21,21,21,0.06)',
         'glow-purple': '0 4px 16px -4px rgba(21,21,21,0.12)'

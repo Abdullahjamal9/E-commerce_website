@@ -37,7 +37,7 @@ export default function ProductRail({
       {/* Two-up on phones like the rest of the catalogue, widening with the
           viewport — rather than a sideways-scrolling rail, which hid half the
           row and read inconsistently against the shop grid. */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 3xl:grid-cols-5">
         {products.map((p) => (
           <ProductCard key={p.id} shoe={p} />
         ))}
