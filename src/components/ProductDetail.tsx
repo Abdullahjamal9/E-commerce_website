@@ -171,22 +171,28 @@ export default function ProductDetail({
         lockConsumed = 0;
       }
 
+      // Lenis stays paused for the panel's whole pinned span, not just the
+      // ticks we redirect into it — handing a mid-span tick back to "native
+      // scroll, Lenis will probably pick it up" caused a visible stutter
+      // right at the handoff (Lenis was still stopped, so nothing actually
+      // moved that tick, then it caught up abruptly on the next one). Simpler
+      // and glitch-free to keep single-authority control for the whole span:
+      // scroll the panel while it still has room, then scroll the page
+      // ourselves once it doesn't — Lenis only takes back over once we've
+      // genuinely scrolled past the panel.
+      setLenisPaused(true);
+
       const canScrollDown = panel.scrollTop + panel.clientHeight < panel.scrollHeight - 1;
       const canScrollUp = panel.scrollTop > 0;
       const holding = lockConsumed < MIN_LOCK_PX;
       const intercepting = (e.deltaY > 0 && (canScrollDown || holding)) || (e.deltaY < 0 && (canScrollUp || holding));
 
-      // Only pause Lenis for the exact ticks we're actually taking over —
-      // "pinned" alone stays true for the panel's whole natural sticky span,
-      // well past the point our own hold budget and the panel's real
-      // overflow are both exhausted. Keeping Lenis paused for all of that
-      // would leave nothing to advance the page once we stop intercepting.
-      setLenisPaused(intercepting);
-
+      e.preventDefault();
       if (intercepting) {
-        e.preventDefault();
         panel.scrollTop += e.deltaY;
         lockConsumed += Math.abs(e.deltaY);
+      } else {
+        window.scrollTo(window.scrollX, window.scrollY + e.deltaY);
       }
     };
 
