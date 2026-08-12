@@ -22,13 +22,32 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* Lenis (SmoothScroll.tsx) now owns scroll easing, including anchor
+     links — it drives the actual position with many rapid native scrollTo
+     calls per second, which the browser would otherwise also try to
+     CSS-smooth on top of, fighting Lenis's own easing curve every frame. */
+  scroll-behavior: auto;
 }
 
 body {
   background: var(--bg);
   color: var(--fg);
   overflow-x: hidden;
+}
+
+/* Lenis's own recommended baseline — keeps its scroll-height measurement
+   correct and stops it fighting any lingering scroll-behavior: smooth. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
 }
 
 select option {

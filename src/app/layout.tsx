@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import Toaster from '@/components/Toaster';
+import SmoothScroll from '@/components/SmoothScroll';
 import { getSettings } from '@/lib/settings';
 
 // tailwind.config points font-sans at var(--font-sans), but nothing ever
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`light ${sans.variable}`} suppressHydrationWarning>
       <body className="min-h-screen font-sans antialiased">
+        <SmoothScroll />
         {children}
         <Toaster />
       </body>

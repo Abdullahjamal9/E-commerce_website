@@ -6,6 +6,7 @@ import type { Shoe } from '@/lib/types';
 import { formatPrice } from '@/lib/currency';
 import { getSalePrice } from '@/lib/sale';
 import { cloudinaryResize } from '@/lib/cloudinaryUrl';
+import { lenisRef } from '@/lib/lenisInstance';
 import { useCart } from '@/store/useCart';
 import { useWishlist } from '@/store/useWishlist';
 import { useToast } from '@/store/useToast';
@@ -124,10 +125,26 @@ export default function ProductDetail({
     let lockConsumed = 0;
     // 0 = no direction committed yet, 1 = holding for a downward pass, -1 = upward.
     let lockDir = 0;
+    // The site-wide Lenis smooth-scroll (SmoothScroll.tsx) has its own wheel
+    // listener that would otherwise process the same event and keep nudging
+    // its virtual scroll target while we're trying to redirect input into
+    // the panel instead. Pausing it for the pinned engagement, and resuming
+    // once released, hands control over cleanly instead of both fighting
+    // for the same wheel input.
+    let lenisPaused = false;
+    const setLenisPaused = (next: boolean) => {
+      if (next === lenisPaused) return;
+      lenisPaused = next;
+      if (next) lenisRef.current?.stop();
+      else lenisRef.current?.start();
+    };
 
     const onWheel = (e: WheelEvent) => {
       const panel = buyPanelRef.current;
-      if (!panel || window.innerWidth < 1024) return;
+      if (!panel || window.innerWidth < 1024) {
+        setLenisPaused(false);
+        return;
+      }
 
       const rect = panel.getBoundingClientRect();
       // Testing for the exact sticky offset was too strict: at non-100% zoom
@@ -139,6 +156,7 @@ export default function ProductDetail({
       if (!pinned) {
         lockDir = 0;
         lockConsumed = 0;
+        setLenisPaused(false);
         return;
       }
 
@@ -156,8 +174,16 @@ export default function ProductDetail({
       const canScrollDown = panel.scrollTop + panel.clientHeight < panel.scrollHeight - 1;
       const canScrollUp = panel.scrollTop > 0;
       const holding = lockConsumed < MIN_LOCK_PX;
+      const intercepting = (e.deltaY > 0 && (canScrollDown || holding)) || (e.deltaY < 0 && (canScrollUp || holding));
 
-      if ((e.deltaY > 0 && (canScrollDown || holding)) || (e.deltaY < 0 && (canScrollUp || holding))) {
+      // Only pause Lenis for the exact ticks we're actually taking over —
+      // "pinned" alone stays true for the panel's whole natural sticky span,
+      // well past the point our own hold budget and the panel's real
+      // overflow are both exhausted. Keeping Lenis paused for all of that
+      // would leave nothing to advance the page once we stop intercepting.
+      setLenisPaused(intercepting);
+
+      if (intercepting) {
         e.preventDefault();
         panel.scrollTop += e.deltaY;
         lockConsumed += Math.abs(e.deltaY);
@@ -165,7 +191,10 @@ export default function ProductDetail({
     };
 
     window.addEventListener('wheel', onWheel, { passive: false });
-    return () => window.removeEventListener('wheel', onWheel);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      setLenisPaused(false);
+    };
   }, []);
 
   const add = useCart((s) => s.add);
