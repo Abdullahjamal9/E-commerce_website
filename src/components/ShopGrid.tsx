@@ -11,8 +11,14 @@ type Sort = 'newest' | 'price-asc' | 'price-desc';
 
 const TEXT_SIZE_ORDER = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL', 'XXXL'];
 const PAGE_SIZE = 24;
-/** Standard "X% or more off" bands offered in the discount filter. */
+/** Discount bands offered in the filter — each tier covers up to (but not
+ *  including) the next one, e.g. "10%+" means 10–19%, not 10% and up. */
 const DISCOUNT_TIERS = [10, 20, 30, 40, 50];
+
+function inDiscountTier(discountPercent: number, tier: number): boolean {
+  const next = DISCOUNT_TIERS[DISCOUNT_TIERS.indexOf(tier) + 1];
+  return next === undefined ? discountPercent >= tier : discountPercent >= tier && discountPercent < next;
+}
 
 /** How many cards were showing for a given category/tag/audience combo —
  * remembered across a visit to a product page and back, so "Load more"
@@ -701,7 +707,7 @@ export default function ShopGrid({
     let list = activeTag === 'All' ? inCategory : inCategory.filter((p) => p.tags.includes(activeTag));
 
     if (activeSize !== 'All') list = list.filter((p) => p.sizes.includes(activeSize));
-    if (activeDiscount !== 'All') list = list.filter((p) => p.discountPercent >= Number(activeDiscount));
+    if (activeDiscount !== 'All') list = list.filter((p) => inDiscountTier(p.discountPercent, Number(activeDiscount)));
 
     const q = search.trim().toLowerCase();
     if (q) {
