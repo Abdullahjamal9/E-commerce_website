@@ -458,6 +458,11 @@ function FilterPanel({
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
+            // Lenis's global smooth-scroll (SmoothScroll.tsx) captures wheel
+            // input for the page regardless of what's under the cursor by
+            // default — this opts the drawer out, so scrolling over it moves
+            // its own content instead of the shop grid behind it.
+            data-lenis-prevent
             className="fixed inset-y-0 left-0 z-[70] flex h-full w-full flex-col bg-[var(--surface)] shadow-glow lg:w-[30%]"
           >
             <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4">
@@ -479,7 +484,11 @@ function FilterPanel({
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-5">
+            {/* overscroll-contain — without it, once this reaches its own
+                scroll limit (or has no overflow to begin with, the common
+                case with few filters active) the leftover wheel delta
+                chains through to the shop grid behind the drawer. */}
+            <div className="flex-1 overflow-y-auto overscroll-contain px-5">
               <div className="border-b border-[var(--border)] py-5">
                 <input
                   value={draftSearch}

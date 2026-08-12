@@ -36,6 +36,8 @@ export default function ProductDetail({
   const onSale = shoe.discountPercent > 0;
   const salePrice = onSale ? getSalePrice(shoe.price, shoe.discountPercent) : shoe.price;
   const mainImageRef = useRef<HTMLDivElement>(null);
+  const thumbRailRef = useRef<HTMLDivElement>(null);
+  const [thumbsScrollable, setThumbsScrollable] = useState(false);
   const buyPanelRef = useRef<HTMLDivElement>(null);
   const descRef = useRef<HTMLParagraphElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -109,6 +111,23 @@ export default function ProductDetail({
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  // Whether the thumbnail rail actually has more images than fit — only
+  // then should hovering it keep scroll input to itself. A product with few
+  // photos has nothing to scroll there, and should let the page scroll
+  // through that area normally rather than swallowing the input for nothing.
+  useEffect(() => {
+    const el = thumbRailRef.current;
+    if (!el) {
+      setThumbsScrollable(false);
+      return;
+    }
+    const check = () => setThumbsScrollable(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [shoe.images.length, mainImageHeight]);
 
   // Redirect wheel scrolling into the pinned buy panel — regardless of
   // where the cursor is, and regardless of whether the description is
@@ -269,8 +288,18 @@ export default function ProductDetail({
         <div className="flex min-w-0 items-start gap-3">
           {shoe.images.length > 1 && (
             <div
+              ref={thumbRailRef}
               style={{ height: mainImageHeight }}
-              className="flex w-16 flex-shrink-0 flex-col gap-2 overflow-y-auto sm:w-20"
+              // Both only kick in once the rail actually has more thumbnails
+              // than fit (thumbsScrollable) — otherwise there's nothing to
+              // scroll here and the page should scroll through it normally,
+              // the same as hovering any other non-scrollable part of the
+              // page. data-lenis-prevent stops the site-wide smooth-scroll
+              // from claiming the wheel input first; overscroll-contain
+              // stops the browser's own scroll-chaining once the rail hits
+              // its own top/bottom.
+              {...(thumbsScrollable ? { 'data-lenis-prevent': true } : {})}
+              className={`flex w-16 flex-shrink-0 flex-col gap-2 overflow-y-auto sm:w-20 ${thumbsScrollable ? 'overscroll-contain' : ''}`}
             >
               {shoe.images.map((img, i) => (
                 <button

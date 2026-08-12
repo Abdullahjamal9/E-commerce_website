@@ -156,6 +156,10 @@ export default function MobileMenu({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           style={{ top: topOffset }}
+          // Opts this drawer out of Lenis's global wheel capture, so
+          // scrolling over it (e.g. a trackpad on a touch-capable laptop)
+          // scrolls the menu instead of the page behind it.
+          data-lenis-prevent
           className="fixed inset-x-0 bottom-0 z-40 overflow-hidden bg-[var(--bg)] lg:hidden"
         >
           {/* Levels are stacked absolutely so the outgoing and incoming panels

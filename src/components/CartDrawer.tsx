@@ -27,6 +27,11 @@ export default function CartDrawer() {
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 260 }}
             style={{ willChange: 'transform' }}
+            // Lenis's global smooth-scroll captures wheel input for the page
+            // regardless of what's under the cursor by default — this opts
+            // the drawer out, so scrolling over it moves the cart list
+            // instead of the page behind it.
+            data-lenis-prevent
             className="panel-solid fixed right-0 top-0 z-[70] flex h-full w-full max-w-md flex-col p-6"
           >
             <div className="flex items-center justify-between">
@@ -36,7 +41,7 @@ export default function CartDrawer() {
               </button>
             </div>
 
-            <div className="no-scrollbar mt-6 flex-1 space-y-4 overflow-y-auto">
+            <div className="no-scrollbar mt-6 flex-1 space-y-4 overflow-y-auto overscroll-contain">
               {items.length === 0 && (
                 <p className="mt-20 text-center opacity-60">Your cart is empty.</p>
               )}
