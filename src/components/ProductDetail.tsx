@@ -111,26 +111,29 @@ export default function ProductDetail({
   }, []);
 
   // Redirect wheel scrolling into the pinned buy panel — regardless of
-  // where the cursor is — while it's stuck in the viewport and still has
-  // room to scroll; once exhausted, hand scrolling back to the page.
-  //
-  // A short description barely overflows the panel at all, so relying only
-  // on real content height made the hold last a single wheel tick — easy to
-  // miss entirely. MIN_LOCK_PX is a floor on how much wheel input the panel
-  // absorbs before releasing to the page, independent of how much the
-  // content actually needs to scroll, so the pause is felt on every product.
+  // where the cursor is, and regardless of whether the description is
+  // expanded — while it's stuck in the viewport and still has real content
+  // left to reveal in that direction; once exhausted, hand scrolling back
+  // to the page.
   useEffect(() => {
     const STICKY_TOP = 112; // px, matches lg:top-28
-    const MIN_LOCK_PX = 260;
-    let lockConsumed = 0;
-    // 0 = no direction committed yet, 1 = holding for a downward pass, -1 = upward.
-    let lockDir = 0;
+    const EASE = 0.22; // per-frame catch-up fraction — matches Lenis's glide rather than snapping to each wheel tick instantly
     // The site-wide Lenis smooth-scroll (SmoothScroll.tsx) has its own wheel
     // listener that would otherwise process the same event and keep nudging
     // its virtual scroll target while we're trying to redirect input into
-    // the panel instead. Pausing it for the pinned engagement, and resuming
-    // once released, hands control over cleanly instead of both fighting
-    // for the same wheel input.
+    // the panel instead. Pausing it while we're actively redirecting, and
+    // resuming the moment the panel runs out of room in that direction,
+    // hands control over cleanly instead of both fighting the same input.
+    //
+    // An earlier version also drove the page's own scroll manually once the
+    // panel was exhausted (to avoid a one-tick stutter at the handoff), but
+    // that meant juggling two competing "who owns window.scrollY right now"
+    // authorities — ours and Lenis's — and the reconciliation between them
+    // turned out to have edge cases (reversing direction right as the panel
+    // was about to release) that froze the page outright, which is a far
+    // worse failure than the stutter it was trying to avoid. Simpler and
+    // more robust to keep this effect's authority strictly to the panel's
+    // own scrollTop, and let go of everything else immediately.
     let lenisPaused = false;
     const setLenisPaused = (next: boolean) => {
       if (next === lenisPaused) return;
@@ -139,10 +142,39 @@ export default function ProductDetail({
       else lenisRef.current?.start();
     };
 
+    // Directly setting scrollTop per wheel tick moved the panel in raw,
+    // un-eased jumps — jarring next to Lenis's glide everywhere else. It
+    // eases toward an accumulated target instead of snapping to it.
+    let panelTarget: number | null = null;
+    let rafId: number | null = null;
+
+    const tickPanel = (panel: HTMLDivElement) => {
+      // A queued frame can still fire after panelTarget was cleared out
+      // from under it — the early return must still clear rafId, or the
+      // "only one loop at a time" guard below stays tripped forever.
+      if (panelTarget === null) {
+        rafId = null;
+        return;
+      }
+      const diff = panelTarget - panel.scrollTop;
+      if (Math.abs(diff) < 0.5) {
+        panel.scrollTop = panelTarget;
+        rafId = null;
+        return;
+      }
+      panel.scrollTop += diff * EASE;
+      rafId = requestAnimationFrame(() => tickPanel(panel));
+    };
+
+    const reset = () => {
+      panelTarget = null;
+      setLenisPaused(false);
+    };
+
     const onWheel = (e: WheelEvent) => {
       const panel = buyPanelRef.current;
       if (!panel || window.innerWidth < 1024) {
-        setLenisPaused(false);
+        reset();
         return;
       }
 
@@ -154,51 +186,36 @@ export default function ProductDetail({
       // sticky line, still on screen" as the trigger instead.
       const pinned = rect.top <= STICKY_TOP + 4 && rect.bottom > 0;
       if (!pinned) {
-        lockDir = 0;
-        lockConsumed = 0;
+        reset();
+        return;
+      }
+
+      // Base "current position" on the in-flight target when one exists,
+      // not the actual scrollTop — that lags behind mid-ease, and reading
+      // it directly would make consecutive ticks stack on a stale value
+      // instead of the position already promised to the user.
+      const maxPanelTop = panel.scrollHeight - panel.clientHeight;
+      const curPanelTop = panelTarget ?? panel.scrollTop;
+      const hasRoom = e.deltaY > 0 ? curPanelTop < maxPanelTop - 0.5 : curPanelTop > 0.5;
+
+      if (!hasRoom) {
+        // Nothing left to reveal in this direction — let this tick (and
+        // whatever follows) scroll the page normally instead of us trying
+        // to drive it.
         setLenisPaused(false);
         return;
       }
 
-      // A sticky panel typically stays pinned for its entire scroll pass, so
-      // "still pinned" alone isn't enough to know a hold is still active —
-      // reversing direction mid-pinned (scroll down, then immediately back
-      // up) should get its own fresh budget rather than inheriting whatever
-      // was left over (or already spent) from the other direction.
-      const dir = e.deltaY > 0 ? 1 : -1;
-      if (dir !== lockDir) {
-        lockDir = dir;
-        lockConsumed = 0;
-      }
-
-      // Lenis stays paused for the panel's whole pinned span, not just the
-      // ticks we redirect into it — handing a mid-span tick back to "native
-      // scroll, Lenis will probably pick it up" caused a visible stutter
-      // right at the handoff (Lenis was still stopped, so nothing actually
-      // moved that tick, then it caught up abruptly on the next one). Simpler
-      // and glitch-free to keep single-authority control for the whole span:
-      // scroll the panel while it still has room, then scroll the page
-      // ourselves once it doesn't — Lenis only takes back over once we've
-      // genuinely scrolled past the panel.
       setLenisPaused(true);
-
-      const canScrollDown = panel.scrollTop + panel.clientHeight < panel.scrollHeight - 1;
-      const canScrollUp = panel.scrollTop > 0;
-      const holding = lockConsumed < MIN_LOCK_PX;
-      const intercepting = (e.deltaY > 0 && (canScrollDown || holding)) || (e.deltaY < 0 && (canScrollUp || holding));
-
       e.preventDefault();
-      if (intercepting) {
-        panel.scrollTop += e.deltaY;
-        lockConsumed += Math.abs(e.deltaY);
-      } else {
-        window.scrollTo(window.scrollX, window.scrollY + e.deltaY);
-      }
+      panelTarget = Math.min(maxPanelTop, Math.max(0, curPanelTop + e.deltaY));
+      if (rafId === null) rafId = requestAnimationFrame(() => tickPanel(panel));
     };
 
     window.addEventListener('wheel', onWheel, { passive: false });
     return () => {
       window.removeEventListener('wheel', onWheel);
+      if (rafId !== null) cancelAnimationFrame(rafId);
       setLenisPaused(false);
     };
   }, []);

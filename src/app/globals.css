@@ -46,9 +46,13 @@ html.lenis body {
   scroll-behavior: auto !important;
 }
 
-.lenis.lenis-stopped {
-  overflow: hidden;
-}
+/* Deliberately not adding Lenis's usual `.lenis-stopped { overflow: hidden }`
+   baseline rule — that's meant for "stopped while a modal blocks scrolling
+   entirely" use cases. Ours (ProductDetail's pinned-panel wheel redirect)
+   stops Lenis just to take over driving scroll ourselves for a moment, not
+   to block scrolling — overflow: hidden here only hid the scrollbar for
+   that whole stretch and made it flicker in and out right around the point
+   scrolling handed back over. */
 
 select option {
   background-color: var(--select-bg);
