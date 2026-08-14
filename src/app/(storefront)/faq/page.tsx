@@ -1,6 +1,14 @@
+import type { Metadata } from 'next';
 import { getSettings } from '@/lib/settings';
+import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Frequently Asked Questions',
+  description: 'Answers on payment methods, delivery times, order tracking, and returns.',
+  alternates: { canonical: `${SITE_URL}/faq` }
+};
 
 export default async function FAQPage() {
   const settings = await getSettings();

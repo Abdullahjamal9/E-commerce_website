@@ -1,7 +1,15 @@
+import type { Metadata } from 'next';
 import ContactForm from '@/components/ContactForm';
 import { getSettings } from '@/lib/settings';
+import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Contact Us',
+  description: 'Questions about an order, sizing, or a collaboration — get in touch and we’ll get back to you.',
+  alternates: { canonical: `${SITE_URL}/contact` }
+};
 
 export default async function ContactPage() {
   const settings = await getSettings();

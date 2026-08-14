@@ -267,7 +267,7 @@ export default function ProductReviews({
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={url}
-                          alt=""
+                          alt={`Photo from ${r.customerName}'s review`}
                           className="h-16 w-16 rounded-lg object-cover transition hover:opacity-80"
                         />
                       </a>

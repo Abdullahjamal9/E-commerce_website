@@ -1,6 +1,14 @@
+import type { Metadata } from 'next';
 import { getSettings } from '@/lib/settings';
+import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Shipping & Returns',
+  description: 'Delivery times across Pakistan, and how to return or exchange an order.',
+  alternates: { canonical: `${SITE_URL}/shipping-returns` }
+};
 
 export default async function ShippingReturnsPage() {
   const settings = await getSettings();

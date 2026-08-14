@@ -1,6 +1,14 @@
+import type { Metadata } from 'next';
 import { getSettings } from '@/lib/settings';
+import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Terms & Conditions',
+  description: 'The terms that govern using this site and placing an order.',
+  alternates: { canonical: `${SITE_URL}/terms` }
+};
 
 export default async function TermsPage() {
   const settings = await getSettings();

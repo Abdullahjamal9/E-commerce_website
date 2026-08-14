@@ -1,6 +1,14 @@
+import type { Metadata } from 'next';
 import { getSettings } from '@/lib/settings';
+import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description: 'How we collect, use, and protect your personal information.',
+  alternates: { canonical: `${SITE_URL}/privacy-policy` }
+};
 
 export default async function PrivacyPolicyPage() {
   const settings = await getSettings();

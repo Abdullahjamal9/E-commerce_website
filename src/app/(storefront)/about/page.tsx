@@ -1,6 +1,16 @@
+import type { Metadata } from 'next';
 import { getSettings } from '@/lib/settings';
+import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
+
+// A plain string title picks up the root layout's "%s — StoreName" template,
+// so this doesn't need its own getSettings() call just for the title.
+export const metadata: Metadata = {
+  title: 'About Us',
+  description: 'Hand-finished footwear and apparel, shipped nationwide with Cash on Delivery or bank transfer.',
+  alternates: { canonical: `${SITE_URL}/about` }
+};
 
 export default async function AboutPage() {
   const settings = await getSettings();

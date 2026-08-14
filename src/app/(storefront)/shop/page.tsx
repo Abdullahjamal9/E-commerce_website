@@ -5,6 +5,7 @@ import { getTags } from '@/lib/tags';
 import { getProducts } from '@/lib/products';
 import { getSettings } from '@/lib/settings';
 import type { Category, Tag } from '@/lib/types';
+import { SITE_URL } from '@/lib/site';
 
 export async function generateMetadata({
   searchParams
@@ -15,9 +16,27 @@ export async function generateMetadata({
   const scope = [searchParams.audience, searchParams.tag ?? searchParams.category]
     .filter(Boolean)
     .join(' ');
+  // A plain string picks up the root layout's "%s — StoreName" template —
+  // appending storeName again here would double it up.
+  const title = scope || 'Shop';
+  const description = `Browse the full ${settings.storeName} catalogue.`;
+
+  // A single category or tag filter is a real landing page (the sitemap
+  // lists these individually), so it gets a self-referencing canonical. Any
+  // other combination — audience filters, category+tag together, no filter
+  // at all — canonicalizes back to the bare listing rather than asking
+  // Google to index every possible filter combination separately.
+  const singleFilter =
+    (searchParams.category && !searchParams.tag && !searchParams.audience && `?category=${searchParams.category}`) ||
+    (searchParams.tag && !searchParams.category && !searchParams.audience && `?tag=${searchParams.tag}`) ||
+    '';
+  const canonical = `${SITE_URL}/shop${singleFilter}`;
+
   return {
-    title: scope ? `${scope} — ${settings.storeName}` : `Shop — ${settings.storeName}`,
-    description: `Browse the full ${settings.storeName} catalogue.`
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { type: 'website', url: canonical, title, description }
   };
 }
 

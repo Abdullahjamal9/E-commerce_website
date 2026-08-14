@@ -1,4 +1,12 @@
+import type { Metadata } from 'next';
 import TrackOrderForm from '@/components/TrackOrderForm';
+import { SITE_URL } from '@/lib/site';
+
+export const metadata: Metadata = {
+  title: 'Track Your Order',
+  description: 'Check the latest status of your order using your order number and phone number.',
+  alternates: { canonical: `${SITE_URL}/track-order` }
+};
 
 export default function TrackOrderPage() {
   return (

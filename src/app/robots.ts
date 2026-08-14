@@ -1,13 +1,14 @@
 import type { MetadataRoute } from 'next';
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+import { SITE_URL } from '@/lib/site';
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin', '/api']
+      // /wishlist is per-visitor (read from localStorage) and has no unique
+      // public content of its own — nothing there is worth a crawl budget.
+      disallow: ['/admin', '/api', '/wishlist']
     },
     sitemap: `${SITE_URL}/sitemap.xml`
   };
