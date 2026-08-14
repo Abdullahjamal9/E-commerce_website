@@ -48,6 +48,9 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(SITE_URL),
     title: { default: settings.storeName, template: `%s — ${settings.storeName}` },
     description: DESCRIPTION,
+    // Proves ownership for Google Search Console — renders as
+    // <meta name="google-site-verification" content="..." /> in <head>.
+    verification: { google: '4_z2EHRITRaJsIHgoJMTgZM8GDaO6cj9-7B1B-Tl1aQ' },
     // Per-page metadata (product, shop) overrides these; this is what search
     // engines and link previews fall back to on every other route.
     openGraph: {
