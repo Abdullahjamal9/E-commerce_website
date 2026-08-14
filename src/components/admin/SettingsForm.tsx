@@ -30,7 +30,9 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
     facebookUrl: settings.facebookUrl,
     instagramUrl: settings.instagramUrl,
     saleEnabled: settings.saleEnabled,
-    saleEndsAt: toDatetimeLocal(settings.saleEndsAt)
+    saleEndsAt: toDatetimeLocal(settings.saleEndsAt),
+    generalSaleEnabled: settings.generalSaleEnabled,
+    generalSaleEndsAt: toDatetimeLocal(settings.generalSaleEndsAt)
   });
   const [saving, setSaving] = useState(false);
 
@@ -53,7 +55,8 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...form,
-        saleEndsAt: form.saleEndsAt ? new Date(form.saleEndsAt).toISOString() : null
+        saleEndsAt: form.saleEndsAt ? new Date(form.saleEndsAt).toISOString() : null,
+        generalSaleEndsAt: form.generalSaleEndsAt ? new Date(form.generalSaleEndsAt).toISOString() : null
       })
     });
     setSaving(false);
@@ -95,18 +98,18 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
       </p>
 
       <div>
-        <p className="mb-3 font-semibold">Sale</p>
+        <p className="mb-3 font-semibold">Independence Day sale</p>
         <label className="glass flex items-center gap-3 rounded-xl p-3">
           <input
             type="checkbox"
             checked={form.saleEnabled}
             onChange={(e) => setForm({ ...form, saleEnabled: e.target.checked })}
           />
-          Independence Day banner enabled on the homepage
+          Independence Day sale running
         </label>
         <div className="mt-3">
           <label className="mb-1 block text-sm font-medium opacity-80">
-            Sale ends at (shows a countdown on discounted products)
+            Ends at (green &ldquo;Azadi Sale Ends In&rdquo; countdown on discounted products)
           </label>
           <input
             type="datetime-local"
@@ -116,7 +119,34 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
           />
         </div>
         <p className="mt-2 text-xs opacity-50">
-          Discounts are set per product — open a product under Products and set its Discount %.
+          Leave this configured all year — switching it back on next 14 August is all it takes.
+        </p>
+      </div>
+
+      <div>
+        <p className="mb-3 font-semibold">Sale (any time of year)</p>
+        <label className="glass flex items-center gap-3 rounded-xl p-3">
+          <input
+            type="checkbox"
+            checked={form.generalSaleEnabled}
+            onChange={(e) => setForm({ ...form, generalSaleEnabled: e.target.checked })}
+          />
+          Sale running
+        </label>
+        <div className="mt-3">
+          <label className="mb-1 block text-sm font-medium opacity-80">
+            Ends at (black &ldquo;Sale Ends In&rdquo; countdown on discounted products)
+          </label>
+          <input
+            type="datetime-local"
+            value={form.generalSaleEndsAt}
+            onChange={(e) => setForm({ ...form, generalSaleEndsAt: e.target.value })}
+            className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
+          />
+        </div>
+        <p className="mt-2 text-xs opacity-50">
+          With both switched on, the Independence Day countdown is the one shown. Discounts
+          themselves are set per product — open a product under Products and set its Discount %.
         </p>
       </div>
 

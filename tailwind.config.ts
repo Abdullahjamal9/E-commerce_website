@@ -18,7 +18,10 @@ const config: Config = {
         ink: { 900: '#151515', 800: '#1c1c1c', 700: '#232323' },
         line: '#dad4d0'
       },
-      fontFamily: { sans: ['var(--font-sans)', 'system-ui', 'sans-serif'] },
+      fontFamily: {
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'Impact', 'system-ui', 'sans-serif']
+      },
       // Page gutter width. Widened from 1440px so ultra-wide monitors
       // (2500px+) don't sit behind large empty side margins, while still
       // stopping short of true edge-to-edge so content doesn't stretch too

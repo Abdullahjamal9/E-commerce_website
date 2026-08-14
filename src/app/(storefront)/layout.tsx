@@ -13,12 +13,23 @@ export const dynamic = 'force-dynamic';
 
 export default async function StorefrontLayout({ children }: { children: React.ReactNode }) {
   const [settings, categories, tags] = await Promise.all([getSettings(), getCategories(), getTags()]);
-  const navItems = buildNav(categories, tags, settings.saleEnabled);
+
+  // Two sales share one countdown: the Independence Day one, kept configured
+  // year-round for next 14 August, and an ordinary one that can be switched on
+  // whenever. If both are on, the seasonal one wins — it is the more specific
+  // occasion, and its branding is the point of running it.
+  const azadiEndsAt = settings.saleEnabled ? settings.saleEndsAt : null;
+  const generalEndsAt = settings.generalSaleEnabled ? settings.generalSaleEndsAt : null;
+  const countdownEndsAt = azadiEndsAt ?? generalEndsAt;
+  const countdownVariant = azadiEndsAt ? 'azadi' : 'general';
+
+  const saleRunning = settings.saleEnabled || settings.generalSaleEnabled;
+  const navItems = buildNav(categories, tags, saleRunning);
 
   // One glyph per line, leading the text — enough to catch the eye in a
   // ticker without turning the strip into decoration.
   const announcements = [
-    settings.saleEnabled ? '🏷️ Mid-season sale — up to 50% off' : null,
+    saleRunning ? '🏷️ Mid-season sale — up to 50% off' : null,
     '🚚 Free delivery on orders over Rs. 3,000',
     '💵 Cash on Delivery available nationwide'
   ].filter((m): m is string => Boolean(m));
@@ -26,7 +37,8 @@ export default async function StorefrontLayout({ children }: { children: React.R
   return (
     <>
       <SaleCountdownSync
-        saleEndsAt={settings.saleEnabled && settings.saleEndsAt ? settings.saleEndsAt.toISOString() : null}
+        saleEndsAt={countdownEndsAt ? countdownEndsAt.toISOString() : null}
+        variant={countdownVariant}
       />
       <AnnouncementBar messages={announcements} />
       <Navbar storeName={settings.storeName} navItems={navItems} />

@@ -23,6 +23,14 @@ const sans = localFont({
   display: 'swap'
 });
 
+// Display face for the homepage banner headline only — the condensed poster
+// weight the artwork was set in. Self-hosted for the same reason as above.
+const display = localFont({
+  src: [{ path: '../assets/fonts/anton-400.woff2', weight: '400', style: 'normal' }],
+  variable: '--font-display',
+  display: 'swap'
+});
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
   return {
@@ -33,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`light ${sans.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`light ${sans.variable} ${display.variable}`} suppressHydrationWarning>
       <body className="min-h-screen font-sans antialiased">
         <SmoothScroll />
         {children}

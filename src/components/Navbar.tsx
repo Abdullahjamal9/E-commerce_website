@@ -103,14 +103,20 @@ function sampleHeaderStrip(img: HTMLImageElement, bandTop: number, bandBottom: n
   }
 }
 
-/** Mean luminance of `backdrop` across `left`–`right` viewport pixels. */
+/**
+ * Mean luminance of `backdrop` across `left`–`right` viewport pixels. An item
+ * sitting entirely beside the image — the artwork need not span the full width
+ * — reads the nearest edge column, which is the tone its neighbourhood
+ * continues into, rather than being treated as unknown.
+ */
 function lumaAcross(backdrop: Backdrop, left: number, right: number): number {
   const { columns, width } = backdrop;
-  const first = Math.max(0, Math.floor(((left - backdrop.left) / width) * columns.length));
-  const last = Math.min(columns.length - 1, Math.ceil(((right - backdrop.left) / width) * columns.length) - 1);
+  const clamp = (i: number) => Math.min(columns.length - 1, Math.max(0, i));
+  const first = clamp(Math.floor(((left - backdrop.left) / width) * columns.length));
+  const last = clamp(Math.ceil(((right - backdrop.left) / width) * columns.length) - 1);
   let total = 0;
   let n = 0;
-  for (let i = first; i <= last; i++) {
+  for (let i = Math.min(first, last); i <= Math.max(first, last); i++) {
     total += columns[i];
     n++;
   }
@@ -248,8 +254,8 @@ export default function Navbar({
   // See-through over the page's own artwork at rest; opaque once it has
   // scrolled onto ordinary content, been pointed at, or has a panel hanging
   // off it — anything opaque goes back to the standard near-black type. Below
-  // lg it is simply always opaque.
-  const solid = docked || mobileSearchOpen || hovered || !desktop;
+  // lg there is no hover to speak of, so that leg only matters on desktop.
+  const solid = docked || mobileSearchOpen || (desktop && hovered);
   // Square and edge-to-edge except while resting on desktop artwork.
   const floating = desktop && !docked;
 
@@ -308,7 +314,13 @@ export default function Navbar({
             ? 'glass'
             : // Utilities rather than .glass here: that class is defined after
               // Tailwind's layers, so its own background could never be beaten.
-              `header-adaptive border bg-transparent ${borderTone}`
+              // Only the floating pill gets a full outline — its top edge is
+              // inset from the screen edge, so a border there reads as part of
+              // the pill. Docked to the screen edge (mobile, or desktop once
+              // scrolled past floating), the top edge sits flush against
+              // whatever's above it, and a border there would show as a stray
+              // line right where the announcement bar ends.
+              `header-adaptive bg-transparent ${floating ? 'border' : 'border-b'} ${borderTone}`
         }`}
       >
         <nav className="relative mx-auto flex h-16 max-w-site items-center justify-between gap-3 px-4 sm:px-6">

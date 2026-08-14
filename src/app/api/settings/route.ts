@@ -22,6 +22,11 @@ const settingsSchema = z.object({
   saleEndsAt: z
     .string()
     .nullable()
+    .transform((s) => (s ? new Date(s) : null)),
+  generalSaleEnabled: z.boolean(),
+  generalSaleEndsAt: z
+    .string()
+    .nullable()
     .transform((s) => (s ? new Date(s) : null))
 });
 

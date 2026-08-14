@@ -1,8 +1,9 @@
 import HeroSlider, { type HeroSlide } from '@/components/HeroSlider';
+import PromoBanner from '@/components/PromoBanner';
+import SaleBanner from '@/components/SaleBanner';
 import CategoryTiles, { type Tile } from '@/components/CategoryTiles';
 import ProductRail from '@/components/ProductRail';
 import SupportStrip from '@/components/SupportStrip';
-import SaleBanner from '@/components/SaleBanner';
 import { getFeaturedProducts, getProducts, getRecommendedProducts } from '@/lib/products';
 import { getSettings } from '@/lib/settings';
 import { getTags } from '@/lib/tags';
@@ -42,13 +43,19 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Below lg the header is a plain fixed bar sitting on the page, so the
-          first block clears its 64px height. From lg up it floats and the
-          artwork runs underneath it full-bleed. */}
-      <div className="pt-16 lg:pt-0">
-        {settings.saleEnabled && <SaleBanner />}
-        <HeroSlider slides={slides} />
-      </div>
+      {/* The Independence Day artwork takes the banner slot for as long as
+          that sale is switched on; the rest of the year the standing campaign
+          runs there. SaleBanner's own crop doesn't clear the mobile header on
+          its own, so it still needs external clearance; PromoBanner now
+          builds its own into each of its two crops. */}
+      {settings.saleEnabled ? (
+        <div className="pt-16 lg:pt-0">
+          <SaleBanner />
+        </div>
+      ) : (
+        <PromoBanner />
+      )}
+      <HeroSlider slides={slides} />
       <CategoryTiles tiles={tiles} />
       <ProductRail title="Trending" accent="Now" href="/shop" products={featured.slice(0, 8)} />
       <ProductRail title="Recommended" accent="For You" href="/shop" products={picks} />

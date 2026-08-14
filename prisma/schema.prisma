@@ -147,6 +147,10 @@ model Settings {
   instagramUrl        String  @default("")
   /** Toggles the Independence Day promo banner on the homepage — per-product discounts are set individually and don't depend on this. */
   saleEnabled         Boolean @default(false)
-  /** When set, discounted products show a countdown bar to this moment. */
+  /** When set, discounted products show an Independence Day countdown to this moment. */
   saleEndsAt          DateTime?
+  /** An ordinary sale that can be run at any time of year. Kept separate from the Independence Day pair above so that one stays configured for next 14 August. */
+  generalSaleEnabled  Boolean @default(false)
+  /** When set, discounted products show a plain countdown to this moment. */
+  generalSaleEndsAt   DateTime?
 }

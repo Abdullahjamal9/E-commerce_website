@@ -35,6 +35,16 @@ export async function POST() {
     );
     applied.push('Settings.saleEnabled');
   }
+  if (!settingsCols.some((c) => c.name === 'generalSaleEnabled')) {
+    await prisma.$executeRawUnsafe(
+      'ALTER TABLE "Settings" ADD COLUMN "generalSaleEnabled" BOOLEAN NOT NULL DEFAULT false;'
+    );
+    applied.push('Settings.generalSaleEnabled');
+  }
+  if (!settingsCols.some((c) => c.name === 'generalSaleEndsAt')) {
+    await prisma.$executeRawUnsafe('ALTER TABLE "Settings" ADD COLUMN "generalSaleEndsAt" DATETIME;');
+    applied.push('Settings.generalSaleEndsAt');
+  }
   if (settingsCols.some((c) => c.name === 'salePercent')) {
     await prisma.$executeRawUnsafe('ALTER TABLE "Settings" DROP COLUMN "salePercent";');
     applied.push('dropped Settings.salePercent');
