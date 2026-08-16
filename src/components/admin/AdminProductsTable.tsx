@@ -151,14 +151,14 @@ export default function AdminProductsTable({ products }: { products: Shoe[] }) {
         {featuredCount > MAX_FEATURED && (
           <span className="text-amber-400">
             {' '}
-            — {featuredCount - MAX_FEATURED} of them won&apos;t appear; uncheck some or drag the rest
+            {featuredCount - MAX_FEATURED} of them won&apos;t appear; uncheck some or drag the rest
             higher.
           </span>
         )}
         .
       </p>
       <p className="mb-3 text-xs opacity-60">
-        Drag rows by the ⠿ handle to reorder — this only reorders within whatever&apos;s currently
+        Drag rows by the ⠿ handle to reorder. This only reorders within whatever&apos;s currently
         visible (e.g. a filtered category, or this page), leaving everything else untouched.
       </p>
       <table className="w-full text-left text-sm">

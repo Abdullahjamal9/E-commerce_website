@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from './ProductCard';
 import ScrollableChipRow from './ScrollableChipRow';
 import type { Category, Shoe, Tag } from '@/lib/types';
+import { collectionCopy, collectionLabel } from '@/lib/collectionCopy';
+import { inStockFirst } from '@/lib/stockSort';
 
 type Sort = 'newest' | 'price-asc' | 'price-desc';
 
@@ -733,7 +735,10 @@ export default function ShopGrid({
     if (sort === 'price-asc') list = [...list].sort((a, b) => a.price - b.price);
     if (sort === 'price-desc') list = [...list].sort((a, b) => b.price - a.price);
 
-    return list;
+    // Re-applied after the price sorts, which would otherwise scatter sold-out
+    // pairs back through the grid. The server already ordered them this way;
+    // this keeps it true once the shopper re-sorts client-side.
+    return inStockFirst(list);
   }, [inCategory, activeTag, activeSize, activeDiscount, search, sort, minPrice, maxPrice]);
 
   // Reset how many cards are rendered whenever the filter criteria actually
@@ -771,7 +776,16 @@ export default function ShopGrid({
     minPrice !== '' || maxPrice !== ''
   ].filter(Boolean).length;
 
-  const scope = activeCategory === 'All' ? 'All Products' : activeCategory;
+  // The tag is what actually narrows this grid — there's only one category —
+  // so it leads the heading. Without this, /shop?tag=Running announced itself
+  // as "All Products" while showing nothing but running shoes, which misreads
+  // to a shopper and hands search engines the wrong h1 for the page.
+  const scope =
+    activeTag !== 'All'
+      ? collectionLabel(activeTag)
+      : activeCategory === 'All'
+        ? 'All Products'
+        : activeCategory;
   const heading = audience ? `${audience}'s ${scope === 'All Products' ? 'Collection' : scope}` : scope;
 
   return (
@@ -787,7 +801,9 @@ export default function ShopGrid({
         </nav>
 
         <h1 className="text-2xl font-black uppercase tracking-wide sm:text-3xl">{heading}</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">Browse the {storeName} catalogue.</p>
+        <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
+          {collectionCopy(activeTag === 'All' ? null : activeTag, storeName)}
+        </p>
 
         {/* Style tab row — the reference storefront's rounded, separator-split
             strip. Driven by tags, which are our equivalent of its style

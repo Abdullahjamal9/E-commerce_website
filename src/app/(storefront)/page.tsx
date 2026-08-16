@@ -43,6 +43,15 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* The page's headline lives inside the banner artwork, where it's
+          pixels — unreadable to search engines and screen readers alike, and
+          leaving the homepage with no h1 at all. This states the same thing in
+          text for both. It's kept off-screen rather than rendered because the
+          artwork is already saying it visually; sr-only is the standard way to
+          give a heading to a page whose h1 is an image. */}
+      <h1 className="sr-only">
+        Buy Shoes Online in Pakistan: Sneakers, Running, Formal and Casual Shoes
+      </h1>
       {/* The Independence Day artwork takes the banner slot for as long as
           that sale is switched on; the rest of the year the standing campaign
           runs there. SaleBanner's own crop doesn't clear the mobile header on

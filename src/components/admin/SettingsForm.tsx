@@ -92,11 +92,6 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
         </div>
       </div>
 
-      <p className="-mb-2 rounded-xl bg-amber-500/10 px-4 py-2 text-xs text-amber-300">
-        These are demo values from initial setup — enter your real bank account and Easypaisa
-        number below so customer payments reach the right place.
-      </p>
-
       <div>
         <p className="mb-3 font-semibold">Independence Day sale</p>
         <label className="glass flex items-center gap-3 rounded-xl p-3">
@@ -119,7 +114,7 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
           />
         </div>
         <p className="mt-2 text-xs opacity-50">
-          Leave this configured all year — switching it back on next 14 August is all it takes.
+          Leave this configured all year. Switching it back on next 14 August is all it takes.
         </p>
       </div>
 
@@ -146,7 +141,7 @@ export default function SettingsForm({ settings }: { settings: PublicSettings })
         </div>
         <p className="mt-2 text-xs opacity-50">
           With both switched on, the Independence Day countdown is the one shown. Discounts
-          themselves are set per product — open a product under Products and set its Discount %.
+          themselves are set per product: open a product under Products and set its Discount %.
         </p>
       </div>
 

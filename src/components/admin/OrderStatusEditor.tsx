@@ -64,7 +64,7 @@ export default function OrderStatusEditor({
       notify('Could not verify payment');
       return;
     }
-    notify('Payment verified — confirmation email sent to customer');
+    notify('Payment verified, confirmation email sent to customer');
     router.refresh();
   };
 

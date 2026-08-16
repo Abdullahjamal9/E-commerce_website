@@ -42,7 +42,7 @@ export default async function PrivacyPolicyPage() {
           <p>
             For Cash on Delivery orders, no payment information is collected online. For bank
             transfer or Easypaisa payments, you transfer funds directly through your own banking
-            app — we never ask for your card number, PIN, or OTP.
+            app. We never ask for your card number, PIN, or OTP.
           </p>
         </section>
         <section>

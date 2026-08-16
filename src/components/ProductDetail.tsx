@@ -313,7 +313,7 @@ export default function ProductDetail({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={cloudinaryResize(img, 200)}
-                    alt={`${shoe.name} — photo ${i + 1}`}
+                    alt={`${shoe.name} photo ${i + 1}`}
                     loading="eager"
                     className="h-full w-full bg-[var(--surface-alt)] object-contain p-1"
                   />

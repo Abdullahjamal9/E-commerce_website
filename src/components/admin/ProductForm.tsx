@@ -255,7 +255,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
           />
           {Number(stock) <= 0 && stock !== '' && (
             <p className="mt-1 text-xs text-red-400">
-              Stock is 0 — this product will show as &quot;Out of stock&quot; on the storefront.
+              Stock is 0, so this product will show as &quot;Out of stock&quot; on the storefront.
             </p>
           )}
         </div>
@@ -284,7 +284,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
           <label className="mb-1 block text-sm font-medium opacity-80">Category</label>
           {categoryOptions.length === 0 ? (
             <p className="rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 text-sm opacity-60">
-              No categories yet — add one from the Categories page first.
+              No categories yet. Add one from the Categories page first.
             </p>
           ) : (
             <SingleSelectDropdown
@@ -302,7 +302,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
             selected={tags}
             onChange={setTags}
             placeholder="Select tags"
-            emptyMessage="No tags yet — add one from the Tags page first."
+            emptyMessage="No tags yet. Add one from the Tags page first."
           />
         </div>
       </div>
@@ -360,7 +360,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
 
       <div>
         <label className="mb-1 block text-sm font-medium opacity-80">
-          Sizes (comma-separated — numbers like 40, 41, 42 or text like S, M, L, XL)
+          Sizes (comma-separated: numbers like 40, 41, 42 or text like S, M, L, XL)
         </label>
         <input
           required
@@ -433,7 +433,7 @@ export default function ProductForm({ productId, initial, categoryOptions, tagOp
       <div>
         <p className="mb-1 text-sm font-medium opacity-80">360° Spin Photos (optional)</p>
         <p className="mb-2 text-xs opacity-50">
-          Place the shoe on a turntable and upload 16–36 photos in rotation order — customers can
+          Place the shoe on a turntable and upload 16-36 photos in rotation order so customers can
           then drag to spin it in 3D. Skip this if you only have regular photos.
         </p>
         {spinImages.length > 0 && (

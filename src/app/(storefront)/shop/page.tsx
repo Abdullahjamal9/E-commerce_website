@@ -6,6 +6,7 @@ import { getProducts } from '@/lib/products';
 import { getSettings } from '@/lib/settings';
 import type { Category, Tag } from '@/lib/types';
 import { SITE_URL } from '@/lib/site';
+import { collectionLabel } from '@/lib/collectionCopy';
 
 export async function generateMetadata({
   searchParams
@@ -16,10 +17,16 @@ export async function generateMetadata({
   const scope = [searchParams.audience, searchParams.tag ?? searchParams.category]
     .filter(Boolean)
     .join(' ');
-  // A plain string picks up the root layout's "%s — StoreName" template —
-  // appending storeName again here would double it up.
-  const title = scope || 'Shop';
-  const description = `Browse the full ${settings.storeName} catalogue.`;
+
+  // Same helper the grid's own heading uses, so the title and the h1 on the
+  // page can't drift apart. "Running" is a filter label; "Running Shoes in
+  // Pakistan" is what someone types into Google. A plain string picks up the
+  // root layout's "%s — StoreName" template.
+  const label = collectionLabel(scope || null);
+  const title = `${label} in Pakistan`;
+  const description = scope
+    ? `Shop ${label.toLowerCase()} online in Pakistan at ${settings.storeName}. Cash on Delivery nationwide, 7-day returns and exchanges.`
+    : `Browse the full ${settings.storeName} shoe catalogue: sneakers, running, formal, casual and boots. Cash on Delivery nationwide, 7-day returns.`;
 
   // A single category or tag filter is a real landing page (the sitemap
   // lists these individually), so it gets a self-referencing canonical. Any

@@ -45,7 +45,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   // way; only an orderStatus *change* is blocked here.
   if (changingStatus && isOrderStatusLocked(existing)) {
     return NextResponse.json(
-      { error: 'Order Status is locked — the 7-day return window has closed.' },
+      { error: 'Order Status is locked. The 7-day return window has closed.' },
       { status: 409 }
     );
   }

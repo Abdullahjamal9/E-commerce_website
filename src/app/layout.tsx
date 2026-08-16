@@ -33,8 +33,13 @@ const display = localFont({
   display: 'swap'
 });
 
+// What someone actually types into Google, rather than the store's own name —
+// nobody searches a new brand by name, so the homepage leads with the category
+// and the market it sells to. Every claim here is one the site already makes
+// elsewhere: the brands are real product lines, COD is a live payment method,
+// and the 7-day window is the store's stated returns policy.
 const DESCRIPTION =
-  'Shop quality footwear, apparel, and accessories online with fast delivery, Cash on Delivery, and easy returns.';
+  'Buy shoes online in Pakistan: sneakers, running, formal, casual and boots from Nike, Adidas, Puma, Skechers, New Balance and more. Cash on Delivery nationwide, 7-day returns and exchanges.';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
@@ -46,7 +51,12 @@ export async function generateMetadata(): Promise<Metadata> {
     // everywhere — unset, Next silently drops those fields instead of
     // erroring, which is easy to miss.
     metadataBase: new URL(SITE_URL),
-    title: { default: settings.storeName, template: `%s — ${settings.storeName}` },
+    // The template only applies to pages that set their own title; `default`
+    // is used verbatim, so it carries the store name itself.
+    title: {
+      default: `Buy Shoes Online in Pakistan | ${settings.storeName}`,
+      template: `%s | ${settings.storeName}`
+    },
     description: DESCRIPTION,
     // Proves ownership for Google Search Console — renders as
     // <meta name="google-site-verification" content="..." /> in <head>.

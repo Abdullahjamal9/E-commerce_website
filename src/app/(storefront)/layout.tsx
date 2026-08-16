@@ -29,7 +29,7 @@ export default async function StorefrontLayout({ children }: { children: React.R
   // One glyph per line, leading the text — enough to catch the eye in a
   // ticker without turning the strip into decoration.
   const announcements = [
-    saleRunning ? '🏷️ Mid-season sale — up to 50% off' : null,
+    saleRunning ? '🏷️ Mid-season sale: up to 50% off' : null,
     '🚚 Free delivery on orders over Rs. 3,000',
     '💵 Cash on Delivery available nationwide'
   ].filter((m): m is string => Boolean(m));

@@ -1,5 +1,6 @@
 import { prisma } from './db';
 import type { Category, Shoe, ShoeColor, Tag } from './types';
+import { inStockFirst } from './stockSort';
 
 type ProductRow = {
   id: string;
@@ -88,7 +89,10 @@ export async function getProducts(filters: ProductFilters = {}): Promise<Shoe[]>
     }
   }
 
-  return shoes;
+  // Sold-out pairs sink to the bottom of every listing, whatever else the
+  // ordering above worked out to — nothing a shopper can't buy should be
+  // taking up the top of a grid.
+  return inStockFirst(shoes);
 }
 
 /** Storefront-facing lookup — returns undefined for inactive products so they 404 publicly. */
@@ -123,12 +127,14 @@ export async function getRelated(id: string, count = 4): Promise<Shoe[]> {
 
 /** Products an admin has curated onto the homepage, most recently featured first. */
 export async function getFeaturedProducts(maxCount = 8): Promise<Shoe[]> {
+  // No `take` on the query: sorting for stock has to happen across the whole
+  // curated set before the slice, or a rail could come back full of sold-out
+  // pairs while in-stock ones sat just past the cut.
   const featuredRows = await prisma.product.findMany({
     where: { featuredAt: { not: null }, isActive: true },
-    orderBy: { sortOrder: 'asc' },
-    take: maxCount
+    orderBy: { sortOrder: 'asc' }
   });
-  return featuredRows.map(mapProduct);
+  return inStockFirst(featuredRows.map(mapProduct)).slice(0, maxCount);
 }
 
 /**

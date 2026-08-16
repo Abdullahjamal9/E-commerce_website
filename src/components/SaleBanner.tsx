@@ -14,13 +14,13 @@ export default function SaleBanner() {
           decorative top/bottom edges rather than the headline. */}
       <Image
         src={mobileBanner}
-        alt="14th August Independence Day — up to 50% off sitewide"
+        alt="14th August Independence Day sale: up to 50% off sitewide"
         priority
         className="block max-h-[58vh] w-full object-cover object-center md:hidden"
       />
       <Image
         src={desktopBanner}
-        alt="14th August Independence Day — up to 50% off sitewide"
+        alt="14th August Independence Day sale: up to 50% off sitewide"
         priority
         className="hidden h-auto w-full md:block"
       />

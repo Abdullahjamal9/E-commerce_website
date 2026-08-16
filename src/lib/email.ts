@@ -75,7 +75,7 @@ export async function sendOrderEmails(order: Order & { items: OrderItem[] }) {
     ? transporter.sendMail({
         from: FROM,
         to: adminEmail,
-        subject: `New order ${order.orderNumber} — ${paymentLabel(order.paymentMethod)}`,
+        subject: `New order ${order.orderNumber} via ${paymentLabel(order.paymentMethod)}`,
         html: `
           <div style="font-family:sans-serif">
             <h2>New order received</h2>
@@ -111,7 +111,7 @@ export async function sendPaymentVerifiedEmail(order: Order & { items: OrderItem
     await transporter.sendMail({
       from: FROM,
       to: order.email,
-      subject: `Payment verified — order ${order.orderNumber} confirmed`,
+      subject: `Payment verified, order ${order.orderNumber} confirmed`,
       html: `
         <div style="font-family:sans-serif">
           <h2>Your payment has been verified, ${order.customerName}!</h2>

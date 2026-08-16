@@ -31,7 +31,7 @@ export default function ContactForm() {
     }
 
     setSent(true);
-    notify('Message sent — we will get back to you soon');
+    notify('Message sent, we will get back to you soon');
   };
 
   if (sent) {

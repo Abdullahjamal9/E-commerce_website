@@ -25,13 +25,24 @@ export async function generateMetadata({
   const shoe = await getProductBySlug(params.id);
   if (!shoe) return {};
 
-  // A plain string here already picks up the root layout's "%s — StoreName"
-  // template — appending storeName again would double it up.
-  const description = shoe.tagline || shoe.description.slice(0, 160);
+  // Product names here already run ~50 characters and carry the brand, so the
+  // usual "— StoreName" suffix would push the title well past the ~60 Google
+  // displays and truncate the part that matters. `absolute` opts out of the
+  // root template, leaving room for "Price in Pakistan" — the phrasing people
+  // actually search once they have a specific model in mind.
+  // Trimmed: a few product names carry trailing whitespace from data entry,
+  // which shows up as a double space in the rendered title.
+  const title = `${shoe.name.trim()} | Price in Pakistan`;
+  // The product's own copy leads (it's the most specific thing on the page);
+  // the buying terms follow to fill out the snippet, since taglines here are
+  // often far shorter than the ~160 characters Google will show. Taglines
+  // aren't punctuated, so the join has to supply the full stop itself.
+  const detail = (shoe.tagline || shoe.description.slice(0, 110)).trim().replace(/[.,;:]$/, '');
+  const description = `${detail}. Buy online in Pakistan with Cash on Delivery and 7-day returns.`;
   const url = `${SITE_URL}/product/${shoe.slug}`;
 
   return {
-    title: shoe.name,
+    title: { absolute: title },
     description,
     alternates: { canonical: url },
     openGraph: {

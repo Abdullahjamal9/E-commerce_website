@@ -28,7 +28,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
         {windowCloses && (
           <p className={`mb-4 text-sm ${locked ? 'text-red-400' : 'opacity-60'}`}>
             {locked
-              ? `🔒 Order Status locked — the 7-day return window closed ${formatOrderDateTime(windowCloses)}.`
+              ? `🔒 Order Status locked. The 7-day return window closed ${formatOrderDateTime(windowCloses)}.`
               : `Return window closes ${formatOrderDateTime(windowCloses)}.`}
           </p>
         )}
@@ -110,7 +110,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
         href="/admin/orders"
         className="btn-glow mt-6 block w-full rounded-full bg-gradient-to-r from-neon-blue to-neon-purple py-3 text-center font-semibold text-white"
       >
-        Done — Back to Orders
+        Back to Orders
       </Link>
     </div>
   );
