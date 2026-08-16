@@ -127,6 +127,62 @@ export async function sendPaymentVerifiedEmail(order: Order & { items: OrderItem
   }
 }
 
+const STATUS_COPY: Record<string, { subject: string; heading: string; message: string }> = {
+  CONFIRMED: {
+    subject: 'confirmed',
+    heading: 'Your order has been confirmed!',
+    message: 'We’ve confirmed your order and it’s now being prepared for delivery.'
+  },
+  SHIPPED: {
+    subject: 'on its way',
+    heading: 'Your order is on its way!',
+    message: 'Your order has been dispatched and is on its way to you.'
+  },
+  DELIVERED: {
+    subject: 'delivered',
+    heading: 'Your order has been delivered!',
+    message: 'Your order has been marked as delivered. Thank you for shopping with us.'
+  },
+  CANCELLED: {
+    subject: 'cancelled',
+    heading: 'Your order has been cancelled',
+    message:
+      'Your order has been cancelled. If you weren’t expecting this or have any questions, please get in touch with us.'
+  }
+};
+
+/** Notifies the customer when an admin moves an order to one of the statuses in STATUS_COPY — see OrderStatusEditor. */
+export async function sendOrderStatusEmail(order: Order & { items: OrderItem[] }, status: keyof typeof STATUS_COPY) {
+  if (!transporter) return;
+
+  const copy = STATUS_COPY[status];
+  const summary = `
+    <table style="width:100%;border-collapse:collapse;font-family:sans-serif;font-size:14px">
+      ${itemsTable(order.items)}
+      <tr><td style="padding-top:10px;font-weight:700;border-top:1px solid #ddd">Total</td>
+      <td style="padding-top:10px;font-weight:700;border-top:1px solid #ddd;text-align:right">${formatPrice(order.total)}</td></tr>
+    </table>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: FROM,
+      to: order.email,
+      subject: `Order ${order.orderNumber} ${copy.subject}`,
+      html: `
+        <div style="font-family:sans-serif">
+          <h2>${copy.heading}</h2>
+          <p>Hi ${order.customerName}, ${copy.message}</p>
+          ${summary}
+          <p style="margin-top:16px">Delivery address: ${order.address}, ${order.city}</p>
+        </div>
+      `
+    });
+  } catch (err) {
+    console.error('Order status email failed:', err);
+  }
+}
+
 export async function sendContactMessage(data: { name: string; phone: string; message: string }) {
   const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
   if (!transporter || !adminEmail) return;

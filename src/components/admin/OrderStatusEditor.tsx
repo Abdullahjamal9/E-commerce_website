@@ -10,17 +10,20 @@ const ORDER_STATUSES = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELL
 export default function OrderStatusEditor({
   orderId,
   paymentStatus,
-  orderStatus
+  orderStatus,
+  locked = false
 }: {
   orderId: string;
   paymentStatus: string;
   orderStatus: string;
+  locked?: boolean;
 }) {
   const router = useRouter();
   const notify = useToast((s) => s.show);
   const [saving, setSaving] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
 
   const update = async (field: 'paymentStatus' | 'orderStatus', value: string) => {
     setSaving(true);
@@ -31,10 +34,25 @@ export default function OrderStatusEditor({
     });
     setSaving(false);
     if (!res.ok) {
-      notify('Could not update order');
+      // Surfaces the specific reason (e.g. the 7-day lock) instead of a
+      // generic failure message.
+      const body = await res.json().catch(() => null);
+      notify(body?.error ?? 'Could not update order');
       return;
     }
     notify('Order updated');
+    router.refresh();
+  };
+
+  const unlockStatus = async () => {
+    setUnlocking(true);
+    const res = await fetch(`/api/orders/${orderId}/unlock-status`, { method: 'POST' });
+    setUnlocking(false);
+    if (!res.ok) {
+      notify('Could not unlock order status');
+      return;
+    }
+    notify('Order Status unlocked');
     router.refresh();
   };
 
@@ -95,9 +113,9 @@ export default function OrderStatusEditor({
         <label className="mb-1 block text-sm font-medium opacity-80">Order Status</label>
         <select
           defaultValue={orderStatus}
-          disabled={saving}
+          disabled={saving || locked}
           onChange={(e) => update('orderStatus', e.target.value)}
-          className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)]"
+          className="w-full rounded-xl bg-[var(--surface-alt)] px-4 py-2.5 outline-none ring-1 ring-[var(--border)] focus:ring-[var(--fg)] disabled:opacity-50"
         >
           {ORDER_STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -105,6 +123,16 @@ export default function OrderStatusEditor({
             </option>
           ))}
         </select>
+        {locked && (
+          <button
+            type="button"
+            onClick={unlockStatus}
+            disabled={unlocking}
+            className="mt-2 text-xs font-medium underline decoration-dotted opacity-70 transition hover:opacity-100 disabled:opacity-40"
+          >
+            {unlocking ? 'Unlocking…' : 'Unlock to edit (exceptional cases only)'}
+          </button>
+        )}
       </div>
       </div>
       <button

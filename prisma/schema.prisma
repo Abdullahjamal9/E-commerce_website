@@ -101,6 +101,10 @@ model Order {
   total         Int
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  /** Set when orderStatus is moved to DELIVERED, cleared if it's moved off DELIVERED again. Starts the 7-day return/exchange window — see orderStatusUnlocked. */
+  deliveredAt         DateTime?
+  /** Manual override: once the 7-day window closes, Order Status locks against further edits. An admin can flip this to reopen it for an exceptional case. */
+  orderStatusUnlocked Boolean   @default(false)
 
   items OrderItem[]
 }

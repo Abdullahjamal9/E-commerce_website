@@ -19,6 +19,9 @@ export async function POST() {
   const settingsCols = (await prisma.$queryRawUnsafe(
     'PRAGMA table_info(Settings);'
   )) as { name: string }[];
+  const orderCols = (await prisma.$queryRawUnsafe(
+    'PRAGMA table_info("Order");'
+  )) as { name: string }[];
 
   const applied: string[] = [];
 
@@ -44,6 +47,16 @@ export async function POST() {
   if (!settingsCols.some((c) => c.name === 'generalSaleEndsAt')) {
     await prisma.$executeRawUnsafe('ALTER TABLE "Settings" ADD COLUMN "generalSaleEndsAt" DATETIME;');
     applied.push('Settings.generalSaleEndsAt');
+  }
+  if (!orderCols.some((c) => c.name === 'deliveredAt')) {
+    await prisma.$executeRawUnsafe('ALTER TABLE "Order" ADD COLUMN "deliveredAt" DATETIME;');
+    applied.push('Order.deliveredAt');
+  }
+  if (!orderCols.some((c) => c.name === 'orderStatusUnlocked')) {
+    await prisma.$executeRawUnsafe(
+      'ALTER TABLE "Order" ADD COLUMN "orderStatusUnlocked" BOOLEAN NOT NULL DEFAULT false;'
+    );
+    applied.push('Order.orderStatusUnlocked');
   }
   if (settingsCols.some((c) => c.name === 'salePercent')) {
     await prisma.$executeRawUnsafe('ALTER TABLE "Settings" DROP COLUMN "salePercent";');

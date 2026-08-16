@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import OrderStatusEditor from '@/components/admin/OrderStatusEditor';
 import { prisma } from '@/lib/db';
 import { formatPrice } from '@/lib/currency';
+import { formatOrderDateTime } from '@/lib/date';
+import { isOrderStatusLocked, returnWindowCloses } from '@/lib/orderLock';
 
 export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
   const order = await prisma.order.findUnique({
@@ -11,19 +13,30 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
   });
   if (!order) notFound();
 
+  const locked = isOrderStatusLocked(order);
+  const windowCloses = returnWindowCloses(order.deliveredAt);
+
   return (
     <div className="max-w-3xl">
       <h1 className="mb-1 text-2xl font-black sm:text-3xl">{order.orderNumber}</h1>
       <p className="mb-6 text-sm opacity-60">
-        Placed {new Date(order.createdAt).toLocaleString()}
+        Placed {formatOrderDateTime(order.createdAt)}
       </p>
 
       <div className="glass mb-6 rounded-2xl p-6">
         <p className="mb-4 font-semibold">Update Status</p>
+        {windowCloses && (
+          <p className={`mb-4 text-sm ${locked ? 'text-red-400' : 'opacity-60'}`}>
+            {locked
+              ? `🔒 Order Status locked — the 7-day return window closed ${formatOrderDateTime(windowCloses)}.`
+              : `Return window closes ${formatOrderDateTime(windowCloses)}.`}
+          </p>
+        )}
         <OrderStatusEditor
           orderId={order.id}
           paymentStatus={order.paymentStatus}
           orderStatus={order.orderStatus}
+          locked={locked}
         />
       </div>
 
