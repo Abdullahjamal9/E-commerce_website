@@ -28,7 +28,7 @@ export default async function FAQPage() {
     },
     {
       q: 'Can I return or exchange a product?',
-      a: 'Yes, see our Shipping & Returns page for details. Contact us within 3 days of delivery for damaged, defective, or incorrect items.'
+      a: 'Yes, see our Shipping & Returns page for details. Contact us within 7 days of delivery for a return, exchange, or a damaged, defective, or incorrect item.'
     },
     {
       q: 'I paid by bank transfer, when will my order be confirmed?',

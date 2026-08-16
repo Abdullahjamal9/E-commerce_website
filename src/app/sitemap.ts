@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { getAllSlugs } from '@/lib/products';
 import { getCategories } from '@/lib/categories';
 import { getTags } from '@/lib/tags';
+import { GUIDES } from '@/lib/guides';
 import { SITE_URL } from '@/lib/site';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -20,7 +21,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/shipping-returns',
     '/privacy-policy',
     '/terms',
-    '/track-order'
+    '/track-order',
+    '/guides',
+    ...GUIDES.map((g) => `/guides/${g.slug}`)
   ].map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: new Date()

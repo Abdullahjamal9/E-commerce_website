@@ -31,6 +31,7 @@ export default function Footer({
   const about = [
     { label: 'Track Your Order', href: '/track-order' },
     { label: 'Shipping & Returns', href: '/shipping-returns' },
+    { label: 'Buying Guides', href: '/guides' },
     { label: 'FAQ', href: '/faq' },
     { label: 'About Us', href: '/about' },
     { label: 'Contact Us', href: '/contact' }
