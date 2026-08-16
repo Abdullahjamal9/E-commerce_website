@@ -38,17 +38,18 @@ export default async function ShippingReturnsPage() {
         <section>
           <h2 className="mb-2 text-lg font-bold opacity-100">Returns & Exchanges</h2>
           <p>
-            If your item arrives damaged, defective, or doesn&apos;t match your order, contact us
-            within 3 days of delivery and we&apos;ll arrange a replacement or refund. Items must
-            be unused, in original packaging, with tags attached.
+            If your item arrives damaged, defective, or doesn&apos;t match your order, or you&apos;d
+            simply like to return or exchange it, contact us within 7 days of delivery and
+            we&apos;ll arrange a replacement or refund. Items must be unused, in original
+            packaging, with tags attached.
           </p>
         </section>
         <section>
           <h2 className="mb-2 text-lg font-bold opacity-100">Refunds</h2>
           <p>
-            Approved refunds for bank transfer / Easypaisa orders are sent back to the same
-            account used for payment. Cash on Delivery refunds are processed via bank transfer or
-            Easypaisa after verification.
+            Once approved, refunds are processed within 3 business days. Bank transfer / Easypaisa
+            orders are refunded to the same account used for payment; Cash on Delivery refunds are
+            sent via bank transfer or Easypaisa after verification.
           </p>
           <p className="mt-2">
             Please note that delivery charges are non-refundable and will be deducted from the
