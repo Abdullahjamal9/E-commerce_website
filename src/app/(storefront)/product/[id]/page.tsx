@@ -38,7 +38,10 @@ export async function generateMetadata({
   // often far shorter than the ~160 characters Google will show. Taglines
   // aren't punctuated, so the join has to supply the full stop itself.
   const detail = (shoe.tagline || shoe.description.slice(0, 110)).trim().replace(/[.,;:]$/, '');
-  const description = `${detail}. Buy online in Pakistan with Cash on Delivery and 7-day returns.`;
+  const buyLine = shoe.tags.includes('Preloved')
+    ? 'Preloved, inspected pair. Buy online in Pakistan with Cash on Delivery and 7-day returns.'
+    : 'Buy online in Pakistan with Cash on Delivery and 7-day returns.';
+  const description = `${detail}. ${buyLine}`;
   const url = `${SITE_URL}/product/${shoe.slug}`;
 
   return {
@@ -86,6 +89,12 @@ export default async function ProductPage({ params }: { params: { id: string } }
     image: shoe.images.length ? shoe.images : [shoe.image],
     sku: shoe.id,
     category: shoe.category,
+    // The store sells a mix of new and preloved pairs — Google only trusts
+    // this over the plain word "preloved" in the description, so a product
+    // tagged Preloved is worth surfacing as UsedCondition explicitly.
+    itemCondition: shoe.tags.includes('Preloved')
+      ? 'https://schema.org/UsedCondition'
+      : 'https://schema.org/NewCondition',
     offers: {
       '@type': 'Offer',
       url: `${SITE_URL}/product/${shoe.slug}`,

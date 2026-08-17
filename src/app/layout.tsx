@@ -39,7 +39,7 @@ const display = localFont({
 // elsewhere: the brands are real product lines, COD is a live payment method,
 // and the 7-day window is the store's stated returns policy.
 const DESCRIPTION =
-  'Buy shoes online in Pakistan: sneakers, running, formal, casual and boots from Nike, Adidas, Puma, Skechers, New Balance and more. Cash on Delivery nationwide, 7-day returns and exchanges.';
+  'Buy new and preloved shoes online in Pakistan: sneakers, running, formal, casual and boots from Nike, Adidas, Puma, Skechers, New Balance and more. Cash on Delivery nationwide, 7-day returns and exchanges.';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
