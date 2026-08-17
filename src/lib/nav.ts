@@ -22,12 +22,10 @@ export interface NavItem {
  *  These become the top-level menus, with styles nested underneath. */
 const AUDIENCE_TAGS = ['Men', 'Women'];
 const NEW_ARRIVALS = 'New Arrivals';
-const PRELOVED = 'Preloved';
-// Preloved gets its own top-level menu entry (below) rather than living
-// nested under each audience's style columns — nested links canonicalize
-// back to the bare /shop listing (see shop/page.tsx), so they carry none of
-// the standalone landing page's SEO value for "preloved shoes" searches.
-const NON_STYLE_TAGS = [...AUDIENCE_TAGS, 'Unisex', NEW_ARRIVALS, PRELOVED];
+// Kept out of the header nav entirely (not even nested under a style
+// column) — /shop?tag=Preloved still exists and is still in the sitemap for
+// search engines, it's just not surfaced as a clickable menu item.
+const NON_STYLE_TAGS = [...AUDIENCE_TAGS, 'Unisex', NEW_ARRIVALS, 'Preloved'];
 const MAX_ROWS_PER_COLUMN = 7;
 const MAX_STYLE_COLUMNS = 3;
 
@@ -62,7 +60,6 @@ export function buildNav(categories: string[], tags: string[], saleEnabled: bool
 
   if (saleEnabled) items.push({ label: 'Sale', href: '/shop' });
   if (tags.includes(NEW_ARRIVALS)) items.push({ label: NEW_ARRIVALS, href: tagHref(NEW_ARRIVALS) });
-  if (tags.includes(PRELOVED)) items.push({ label: PRELOVED, href: tagHref(PRELOVED) });
 
   for (const audience of AUDIENCE_TAGS) {
     if (!tags.includes(audience)) continue;
