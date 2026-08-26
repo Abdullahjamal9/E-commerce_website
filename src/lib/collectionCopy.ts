@@ -24,6 +24,7 @@ const TAG_COPY: Record<string, string> = {
   Samba: 'Samba-style low profile shoes with the classic gum-sole terrace look.',
   Skechers: 'Skechers shoes known for their cushioned midsoles and easy everyday comfort.',
   'New Arrivals': 'The latest pairs to land in stock, with new brands, colours and sizes added regularly.',
+  Preloved: 'Preloved and used shoes in Pakistan, inspected and in good condition at a fraction of retail price.',
   Men: 'Men’s shoes across sneakers, formal, casual and sports, in full size runs.',
   Women: 'Women’s shoes across sneakers, formal, casual and sports, in full size runs.',
   Unisex: 'Unisex pairs that run across men’s and women’s sizing.'

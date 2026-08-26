@@ -22,7 +22,10 @@ export interface NavItem {
  *  These become the top-level menus, with styles nested underneath. */
 const AUDIENCE_TAGS = ['Men', 'Women'];
 const NEW_ARRIVALS = 'New Arrivals';
-const NON_STYLE_TAGS = [...AUDIENCE_TAGS, 'Unisex', NEW_ARRIVALS];
+// Kept out of the header nav entirely (not even nested under a style
+// column) — /shop?tag=Preloved still exists and is still in the sitemap for
+// search engines, it's just not surfaced as a clickable menu item.
+const NON_STYLE_TAGS = [...AUDIENCE_TAGS, 'Unisex', NEW_ARRIVALS, 'Preloved'];
 const MAX_ROWS_PER_COLUMN = 7;
 const MAX_STYLE_COLUMNS = 3;
 
