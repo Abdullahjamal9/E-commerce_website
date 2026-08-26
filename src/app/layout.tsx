@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import Script from 'next/script';
 import './globals.css';
 import Toaster from '@/components/Toaster';
 import SmoothScroll from '@/components/SmoothScroll';
@@ -113,6 +114,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
+        {/* Google tag (gtag.js) for Merchant Center / conversion tracking.
+            next/script with afterInteractive is the framework's own
+            recommended pattern for this: it loads once, after hydration,
+            without blocking the page the way a raw <script> in <head> would. */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=GT-NNVB9V8C" strategy="afterInteractive" />
+        <Script id="google-tag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'GT-NNVB9V8C');
+          `}
+        </Script>
         <SmoothScroll />
         {children}
         <Toaster />
