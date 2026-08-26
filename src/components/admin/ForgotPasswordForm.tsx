@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import logo from '@/assets/logo.png';
+import logoBlack from '@/assets/logo_black-removebg-preview.png';
 import FloatingBackground from './FloatingBackground';
 
 export default function ForgotPasswordForm({ storeName }: { storeName: string }) {
@@ -31,7 +31,7 @@ export default function ForgotPasswordForm({ storeName }: { storeName: string })
 
       <div className="glass relative z-10 w-full max-w-sm space-y-5 rounded-3xl p-8">
         <div className="text-center">
-          <Image src={logo} alt={storeName} width={40} height={40} className="mx-auto" />
+          <Image src={logoBlack} alt={storeName} width={40} height={40} className="mx-auto" />
           <p className="mt-2 text-xl font-black tracking-[0.3em] neon-text">{storeName}</p>
           <p className="mt-2 text-sm opacity-60">Reset admin password</p>
         </div>

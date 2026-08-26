@@ -6,7 +6,9 @@ import Toaster from '@/components/Toaster';
 import SmoothScroll from '@/components/SmoothScroll';
 import { getSettings } from '@/lib/settings';
 import { SITE_URL } from '@/lib/site';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo_black-removebg-preview.png';
+import faviconBlack from '@/assets/favicon-black.png';
+import faviconWhite from '@/assets/favicon-white.png';
 
 // tailwind.config points font-sans at var(--font-sans), but nothing ever
 // defined it — an undefined var invalidates the whole font-family
@@ -62,6 +64,19 @@ export async function generateMetadata(): Promise<Metadata> {
     // Proves ownership for Google Search Console — renders as
     // <meta name="google-site-verification" content="..." /> in <head>.
     verification: { google: '4_z2EHRITRaJsIHgoJMTgZM8GDaO6cj9-7B1B-Tl1aQ' },
+    // Explicit rather than the src/app/icon.png file convention, because that
+    // convention has no way to express "different file per colour scheme" —
+    // the media query here is what lets Chrome/Edge swap the tab icon for
+    // dark browser themes. Browsers that don't understand `media` on a
+    // favicon link (Safari, Firefox) fall back to the first entry, which is
+    // why the light/black icon — the one that reads correctly on the
+    // overwhelmingly more common default light chrome — is listed first.
+    icons: {
+      icon: [
+        { url: faviconBlack.src, media: '(prefers-color-scheme: light)' },
+        { url: faviconWhite.src, media: '(prefers-color-scheme: dark)' }
+      ]
+    },
     // Per-page metadata (product, shop) overrides these; this is what search
     // engines and link previews fall back to on every other route.
     openGraph: {

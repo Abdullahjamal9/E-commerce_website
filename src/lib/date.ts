@@ -18,3 +18,18 @@ export function formatOrderDateTime(date: Date | string): string {
 export function formatOrderDate(date: Date | string): string {
   return new Date(date).toLocaleDateString('en-PK', { timeZone: 'Asia/Karachi' });
 }
+
+/**
+ * A YYYY-MM-DD estimate for Google Customer Reviews' `estimated_delivery_date`
+ * field, which only uses this to time when it prompts the customer for a
+ * review — not a delivery promise shown to the customer. Five calendar days
+ * out from the order matches the upper end of the "2-5 business days" the
+ * Shipping & Returns page already states; the wider estimate is deliberate,
+ * since prompting before the order has actually arrived is worse than
+ * prompting a little late.
+ */
+export function estimatedDeliveryDate(createdAt: Date | string): string {
+  const date = new Date(createdAt);
+  date.setDate(date.getDate() + 5);
+  return date.toISOString().slice(0, 10);
+}

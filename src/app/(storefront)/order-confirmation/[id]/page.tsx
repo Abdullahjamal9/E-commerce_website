@@ -1,8 +1,12 @@
 import Link from 'next/link';
+import Script from 'next/script';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { getSettings } from '@/lib/settings';
 import { formatPrice } from '@/lib/currency';
+import { estimatedDeliveryDate } from '@/lib/date';
+
+const MERCHANT_ID = 5839977961;
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +78,31 @@ export default async function OrderConfirmationPage({ params }: { params: { id: 
           </a>
         )}
       </div>
+
+      {/* Google Customer Reviews opt-in survey. The inline script is loaded
+          first (and un-deferred) so window.renderOptIn exists before
+          platform.js's async `onload=renderOptIn` callback can fire — the
+          reverse order risks a race on a slow connection. Real order data is
+          JSON-stringified into the snippet rather than template-interpolated
+          directly, so a stray quote or backslash in an address/email can't
+          break the script. delivery_country is always PK — the store ships
+          nationwide within Pakistan only. */}
+      <Script id="google-customer-reviews-config" strategy="afterInteractive">
+        {`
+          window.renderOptIn = function() {
+            window.gapi.load('surveyoptin', function() {
+              window.gapi.surveyoptin.render({
+                "merchant_id": ${MERCHANT_ID},
+                "order_id": ${JSON.stringify(order.orderNumber)},
+                "email": ${JSON.stringify(order.email)},
+                "delivery_country": "PK",
+                "estimated_delivery_date": ${JSON.stringify(estimatedDeliveryDate(order.createdAt))}
+              });
+            });
+          };
+        `}
+      </Script>
+      <Script src="https://apis.google.com/js/platform.js?onload=renderOptIn" strategy="afterInteractive" />
     </div>
   );
 }

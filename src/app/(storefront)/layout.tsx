@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import Navbar from '@/components/Navbar';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import CartDrawer from '@/components/CartDrawer';
@@ -8,6 +9,8 @@ import { getSettings } from '@/lib/settings';
 import { getCategories } from '@/lib/categories';
 import { getTags } from '@/lib/tags';
 import { buildNav } from '@/lib/nav';
+
+const MERCHANT_ID = 5839977961;
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +62,23 @@ export default async function StorefrontLayout({ children }: { children: React.R
         categories={categories}
       />
       <CartDrawer />
+      {/* Google Customer Reviews seller-rating badge — a self-injecting
+          floating widget, not visible page content, so it lives here rather
+          than inside Footer.tsx alongside the footer's own markup. region
+          matches the store's actual market: Pakistan, the same "PK" already
+          used for the opt-in survey and the Merchant Center feed label. */}
+      <Script id="merchantWidgetScript" src="https://www.gstatic.com/shopping/merchant/merchantwidget.js" strategy="afterInteractive" />
+      <Script id="merchant-widget-start" strategy="afterInteractive">
+        {`
+          document.getElementById('merchantWidgetScript').addEventListener('load', function () {
+            merchantwidget.start({
+              merchant_id: ${MERCHANT_ID},
+              position: 'BOTTOM_RIGHT',
+              region: 'PK'
+            });
+          });
+        `}
+      </Script>
     </>
   );
 }
