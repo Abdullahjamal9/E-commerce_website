@@ -177,3 +177,17 @@ select option {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Shrinks Google's Customer Reviews badge (merchantwidget.js) — it ships no
+   size option of its own, and its iframe/wrapper is cross-origin, so nothing
+   inside it (hover state, click hit-area) can be reached or restyled from
+   here at all; this is the one thing about it a page's own CSS can affect.
+   transform, not width/height: Google's script owns this element and
+   periodically rewrites its inline width/height/position, which would just
+   overwrite a sizing change on the next resize. transform is a property its
+   script never touches, so this survives that; scaling from the bottom-right
+   corner keeps it anchored there instead of drifting as it shrinks. */
+#google-merchantwidget-iframe-wrapper {
+  transform: scale(0.82);
+  transform-origin: bottom right;
+}
