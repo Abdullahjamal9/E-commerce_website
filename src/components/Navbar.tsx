@@ -12,8 +12,8 @@ import MegaMenu from './MegaMenu';
 import MobileMenu from './MobileMenu';
 import { BagIcon, HeartIcon, XIcon } from './icons';
 import type { NavItem } from '@/lib/nav';
-import logoBlack from '@/assets/logo_black-removebg-preview.png';
-import logoWhite from '@/assets/logo_white-removebg-preview.png';
+import wordmarkForDarkBg from '@/assets/Asset 1-8.png';
+import wordmarkForLightBg from '@/assets/Asset 3-8.png';
 
 // Height of the announcement strip (h-9) the fixed header has to clear at
 // rest; once scrolled the strip has moved away and the header sits at 0.
@@ -169,12 +169,14 @@ export default function Navbar({
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [backdrop, setBackdrop] = useState<Backdrop | null>(null);
-  // The wordmark icon is a raster image (two fixed-colour exports, not an
-  // SVG), so it can't pick up the same `color` style the text/icons below get
-  // — it needs its own source swapped instead. Defaults to the black export,
-  // matching every other page where the header is solid and there's no dark
-  // artwork underneath it.
-  const [logoOnDark, setLogoOnDark] = useState(false);
+  // The wordmark is a raster image (two fixed-colour exports, not an SVG), so
+  // it can't pick up the same `color` style the text/icons below get — it
+  // needs its own source swapped instead. Tracked separately for the desktop
+  // and mobile wordmarks since they sit over different patches of artwork.
+  // Defaults to the light-background export, matching every other page where
+  // the header is solid and there's no dark artwork underneath it.
+  const [logoOnDarkDesktop, setLogoOnDarkDesktop] = useState(false);
+  const [logoOnDarkMobile, setLogoOnDarkMobile] = useState(false);
   const [desktop, setDesktop] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -278,7 +280,8 @@ export default function Navbar({
 
     if (solid || !backdrop) {
       clear();
-      setLogoOnDark(false);
+      setLogoOnDarkDesktop(false);
+      setLogoOnDarkMobile(false);
       return;
     }
 
@@ -292,12 +295,17 @@ export default function Navbar({
       el.style.setProperty('color', luma < DARK_BACKDROP_LUMA ? '#ffffff' : '#151515');
     });
 
-    // The logo image can't take a `color` style, so its own patch of backdrop
-    // is read the same way and used to pick which export to show instead.
-    const logoEl = header.querySelector<HTMLElement>('[data-logo-icon]');
-    if (logoEl) {
-      const rect = logoEl.getBoundingClientRect();
-      setLogoOnDark(rect.width > 0 && lumaAcross(backdrop, rect.left, rect.right) < DARK_BACKDROP_LUMA);
+    // The wordmark images can't take a `color` style, so each one's own patch
+    // of backdrop is read the same way and used to pick which export to show.
+    const logoDesktopEl = header.querySelector<HTMLElement>('[data-logo-icon="desktop"]');
+    if (logoDesktopEl) {
+      const rect = logoDesktopEl.getBoundingClientRect();
+      setLogoOnDarkDesktop(rect.width > 0 && lumaAcross(backdrop, rect.left, rect.right) < DARK_BACKDROP_LUMA);
+    }
+    const logoMobileEl = header.querySelector<HTMLElement>('[data-logo-icon="mobile"]');
+    if (logoMobileEl) {
+      const rect = logoMobileEl.getBoundingClientRect();
+      setLogoOnDarkMobile(rect.width > 0 && lumaAcross(backdrop, rect.left, rect.right) < DARK_BACKDROP_LUMA);
     }
 
     return clear;
@@ -351,28 +359,30 @@ export default function Navbar({
               {menuOpen ? <XIcon size={22} /> : <MenuIcon />}
             </button>
 
-            <Link
-              href="/"
-              className="hidden flex-shrink-0 items-center gap-2 text-lg font-black uppercase tracking-[0.25em] neon-text lg:flex"
-            >
+            <Link href="/" className="hidden flex-shrink-0 items-center lg:flex" aria-label={storeName}>
               <Image
-                src={logoOnDark ? logoWhite : logoBlack}
-                alt=""
-                width={26}
-                height={26}
+                src={logoOnDarkDesktop ? wordmarkForDarkBg : wordmarkForLightBg}
+                alt={storeName}
                 priority
-                data-logo-icon
+                className="h-7 w-auto"
+                data-logo-icon="desktop"
               />
-              {storeName}
             </Link>
           </div>
 
           {/* Centre — wordmark, mobile only */}
           <Link
             href="/"
-            className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-2.5 text-[15px] font-black uppercase tracking-[0.2em] neon-text lg:hidden"
+            className="absolute left-1/2 -translate-x-1/2 px-2 py-2.5 lg:hidden"
+            aria-label={storeName}
           >
-            {storeName}
+            <Image
+              src={logoOnDarkMobile ? wordmarkForDarkBg : wordmarkForLightBg}
+              alt={storeName}
+              priority
+              className="h-6 w-auto"
+              data-logo-icon="mobile"
+            />
           </Link>
 
           <ul className="hidden items-center gap-6 lg:flex">

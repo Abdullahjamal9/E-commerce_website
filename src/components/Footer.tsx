@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FacebookIcon, InstagramIcon, MailIcon, WhatsAppIcon } from './icons';
-import logoWhite from '@/assets/logo_white-removebg-preview.png';
+import wordmarkForDarkBg from '@/assets/Asset 1-8.png';
 
 export default function Footer({
   storeName,
@@ -65,10 +65,7 @@ export default function Footer({
     <footer className="mt-24 bg-[#151515] text-white">
       <div className="mx-auto grid max-w-site gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p className="flex items-center gap-2 text-lg font-black uppercase tracking-[0.25em]">
-            <Image src={logoWhite} alt={storeName} width={26} height={26} />
-            {storeName}
-          </p>
+          <Image src={wordmarkForDarkBg} alt={storeName} className="h-7 w-auto" />
           {address && <p className="mt-4 max-w-xs text-sm text-white/60">{address}</p>}
         </div>
 
