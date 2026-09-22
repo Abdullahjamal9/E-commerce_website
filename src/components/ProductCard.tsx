@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import type { Shoe } from '@/lib/types';
 import { formatPrice } from '@/lib/currency';
 import { getSalePrice } from '@/lib/sale';
@@ -20,15 +21,27 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
   const onSale = shoe.discountPercent > 0;
   const salePrice = onSale ? getSalePrice(shoe.price, shoe.discountPercent) : shoe.price;
 
+  // Auto-picked when there's only one size to begin with — no real choice to
+  // make there. Otherwise left unset so quick-add can insist on a pick,
+  // matching the size selector on the product page.
+  const [selectedSize, setSelectedSize] = useState<string | null>(
+    shoe.sizes.length === 1 ? shoe.sizes[0] : null
+  );
+  const needsSize = shoe.sizes.length > 0 && !selectedSize;
+
   const quickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     if (outOfStock) return;
+    if (needsSize) {
+      notify('Please select a size');
+      return;
+    }
     add({
       shoeId: shoe.id,
       name: shoe.name,
       price: salePrice,
       colorHex: shoe.colors[0].hex,
-      size: shoe.sizes[0],
+      size: selectedSize ?? shoe.sizes[0] ?? '',
       qty: 1,
       image: shoe.image
     });
@@ -94,12 +107,22 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
           {shoe.sizes.length > 0 && (
             <div className="mt-2.5 flex flex-wrap gap-1">
               {shoe.sizes.slice(0, 6).map((s) => (
-                <span
+                <button
                   key={s}
-                  className="min-w-[26px] border border-[var(--border)] px-1.5 py-0.5 text-center text-[10px] text-[var(--muted)]"
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedSize(s);
+                  }}
+                  className={`min-w-[26px] border px-1.5 py-0.5 text-center text-[10px] transition ${
+                    selectedSize === s
+                      ? 'border-[var(--fg)] bg-[var(--fg)] text-[var(--bg)]'
+                      : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--fg)] hover:text-[var(--fg)]'
+                  }`}
                 >
                   {s}
-                </span>
+                </button>
               ))}
             </div>
           )}
@@ -109,7 +132,7 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
             disabled={outOfStock}
             className="btn-glow mt-3 w-full bg-[var(--accent)] py-2.5 text-xs font-semibold uppercase tracking-wide text-[var(--accent-fg)] disabled:cursor-not-allowed disabled:bg-[#939393]"
           >
-            {outOfStock ? 'Sold out' : 'Add to cart'}
+            {outOfStock ? 'Sold out' : needsSize ? 'Select a size' : 'Add to cart'}
           </button>
         </div>
       </Link>
