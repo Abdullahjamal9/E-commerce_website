@@ -328,10 +328,10 @@ function FilterPanel({
   tagFilters,
   productsInScope,
   priceBounds,
-  category,
+  categories,
   tag,
-  size,
-  discount,
+  sizes: selectedSizes,
+  discounts: selectedDiscounts,
   search,
   minPrice,
   maxPrice,
@@ -339,33 +339,33 @@ function FilterPanel({
 }: {
   open: boolean;
   onClose: () => void;
-  categoryFilters: (Category | 'All')[];
+  categoryFilters: Category[];
   tagFilters: (Tag | 'All')[];
   /** Audience-filtered but otherwise unfiltered products, so sizes can be
    *  recomputed live as the draft category/tag change inside the panel. */
   productsInScope: Shoe[];
   priceBounds: [number, number];
-  category: Category | 'All';
+  categories: Category[];
   tag: Tag | 'All';
-  size: string | 'All';
-  discount: string | 'All';
+  sizes: string[];
+  discounts: string[];
   search: string;
   minPrice: string;
   maxPrice: string;
   onApply: (v: {
-    category: Category | 'All';
+    categories: Category[];
     tag: Tag | 'All';
-    size: string | 'All';
-    discount: string | 'All';
+    sizes: string[];
+    discounts: string[];
     search: string;
     minPrice: string;
     maxPrice: string;
   }) => void;
 }) {
-  const [draftCategory, setDraftCategory] = useState(category);
+  const [draftCategories, setDraftCategories] = useState(categories);
   const [draftTag, setDraftTag] = useState(tag);
-  const [draftSize, setDraftSize] = useState(size);
-  const [draftDiscount, setDraftDiscount] = useState(discount);
+  const [draftSizes, setDraftSizes] = useState(selectedSizes);
+  const [draftDiscounts, setDraftDiscounts] = useState(selectedDiscounts);
   const [draftSearch, setDraftSearch] = useState(search);
   const [draftMin, setDraftMin] = useState(priceBounds[0]);
   const [draftMax, setDraftMax] = useState(priceBounds[1]);
@@ -374,45 +374,55 @@ function FilterPanel({
   // currently picked, so sizes show up the moment that combination actually
   // has sized products — a style tag alone (with category left on "All")
   // is enough to surface them, not just an explicit category pick.
-  const sizes = useMemo(() => {
+  const sizeOptions = useMemo(() => {
     let list = productsInScope;
-    if (draftCategory !== 'All') list = list.filter((p) => p.category === draftCategory);
+    if (draftCategories.length > 0) list = list.filter((p) => draftCategories.includes(p.category));
     if (draftTag !== 'All') list = list.filter((p) => p.tags.includes(draftTag));
     return Array.from(new Set(list.flatMap((p) => p.sizes))).sort(compareSizes);
-  }, [productsInScope, draftCategory, draftTag]);
+  }, [productsInScope, draftCategories, draftTag]);
 
   // Discount tiers ("10% or more off" etc.) — only offered up to whatever
   // the highest live discount in this category/style actually is.
   const discountTiers = useMemo(() => {
     let list = productsInScope;
-    if (draftCategory !== 'All') list = list.filter((p) => p.category === draftCategory);
+    if (draftCategories.length > 0) list = list.filter((p) => draftCategories.includes(p.category));
     if (draftTag !== 'All') list = list.filter((p) => p.tags.includes(draftTag));
     const maxDiscount = Math.max(0, ...list.map((p) => p.discountPercent));
     return DISCOUNT_TIERS.filter((t) => t <= maxDiscount);
-  }, [productsInScope, draftCategory, draftTag]);
+  }, [productsInScope, draftCategories, draftTag]);
 
-  // A size/discount chosen under one category/style may not exist under
-  // another — clear both whenever the user actually changes either (not
-  // when the panel is merely re-seeding drafts on open).
-  const selectCategory = (c: Category | 'All') => {
-    setDraftCategory(c);
-    setDraftSize('All');
-    setDraftDiscount('All');
+  // Drop any size/discount pick that no longer exists under the current
+  // category/style combination, rather than clearing the whole selection —
+  // multiple sizes can be picked, and narrowing categories shouldn't wipe
+  // out ones that are still valid.
+  useEffect(() => {
+    setDraftSizes((prev) => prev.filter((s) => sizeOptions.includes(s)));
+  }, [sizeOptions]);
+  useEffect(() => {
+    setDraftDiscounts((prev) => prev.filter((d) => discountTiers.includes(Number(d))));
+  }, [discountTiers]);
+
+  const toggleCategory = (c: Category) => {
+    setDraftCategories((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+  };
+  const toggleSize = (s: string) => {
+    setDraftSizes((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
+  };
+  const toggleDiscount = (d: string) => {
+    setDraftDiscounts((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]));
   };
   const selectTag = (t: Tag | 'All') => {
     setDraftTag(t);
-    setDraftSize('All');
-    setDraftDiscount('All');
   };
 
   // Re-seed the draft from committed values every time the panel opens,
   // so a Cancel on a previous open never bleeds into the next one.
   useEffect(() => {
     if (!open) return;
-    setDraftCategory(category);
+    setDraftCategories(categories);
     setDraftTag(tag);
-    setDraftSize(size);
-    setDraftDiscount(discount);
+    setDraftSizes(selectedSizes);
+    setDraftDiscounts(selectedDiscounts);
     setDraftSearch(search);
     setDraftMin(minPrice === '' ? priceBounds[0] : Number(minPrice));
     setDraftMax(maxPrice === '' ? priceBounds[1] : Number(maxPrice));
@@ -423,9 +433,9 @@ function FilterPanel({
   // treated as "browsing this collection", not a narrowing filter, so it
   // survives a clear the same way the category tab strip above the grid does.
   const clearFilters = () => {
-    setDraftCategory('All');
-    setDraftSize('All');
-    setDraftDiscount('All');
+    setDraftCategories([]);
+    setDraftSizes([]);
+    setDraftDiscounts([]);
     setDraftSearch('');
     setDraftMin(priceBounds[0]);
     setDraftMax(priceBounds[1]);
@@ -433,10 +443,10 @@ function FilterPanel({
 
   const apply = () => {
     onApply({
-      category: draftCategory,
+      categories: draftCategories,
       tag: draftTag,
-      size: draftSize,
-      discount: draftDiscount,
+      sizes: draftSizes,
+      discounts: draftDiscounts,
       search: draftSearch,
       minPrice: draftMin <= priceBounds[0] ? '' : String(draftMin),
       maxPrice: draftMax >= priceBounds[1] ? '' : String(draftMax)
@@ -500,11 +510,14 @@ function FilterPanel({
                 />
               </div>
 
-              {categoryFilters.length > 2 && (
+              {categoryFilters.length > 1 && (
                 <PanelSection title="Category">
                   <div className="flex flex-wrap gap-2">
+                    <ChipButton active={draftCategories.length === 0} onClick={() => setDraftCategories([])}>
+                      All
+                    </ChipButton>
                     {categoryFilters.map((c) => (
-                      <ChipButton key={c} active={draftCategory === c} onClick={() => selectCategory(c)}>
+                      <ChipButton key={c} active={draftCategories.includes(c)} onClick={() => toggleCategory(c)}>
                         {c}
                       </ChipButton>
                     ))}
@@ -527,11 +540,11 @@ function FilterPanel({
               {discountTiers.length > 0 && (
                 <PanelSection title="Discount">
                   <div className="flex flex-wrap gap-2">
-                    <SizeBox active={draftDiscount === 'All'} onClick={() => setDraftDiscount('All')}>
+                    <SizeBox active={draftDiscounts.length === 0} onClick={() => setDraftDiscounts([])}>
                       All
                     </SizeBox>
                     {discountTiers.map((t) => (
-                      <SizeBox key={t} active={draftDiscount === String(t)} onClick={() => setDraftDiscount(String(t))}>
+                      <SizeBox key={t} active={draftDiscounts.includes(String(t))} onClick={() => toggleDiscount(String(t))}>
                         {t}%+
                       </SizeBox>
                     ))}
@@ -548,15 +561,15 @@ function FilterPanel({
                   ))}
                 </div>
 
-                {sizes.length > 0 && (
+                {sizeOptions.length > 0 && (
                   <div className="mt-5">
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Size</p>
                     <div className="flex flex-wrap gap-2">
-                      <SizeBox active={draftSize === 'All'} onClick={() => setDraftSize('All')}>
+                      <SizeBox active={draftSizes.length === 0} onClick={() => setDraftSizes([])}>
                         All
                       </SizeBox>
-                      {sizes.map((s) => (
-                        <SizeBox key={s} active={draftSize === s} onClick={() => setDraftSize(s)}>
+                      {sizeOptions.map((s) => (
+                        <SizeBox key={s} active={draftSizes.includes(s)} onClick={() => toggleSize(s)}>
                           {s}
                         </SizeBox>
                       ))}
@@ -607,7 +620,7 @@ export default function ShopGrid({
   audience?: Tag;
   storeName: string;
 }) {
-  const [activeCategory, setActiveCategory] = useState<Category | 'All'>(category ?? 'All');
+  const [activeCategories, setActiveCategories] = useState<Category[]>(category ? [category] : []);
   const [activeTag, setActiveTag] = useState<Tag | 'All'>(initialTag ?? 'All');
 
   // useState's initial value only applies on mount — navigating here again with a
@@ -615,14 +628,14 @@ export default function ShopGrid({
   // this same component with new props instead of remounting it, so the active
   // filters need to be re-synced explicitly or they'd keep showing the old ones.
   useEffect(() => {
-    setActiveCategory(category ?? 'All');
+    setActiveCategories(category ? [category] : []);
   }, [category]);
 
   useEffect(() => {
     setActiveTag(initialTag ?? 'All');
   }, [initialTag]);
-  const [activeSize, setActiveSize] = useState<string | 'All'>('All');
-  const [activeDiscount, setActiveDiscount] = useState<string | 'All'>('All');
+  const [activeSizes, setActiveSizes] = useState<string[]>([]);
+  const [activeDiscounts, setActiveDiscounts] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<Sort>('newest');
   const [minPrice, setMinPrice] = useState('');
@@ -663,12 +676,12 @@ export default function ShopGrid({
   useEffect(() => {
     if (visibleCount <= PAGE_SIZE) return;
     window.sessionStorage.setItem(
-      visibleCountKey(activeCategory, activeTag, audience),
+      visibleCountKey(activeCategories.length > 0 ? activeCategories.join(',') : 'All', activeTag, audience),
       String(visibleCount)
     );
-  }, [visibleCount, activeCategory, activeTag, audience]);
+  }, [visibleCount, activeCategories, activeTag, audience]);
 
-  const categoryFilters: (Category | 'All')[] = ['All', ...categories];
+  const categoryFilters: Category[] = categories;
   // Audience is fixed by the menu, so it isn't offered as a style tab.
   const tagFilters: (Tag | 'All')[] = [
     'All',
@@ -681,8 +694,11 @@ export default function ShopGrid({
   );
 
   const inCategory = useMemo(
-    () => (activeCategory === 'All' ? inAudience : inAudience.filter((p) => p.category === activeCategory)),
-    [inAudience, activeCategory]
+    () =>
+      activeCategories.length === 0
+        ? inAudience
+        : inAudience.filter((p) => activeCategories.includes(p.category)),
+    [inAudience, activeCategories]
   );
 
   // Smart size list: narrows to whatever category/style tag is active, so
@@ -697,11 +713,11 @@ export default function ShopGrid({
   // A size chosen under one category/style may not exist under another, so
   // drop it rather than leaving a filter that silently hides everything.
   useEffect(() => {
-    if (activeSize !== 'All' && !availableSizes.includes(activeSize)) setActiveSize('All');
-  }, [availableSizes, activeSize]);
+    setActiveSizes((prev) => prev.filter((s) => availableSizes.includes(s)));
+  }, [availableSizes]);
 
   // Same idea for discount tiers: only offer bands that actually exist for
-  // the current category/style, and drop a now-invalid pick automatically.
+  // the current category/style, and drop now-invalid picks automatically.
   const availableDiscountTiers = useMemo(() => {
     const list = activeTag === 'All' ? inCategory : inCategory.filter((p) => p.tags.includes(activeTag));
     const maxDiscount = Math.max(0, ...list.map((p) => p.discountPercent));
@@ -709,16 +725,16 @@ export default function ShopGrid({
   }, [inCategory, activeTag]);
 
   useEffect(() => {
-    if (activeDiscount !== 'All' && !availableDiscountTiers.includes(Number(activeDiscount))) {
-      setActiveDiscount('All');
-    }
-  }, [availableDiscountTiers, activeDiscount]);
+    setActiveDiscounts((prev) => prev.filter((d) => availableDiscountTiers.includes(Number(d))));
+  }, [availableDiscountTiers]);
 
   const visible = useMemo(() => {
     let list = activeTag === 'All' ? inCategory : inCategory.filter((p) => p.tags.includes(activeTag));
 
-    if (activeSize !== 'All') list = list.filter((p) => p.sizes.includes(activeSize));
-    if (activeDiscount !== 'All') list = list.filter((p) => inDiscountTier(p.discountPercent, Number(activeDiscount)));
+    if (activeSizes.length > 0) list = list.filter((p) => p.sizes.some((s) => activeSizes.includes(s)));
+    if (activeDiscounts.length > 0) {
+      list = list.filter((p) => activeDiscounts.some((t) => inDiscountTier(p.discountPercent, Number(t))));
+    }
 
     const q = search.trim().toLowerCase();
     if (q) {
@@ -739,7 +755,7 @@ export default function ShopGrid({
     // pairs back through the grid. The server already ordered them this way;
     // this keeps it true once the shopper re-sorts client-side.
     return inStockFirst(list);
-  }, [inCategory, activeTag, activeSize, activeDiscount, search, sort, minPrice, maxPrice]);
+  }, [inCategory, activeTag, activeSizes, activeDiscounts, search, sort, minPrice, maxPrice]);
 
   // Reset how many cards are rendered whenever the filter criteria actually
   // change, so switching category/tag/search doesn't leave a stale "Load
@@ -751,10 +767,10 @@ export default function ShopGrid({
   const filterSignatureRef = useRef<string | null>(null);
   useEffect(() => {
     const signature = JSON.stringify([
-      activeCategory,
+      activeCategories,
       activeTag,
-      activeSize,
-      activeDiscount,
+      activeSizes,
+      activeDiscounts,
       search,
       sort,
       minPrice,
@@ -764,14 +780,14 @@ export default function ShopGrid({
       setVisibleCount(PAGE_SIZE);
     }
     filterSignatureRef.current = signature;
-  }, [activeCategory, activeTag, activeSize, activeDiscount, search, sort, minPrice, maxPrice]);
+  }, [activeCategories, activeTag, activeSizes, activeDiscounts, search, sort, minPrice, maxPrice]);
 
   const shown = visible.slice(0, visibleCount);
 
   const activeFiltersCount = [
-    activeCategory !== 'All',
-    activeSize !== 'All',
-    activeDiscount !== 'All',
+    activeCategories.length > 0,
+    activeSizes.length > 0,
+    activeDiscounts.length > 0,
     search.trim() !== '',
     minPrice !== '' || maxPrice !== ''
   ].filter(Boolean).length;
@@ -783,9 +799,11 @@ export default function ShopGrid({
   const scope =
     activeTag !== 'All'
       ? collectionLabel(activeTag)
-      : activeCategory === 'All'
+      : activeCategories.length === 0
         ? 'All Products'
-        : activeCategory;
+        : activeCategories.length === 1
+          ? activeCategories[0]
+          : `${activeCategories.length} Categories`;
   const heading = audience ? `${audience}'s ${scope === 'All Products' ? 'Collection' : scope}` : scope;
 
   return (
@@ -869,18 +887,18 @@ export default function ShopGrid({
             tagFilters={tagFilters}
             productsInScope={inAudience}
             priceBounds={priceBounds}
-            category={activeCategory}
+            categories={activeCategories}
             tag={activeTag}
-            size={activeSize}
-            discount={activeDiscount}
+            sizes={activeSizes}
+            discounts={activeDiscounts}
             search={search}
             minPrice={minPrice}
             maxPrice={maxPrice}
             onApply={(v) => {
-              setActiveCategory(v.category);
+              setActiveCategories(v.categories);
               setActiveTag(v.tag);
-              setActiveSize(v.size);
-              setActiveDiscount(v.discount);
+              setActiveSizes(v.sizes);
+              setActiveDiscounts(v.discounts);
               setSearch(v.search);
               setMinPrice(v.minPrice);
               setMaxPrice(v.maxPrice);
@@ -889,10 +907,10 @@ export default function ShopGrid({
 
           {visible.length === 0 ? (
             <p className="py-20 text-center text-sm text-[var(--muted)]">
-              {search.trim() || minPrice !== '' || maxPrice !== '' || activeSize !== 'All' || activeDiscount !== 'All'
+              {search.trim() || minPrice !== '' || maxPrice !== '' || activeSizes.length > 0 || activeDiscounts.length > 0
                 ? 'No products match your filters.'
-                : activeCategory !== 'All'
-                  ? `No products available in "${activeCategory}" yet. Check back soon!`
+                : activeCategories.length > 0
+                  ? `No products available in "${activeCategories.join(', ')}" yet. Check back soon!`
                   : 'No products available yet.'}
             </p>
           ) : (
