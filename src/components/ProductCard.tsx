@@ -113,7 +113,7 @@ export default function ProductCard({ shoe }: { shoe: Shoe }) {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setSelectedSize(s);
+                    setSelectedSize((prev) => (prev === s ? null : s));
                   }}
                   className={`min-w-[26px] border px-1.5 py-0.5 text-center text-[10px] transition ${
                     selectedSize === s
